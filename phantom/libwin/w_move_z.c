@@ -57,7 +57,7 @@ void w_to_bottom(drv_video_window_t *w)
 
 void w_to_top(drv_video_window_t *w)
 {
-    w_reset_notification( w ); // If some notifications are in task bar, reset 'em
+    // w_reset_notification( w ); // If some notifications are in task bar, reset 'em
 
     w_lock();
 

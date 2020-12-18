@@ -14,8 +14,9 @@
 #include <phantom_libc.h>
 
 #define ms_hot_shift_x 0
-#define ms_hot_shift_y (mpointer->ysize)
-
+// #define ms_hot_shift_y (mpointer->ysize)
+#define ms_hot_shift_y 0
+// Workaround for pvm_headless
 
 static drv_video_bitmap_t *mpointer = 0;
 static char mouse_is_on_screen = 0;

@@ -31,3 +31,25 @@ clean: clean-subdirs
 
 analyse:: analyse-subdirs
 
+# Genode porting related
+
+vmonly:
+	# building
+	$(MAKE) -C gl
+	$(MAKE) -C libtuned
+	$(MAKE) -C libphantom
+	$(MAKE) -C libwin
+	$(MAKE) -C libfreetype
+	$(MAKE) -C libc
+	$(MAKE) -C vm pvm_headless
+	
+vmonly-clean:
+	# cleaning
+	$(MAKE) -C gl clean
+	$(MAKE) -C libtuned clean
+	$(MAKE) -C libphantom clean
+	$(MAKE) -C libwin clean
+	$(MAKE) -C libfreetype clean
+	$(MAKE) -C libc clean
+	$(MAKE) -C vm clean
+

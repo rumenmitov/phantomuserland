@@ -36,6 +36,10 @@
 
 #include <dev/key_event.h>
 
+// Work around for pvm_headless
+
+// void w_reset_notification( window_handle_t w ){}
+
 #if NEW_TASK_BAR
 
 // -----------------------------------------------------------------------
