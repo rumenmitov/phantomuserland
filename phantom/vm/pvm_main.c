@@ -183,11 +183,14 @@ int main(int argc, char* argv[])
 
     video_drv->mouse = mouse_callback;
 
+    // pvm_headless workaround
+    scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+
     drv_video_init_windows();
     init_main_event_q();
     init_new_windows();
 
-    scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+    // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 
 
     mem = malloc(size+1024*10);
@@ -221,6 +224,10 @@ int main(int argc, char* argv[])
         dir = "pcode";
         rest = "classes";
     }
+
+    // TEMPORARY WORKAROUND
+    dir = "/home/anton/Sandbox/PhantomOS/phantomuserland";
+    rest = "plib/bin/classes";
 
     char fn[1024];
     snprintf( fn, 1024, "%s/%s", dir, rest );

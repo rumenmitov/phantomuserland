@@ -63,3 +63,19 @@ boot:: #all
 test::
 	#cd test
 	$(MAKE) -C test
+
+# Genode porting related
+
+vmonly::
+	# building
+	$(MAKE) -C phantom/gl
+	$(MAKE) -C phantom/libtuned
+	$(MAKE) -C phantom/libphantom
+	$(MAKE) -C phantom/libwin
+	$(MAKE) -C phantom/libfreetype
+	$(MAKE) -C phantom/libc
+	$(MAKE) -C phantom/vm pvm_headless
+	
+vmonly-clean::
+	# cleaning
+	$(MAKE) -C phantom vmonly-clean
