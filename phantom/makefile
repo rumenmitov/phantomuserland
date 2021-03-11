@@ -40,7 +40,7 @@ vmonly:
 	$(MAKE) -C libphantom
 	$(MAKE) -C libwin
 	$(MAKE) -C libfreetype
-	$(MAKE) -C libc
+	# $(MAKE) -C libc
 	$(MAKE) -C vm pvm_headless
 	
 vmonly-clean:
@@ -50,6 +50,6 @@ vmonly-clean:
 	$(MAKE) -C libphantom clean
 	$(MAKE) -C libwin clean
 	$(MAKE) -C libfreetype clean
-	$(MAKE) -C libc clean
+	# $(MAKE) -C libc clean
 	$(MAKE) -C vm clean
 

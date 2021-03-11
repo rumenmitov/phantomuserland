@@ -68,13 +68,7 @@ test::
 
 vmonly::
 	# building
-	$(MAKE) -C phantom/gl
-	$(MAKE) -C phantom/libtuned
-	$(MAKE) -C phantom/libphantom
-	$(MAKE) -C phantom/libwin
-	$(MAKE) -C phantom/libfreetype
-	$(MAKE) -C phantom/libc
-	$(MAKE) -C phantom/vm pvm_headless
+	$(MAKE) -C phantom vmonly
 	
 vmonly-clean::
 	# cleaning

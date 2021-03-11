@@ -7,9 +7,18 @@ include $(realpath $(PHANTOM_HOME))/config.mk
 include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-$(ARCH)
 
 
+# Genode libc includes
+# INCDIRS += $(realpath $(PHANTOM_HOME))/include/libc \
+# 	$(PHANTOM_HOME)/include $(PHANTOM_HOME)/include/libc
+INCDIRS += $(realpath $(PHANTOM_HOME))/include/genode_libc/libc \
+ 	$(PHANTOM_HOME)/include/genode_libc/libc
+
+# Genode libc machine includes
+INCDIRS += $(realpath $(PHANTOM_HOME))/include/genode_libc/spec/x86_64/libc \
+ 	$(PHANTOM_HOME)/include/genode_libc/spec/x86_64/libc
+
 INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH) \
 	$(PHANTOM_HOME)/include $(PHANTOM_HOME)/include/$(ARCH)
-
 
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
@@ -25,6 +34,8 @@ COMMON_FLAGS= $(WARN) $(ARCH_FLAGS) -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDI
 PHANTOM_CFLAGS  += $(COMMON_FLAGS) -fno-stack-protector
 PHANTOM_ASFLAGS += $(COMMON_FLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
 
+PHANTOM_CFLAGS += -DPHANTOM_GENODE
+
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.S $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
@@ -38,11 +49,12 @@ OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 	
 
 %.o: %.c
-	@echo ---- cc $@
+	# FULL_FILE_PATH := $(shell $(CC) -c $(PHANTOM_CFLAGS) -print-file-name=$<)
+	@echo ---- cc {"target" : "$@", "file" : "$<" , "paths" : "$(SRCDIRS)"}
 	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
 
 %.o: %.S
-	@echo ---- cc $@
+	@echo ---- cc {"target" : "$@", "file" : "$<" , "paths" : "$(SRCDIRS)"}
 	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) $<
 
 
