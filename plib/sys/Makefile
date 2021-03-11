@@ -89,14 +89,21 @@ $(BINDIR)/ru.dz.phantom.tetris.io.pc: $(BINDIR)/ru.dz.phantom.tetris.utilites.pc
 $(BINDIR)/ru.dz.phantom.tetris.mainmodule.pc: $(BINDIR)/ru.dz.phantom.tetris.imagesmanager.pc $(BINDIR)/ru.dz.phantom.tetris.figure.pc $(BINDIR)/ru.dz.phantom.tetris.io.pc
 
 $(BINDIR)/ru.dz.windows.root.pc: $(BINDIR)/internal.io.tty.pc $(BINDIR)/internal.bitmap.pc
+$(BINDIR)/ru.dz.windows.window.pc: $(BINDIR)/ru.dz.windows.base.pc
+$(BINDIR)/ru.dz.windows.base.pc: $(BINDIR)/ru.dz.windows.root.pc $(BINDIR)/ru.dz.phantom.backgrounds.pc
 
 $(BINDIR)/test.hier.child1.pc: $(BINDIR)/test.hier.intermediate.pc
 
 $(BINDIR)/test.hier.intermediate.pc: $(BINDIR)/test.hier.root.pc
+
+$(BINDIR)/test.hier.Intermediate.pc: $(BINDIR)/test.hier.root.pc
 
 $(BINDIR)/test.suite.pc: $(BINDIR)/test.hier.child1.pc
 
 $(BINDIR)/ru.dz.phantom.system.regression_tests.pc: $(BINDIR)/ru.dz.phantom.system.regression_tests_ctor.pc
 
 $(BINDIR)/ru.dz.windows.root.pc:  $(BINDIR)/ru.dz.phantom.backgrounds.pc
+
+# $(BINDIR)/test.hier.root.pc:
+
 
