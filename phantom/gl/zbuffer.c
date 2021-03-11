@@ -413,6 +413,7 @@ void ZB_copyFrameBuffer(ZBuffer * zb, void *buf,
 
 #endif /* TGL_FEATURE_RENDER_BITS == 32 */
 
+#ifndef PHANTOM_GENODE
 
 /*
  * adr must be aligned on an 'int'
@@ -462,6 +463,58 @@ void memset_l(void *adr, int val, int count)
 	*p++ = val;
 }
 
+#else
+// Just coppied the code and renamed functions
+
+/*
+ * adr must be aligned on an 'int'
+ */
+void memset_s_gl(void *adr, int val, int count)
+{
+    int i, n, v;
+    unsigned int *p;
+    unsigned short *q;
+
+    p = adr;
+    v = val | (val << 16);
+
+    n = count >> 3;
+    for (i = 0; i < n; i++) {
+	p[0] = v;
+	p[1] = v;
+	p[2] = v;
+	p[3] = v;
+	p += 4;
+    }
+
+    q = (unsigned short *) p;
+    n = count & 7;
+    for (i = 0; i < n; i++)
+	*q++ = val;
+}
+
+void memset_l_gl(void *adr, int val, int count)
+{
+    int i, n, v;
+    unsigned int *p;
+
+    p = adr;
+    v = val;
+    n = count >> 2;
+    for (i = 0; i < n; i++) {
+	p[0] = v;
+	p[1] = v;
+	p[2] = v;
+	p[3] = v;
+	p += 4;
+    }
+
+    n = count & 3;
+    for (i = 0; i < n; i++)
+	*p++ = val;
+}
+#endif
+
 /* count must be a multiple of 4 and >= 4 */
 void memset_RGB24(void *adr,int r, int v, int b,long count)
 {
@@ -493,6 +546,8 @@ void memset_RGB24(void *adr,int r, int v, int b,long count)
     }
 }
 
+#ifndef PHANTOM_GENODE
+
 void ZB_clear(ZBuffer * zb, int clear_z, int z,
 	      int clear_color, int r, int g, int b)
 {
@@ -523,3 +578,40 @@ void ZB_clear(ZBuffer * zb, int clear_z, int z,
 	}
     }
 }
+
+#else
+
+// Same code, but modified to avoid libc memset_s conflict
+
+void ZB_clear(ZBuffer * zb, int clear_z, int z,
+	      int clear_color, int r, int g, int b)
+{
+#if TGL_FEATURE_RENDER_BITS != 24
+    int color;
+#endif
+    int y;
+    PIXEL *pp;
+
+    if (clear_z) {
+	memset_s_gl(zb->zbuf, z, zb->xsize * zb->ysize);
+    }
+    if (clear_color) {
+	pp = zb->pbuf;
+	for (y = 0; y < zb->ysize; y++) {
+#if TGL_FEATURE_RENDER_BITS == 15 || TGL_FEATURE_RENDER_BITS == 16
+            color = RGB_TO_PIXEL(r, g, b);
+	    memset_s_gl(pp, color, zb->xsize);
+#elif TGL_FEATURE_RENDER_BITS == 32
+            color = RGB_TO_PIXEL(r, g, b);
+	    memset_l_gl(pp, color, zb->xsize);
+#elif TGL_FEATURE_RENDER_BITS == 24 
+            memset_RGB24(pp,r>>8,g>>8,b>>8,zb->xsize);
+#else
+#error TODO
+#endif
+	    pp = (PIXEL *) ((char *) pp + zb->linesize);
+	}
+    }
+}
+
+#endif

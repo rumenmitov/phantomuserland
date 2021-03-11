@@ -1,6 +1,8 @@
-ARCH_FLAGS      = -m64 -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
+# ARCH_FLAGS      = -m64 -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-3dnow
+ARCH_FLAGS      = -m64
 
-BIN_PREFIX=x86_64-w64-mingw32-
+# BIN_PREFIX=x86_64-w64-mingw32-
+BIN_PREFIX=
 
 export AS       = $(BIN_PREFIX)as
 export CC       = $(BIN_PREFIX)gcc

@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     }
 
     // TEMPORARY WORKAROUND
-    dir = "/home/anton/Sandbox/PhantomOS/phantomuserland";
+    // dir = "/home/anton/Sandbox/PhantomOS/phantomuserland";
     rest = "plib/bin/classes";
 
     char fn[1024];

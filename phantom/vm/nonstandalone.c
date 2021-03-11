@@ -317,49 +317,51 @@ int k_close( int fd )
 }
 
 
-#if defined(__CYGWIN__)
+// Genode: Fixing setjmp_machdep and longjmp_machdep related errors
 
-// for some reason .weak does not work in cygwin
+// #if defined(__CYGWIN__)
 
-asm("\
-.globl _longjmp_machdep;\
-    _longjmp_machdep: jmp _longjmp \
-    ");
+// // for some reason .weak does not work in cygwin
 
-asm("\
-.globl _setjmp_machdep;\
-    _setjmp_machdep: jmp _setjmp \
-    ");
+// asm("\
+// .globl _longjmp_machdep;\
+//     _longjmp_machdep: jmp _longjmp \
+//     ");
 
-
-#else
-
-//void machdep_longjmp () __attribute__ ((weak, alias ("longjmp")));
-//void machdep_setjmp () __attribute__ ((weak, alias ("setjmp")));
+// asm("\
+// .globl _setjmp_machdep;\
+//     _setjmp_machdep: jmp _setjmp \
+//     ");
 
 
-// freetype lib wants 'em in user mode too, provide hacks to call GCC libc ones
+// #else
 
-//#warning untested
-
-asm("\
-.weak _longjmp_machdep;\
-.globl _longjmp_machdep;\
-    _longjmp_machdep: jmp _longjmp \
-    ");
-
-asm("\
-.weak _setjmp_machdep;\
-.globl _setjmp_machdep;\
-    _setjmp_machdep: jmp _setjmp \
-    ");
+// //void machdep_longjmp () __attribute__ ((weak, alias ("longjmp")));
+// //void machdep_setjmp () __attribute__ ((weak, alias ("setjmp")));
 
 
-//void longjmp_machdep ( void *jb, int a ){    __asm__("jmp __longjmp");}
-//int setjmp_machdep ( void *jb ) {    __asm__("jmp __setjmp");}
+// // freetype lib wants 'em in user mode too, provide hacks to call GCC libc ones
+
+// //#warning untested
+
+// asm("\
+// .weak _longjmp_machdep;\
+// .globl _longjmp_machdep;\
+//     _longjmp_machdep: jmp _longjmp \
+//     ");
+
+// asm("\
+// .weak _setjmp_machdep;\
+// .globl _setjmp_machdep;\
+//     _setjmp_machdep: jmp _setjmp \
+//     ");
 
 
-#endif
+// //void longjmp_machdep ( void *jb, int a ){    __asm__("jmp __longjmp");}
+// //int setjmp_machdep ( void *jb ) {    __asm__("jmp __setjmp");}
+
+
+// #endif
 
 
 #if 1

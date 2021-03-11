@@ -3,6 +3,10 @@
 
 #include "LzmaDec.h"
 
+#ifdef PHANTOM_GENODE
+#include <phantom_types.h>
+#endif
+
 #include <string.h>
 
 #define kNumTopBits 24

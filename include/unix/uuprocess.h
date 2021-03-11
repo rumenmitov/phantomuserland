@@ -12,6 +12,14 @@
 #ifndef UUPROCESS_H
 #define UUPROCESS_H
 
+#ifdef PHANTOM_GENODE
+
+// #include <oldlibc/signal.h>
+// #include <unix/uusignal.h>
+#include <missing.h>
+
+#endif
+
 #include <signal.h>
 #include <unix/uufile.h>
 
