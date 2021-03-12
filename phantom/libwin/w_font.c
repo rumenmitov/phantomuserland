@@ -9,6 +9,13 @@
  *
 **/
 
+#ifdef PHANTOM_GENODE
+
+#include <stddef.h>
+
+#endif
+
+
 #include <video/window.h>
 //#include <video/internal.h>
 #include <video/font.h>

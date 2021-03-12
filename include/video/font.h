@@ -12,6 +12,12 @@
 #ifndef FONT_H
 #define FONT_H
 
+#ifdef PHANTOM_GENODE
+
+#include <stddef.h>
+
+#endif
+
 #ifndef VCONFIG_H
 #include <video/vconfig.h>
 #endif // VCONFIG_H

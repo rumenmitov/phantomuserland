@@ -18,7 +18,11 @@
 #include <video/screen.h>
 #include <video/internal.h>
 
+#ifndef PHANTOM_GENODE
+
 #include "gcc_replacements.h"
+
+#endif
 
 
 #define VSCREEN_WIDTH 1024

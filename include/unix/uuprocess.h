@@ -15,8 +15,8 @@
 #ifdef PHANTOM_GENODE
 
 // #include <oldlibc/signal.h>
-// #include <unix/uusignal.h>
-#include <missing.h>
+#include <unix/uusignal.h>
+// #include <missing.h>
 
 #endif
 

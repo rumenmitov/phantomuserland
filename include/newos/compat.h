@@ -55,8 +55,12 @@ typedef int thread_id;
 
 
 
-
+#ifdef PHANTOM_GENODE
+#else
 #define dprintf printf
+#endif
+
+
 //#define kmalloc malloc
 #define kfree free
 

@@ -12,6 +12,13 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#ifdef PHANTOM_GENODE
+
+#include <stdio.h>
+#include <time.h>
+
+#endif
+
 #ifndef VCONFIG_H
 #include <video/vconfig.h>
 #endif // VCONFIG_H

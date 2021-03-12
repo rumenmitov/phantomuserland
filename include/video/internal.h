@@ -8,6 +8,12 @@
  *
 **/
 
+#ifdef PHANTOM_GENODE
+
+#include <stddef.h>
+
+#endif
+
 
 #ifndef VCONFIG_H
 #include <video/vconfig.h>

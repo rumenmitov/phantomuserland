@@ -18,7 +18,14 @@
 #include <threads.h>
 
 #include "event.h"
+
+#ifndef PHANTOM_GENODE
+
 #include "gcc_replacements.h"
+
+#endif
+
+
 #include "vm/internal_da.h"
 #include "vm/alloc.h"
 #include "hal.h"

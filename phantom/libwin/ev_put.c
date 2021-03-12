@@ -15,6 +15,11 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#ifdef PHANTOM_GENODE
+
+#include <video/window.h>
+
+#endif
 
 
 #include "ev_private.h"

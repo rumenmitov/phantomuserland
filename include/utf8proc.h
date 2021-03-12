@@ -54,6 +54,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
+
+
+#ifdef PHANTOM_GENODE
+
+#include <phantom_types.h>
+
+#endif
+
 /*
 #ifdef _MSC_VER
 typedef signed char int8_t;
