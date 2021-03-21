@@ -36,6 +36,13 @@ PHANTOM_ASFLAGS += $(COMMON_FLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
 
 PHANTOM_CFLAGS += -DPHANTOM_GENODE
 
+
+# Temporary using bsd libc on linux
+# INCDIRS += /usr/include/bsd /usr/lib/gcc/x86_64-linux-gnu/9/include
+# INCDIRS += /usr/lib/gcc/x86_64-linux-gnu/9/include
+# COMMON_FLAGS += 
+# 	-isystem /usr/include/bsd -DLIBBSD_OVERLAY \
+
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.S $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)

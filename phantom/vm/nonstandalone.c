@@ -4,7 +4,7 @@
 #  define NO_NETWORK
 #endif
 
-//#  define NO_NETWORK
+#  define NO_NETWORK
 
 #include <stdio.h>
 #include <stdarg.h>
