@@ -17,6 +17,28 @@
 #include <arch/arch-types.h>
 
 
+#ifdef PHANTOM_GENODE
+
+#include <stdbool.h>
+#include <time.h>
+
+// next are for Unix emulation env
+typedef int		_pid_t;
+typedef _pid_t		pid_t;
+typedef int		tid_t;
+
+typedef u_int32_t 	disk_page_no_t;
+
+typedef u_int64_t   	bigtime_t;
+
+
+// Required by LzmaDec.c 
+#ifndef __cplusplus
+typedef u_int8_t        Bool; // vmware svga
+#endif
+
+#else
+
 typedef u_int32_t       wchar_t;
 
 // FreeBSD code wants these
@@ -83,5 +105,6 @@ typedef	u_int64_t	time_t;
 
 
 
+#endif
 
 #endif // PAGER_TYPES_H

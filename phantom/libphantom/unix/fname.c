@@ -15,10 +15,22 @@
 #define debug_level_info 10
 
 
+#ifdef PHANTOM_GENODE
+
+#include <string.h>
+#include <errno.h>
+#include <stdio.h>
+#include <unix/uuprocess.h>
+
+
+#else
+
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <kernel/unix.h>
 #include <stdio.h>
+
+#endif
 
 
 //! Makes sure that buf contains correct abs fn for given

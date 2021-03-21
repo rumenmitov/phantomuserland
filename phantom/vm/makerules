@@ -27,16 +27,16 @@ vpath %.c . sys
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
 nonstandalone.o: nonstandalone.c
-	$(CC) -m32 -g -c nonstandalone.c
+	$(CC) -m64 -g -c nonstandalone.c
 
 win_screen_win.o: win_screen_win.c
-	$(CC) -m32 -c win_screen_win.c
+	$(CC) -m64 -c win_screen_win.c
 
 win_hal_win.o: win_hal_win.c
-	$(CC) -m32 -c win_hal_win.c
+	$(CC) -m64 -c win_hal_win.c
 
 unix_hal_unix.o: unix_hal_unix.c
-	$(CC) -m32 -c unix_hal_unix.c
+	$(CC) -m64 -c unix_hal_unix.c
 
 x11_display.o: x11_display.c
 	$(CC) -m32 -c x11_display.c
@@ -48,7 +48,8 @@ COMMON_LIB= ../lib/libtuned.a  ../lib/libphantom.a ../lib/libwin.a ../lib/libfre
 ifeq ($(OSTYPE),cygwin)
 OSLIB = -lgdi32 $(COMMON_LIB) 
 else
-OSLIB = $(COMMON_LIB)  ../lib/libphantom_c.a 
+# OSLIB = $(COMMON_LIB)  ../lib/libphantom_c.a 
+OSLIB = $(COMMON_LIB) 
 endif
 
 PVM_TEST_OBJFILES=pvm_main.o nonstandalone.o win_hal.o win_bulk.o win_screen.o win_screen_win.o win_hal_win.o
@@ -63,8 +64,9 @@ pvm_x11: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(X11_TEST_OBJFILE
 	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lX11
 
 pvm_headless: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(HLS_TEST_OBJFILES)
-	$(CC) -m32 -g  -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
-#	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
+	$(CC) -m64 -g -nostdlib -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lbsd -lpthread -lc
+	# $(CC) -m64 -g -nostdlib -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lbsd -lpthread
+	#	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
 
 
 #win_screen_win.o win_hal_win.o

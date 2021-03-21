@@ -17,9 +17,12 @@ extern "C" {
 #endif //__cplusplus
 
 
-//#include <phantom_types.h>
-#include <sys/types.h>
+#ifdef PHANTOM_GENODE
+#include <phantom_types.h>
+#include <arch/arch-types.h>
+#endif
 
+#include <sys/types.h>
 
 
 #define PHANTOM_PARTITION_TYPE_ID 0xD3

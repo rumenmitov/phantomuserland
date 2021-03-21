@@ -345,8 +345,12 @@ void dprintf(const char *, ...);
 
 #ifdef DEBUG
 
+#ifndef PHANTOM_GENODE
+
 #define dprintf(format, args...)  \
   fprintf(stderr,"In '%s': " format "\n",__FUNCTION__, ##args);
+
+#endif
 
 #else
 

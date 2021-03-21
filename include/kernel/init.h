@@ -12,6 +12,10 @@
 #ifndef INIT_H
 #define INIT_H
 
+#ifdef PHANTOM_GENODE
+#include <arch/arch-types.h>
+#endif
+
 #include <errno.h>
 
 /**

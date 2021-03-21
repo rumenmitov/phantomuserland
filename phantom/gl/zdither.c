@@ -8,6 +8,10 @@
 #include "zbuffer.h"
 #include <assert.h>
 
+#ifdef PHANTOM_GENODE
+#include <arch/arch-types.h>
+#endif
+
 #if defined(TGL_FEATURE_8_BITS)
 
 #define _R	5

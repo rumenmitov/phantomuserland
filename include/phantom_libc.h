@@ -12,6 +12,8 @@
 #ifndef PHANTOM_LIBC_H
 #define PHANTOM_LIBC_H
 
+#ifndef PHANTOM_GENODE
+
 #include <phantom_types.h>
 #include <stdarg.h>
 #include <malloc.h>
@@ -26,8 +28,6 @@ extern const char *const sys_errlist[];
 #include <string.h>
 #include <stdlib.h>
 
-
-
 int kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
 int vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap);
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
@@ -41,21 +41,15 @@ int printf(const char *fmt, ...);
 
 int sscanf(const char *ibuf, const char *fmt, ...);
 
-
 void    perror(const char *);
-
 
 // console.c
 int getchar(void);
 int putchar(int c);
 int puts(const char *s);
 
-
-
 u_int32_t random(void);
 void srandom(u_int32_t seed);
-
-
 
 #if 1
 
@@ -65,8 +59,8 @@ static inline int  isupper(unsigned int c) { return ((c) >= 'A' && (c) <= 'Z'); 
 static inline int  islower(unsigned int c) { return ((c) >= 'a' && (c) <= 'z'); }
 static inline int  isalpha(unsigned int c) { return (isupper(c) || islower(c)); }
 static inline int  isdigit(unsigned int c) { return ((c) >= '0' && (c) <= '9'); }
-static inline int  isxdigit(unsigned int c) { return (isdigit(c) 
-			  || ((c) >= 'A' && (c) <= 'F') 
+static inline int  isxdigit(unsigned int c) { return (isdigit(c)
+			  || ((c) >= 'A' && (c) <= 'F')
 			  || ((c) >= 'a' && (c) <= 'f')); }
 static inline int  isprint(unsigned int c) { return ((c) >= ' ' && (c) <= '~'); }
 
@@ -91,12 +85,8 @@ static inline int  tolower(unsigned int c) { return ((c) + 0x20 * (((c) >= 'A') 
 
 #endif
 
-
 extern char **environ;
 char *getenv(const char *name);
-
-
-
 
 /* BCD conversions. */
 extern const u_char	bcd2bin_data[];
@@ -107,8 +97,11 @@ extern const char	hex2ascii_data[];
 #define	bin2bcd(bin)	(bin2bcd_data[bin])
 #define	hex2ascii(hex)	(hex2ascii_data[hex])
 
+#else
 
+#include <stddef.h>
 
+#endif
 
 #define	HD_COLUMN_MASK	0xff
 #define	HD_DELIM_MASK	0xff00
@@ -119,12 +112,4 @@ extern const char	hex2ascii_data[];
 void hexdump(const void *ptr, int length, const char *hdr, int flags);
 
 
-
-
-
-
-
-
-
 #endif // PHANTOM_LIBC_H
-

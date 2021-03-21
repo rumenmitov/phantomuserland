@@ -14,7 +14,14 @@
 #include <video/screen.h>
 #include <assert.h>
 #include <sys/types.h>
+
+#ifdef PHANTOM_GENODE
+
+#else
+
 #include <kernel/boot.h>
+
+#endif
 
 #include "linestart.h"
 

@@ -14,7 +14,13 @@
 #define THREAD_PRIVATE_H
 
 #include <kernel/timedcall.h>
+
+
+#ifdef PHANTOM_GENODE
+#else
 #include <kernel/trap.h>
+#endif
+
 #include <kernel/smp.h>
 
 #include <cpu_state.h>

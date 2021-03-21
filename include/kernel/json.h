@@ -17,7 +17,7 @@ struct json_output
     json_out    putc;
     int         depth;
     int         putc_arg;       // For use of putc func, can contain fd, socket, etc
-    errno_t     errno;
+    errno_t     err;
 };
 
 typedef struct json_output json_output;
