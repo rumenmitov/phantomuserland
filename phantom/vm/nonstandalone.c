@@ -4,7 +4,7 @@
 #  define NO_NETWORK
 #endif
 
-#  define NO_NETWORK
+// #  define NO_NETWORK
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -381,6 +381,11 @@ int k_close( int fd )
 
 int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers )
 {
+    #ifdef PHANTOM_GENODE
+
+    return EINVAL;
+
+    #else
     int nread = 0;
 
     struct sockaddr_in addr;
@@ -524,6 +529,7 @@ err:
     strncpy( obuf, buf, len );
 */
     return 0;
+    #endif
 }
 
 #endif

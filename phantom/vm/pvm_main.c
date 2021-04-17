@@ -157,9 +157,23 @@ static void mouse_callback()
 
 static void args(int argc, char* argv[]);
 
+#ifdef PHANTOM_GENODE
+
+extern void wait_for_continue();
+
+#endif
+
+
 int main(int argc, char* argv[])
 {
     printf("\n\n\n\n----- Phantom exec test v. 0.6\n\n");
+
+    #ifdef PHANTOM_GENODE
+
+    printf("Waiting to start...\n");
+    wait_for_continue();
+
+    #endif
 
     hal_mutex_init( &snap_interlock_mutex, "snap_interlock_mutex" );
     hal_cond_init( &vm_thread_wakeup_cond, "vm_thread_wakeup_cond" );
@@ -225,9 +239,12 @@ int main(int argc, char* argv[])
         rest = "classes";
     }
 
+    #ifdef PHANTOM_GENODE
     // TEMPORARY WORKAROUND
-    // dir = "/home/anton/Sandbox/PhantomOS/phantomuserland";
+    // dir = "/pcode/plib";
+    // rest = "/bin";
     rest = "plib/bin/classes";
+    #endif
 
     char fn[1024];
     snprintf( fn, 1024, "%s/%s", dir, rest );

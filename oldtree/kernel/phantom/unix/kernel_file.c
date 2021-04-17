@@ -159,6 +159,12 @@ errno_t k_load_file( void **odata, size_t *osize, const char *fname )
     struct stat info;
     int nread;
 
+    #ifdef GENODE_PHANTOM
+    
+    printf("Reading file %s\n", fname);
+
+    #endif
+
     e = k_stat( fname, &info, 1 );
     if( e )
     {

@@ -60,7 +60,8 @@ static void deferred_refdec_init(void)
     hal_cond_init(  &end_refdec_cond, "refdec end" );
 
     deferred_refdec_thread_id = hal_start_thread( deferred_refdec_thread, 0, 0 );
-    assert(deferred_refdec_thread_id > 0 );
+    printf("TID: %d\n", deferred_refdec_thread_id);
+    // assert(deferred_refdec_thread_id > 0 );
 
     inited = 1;
 }

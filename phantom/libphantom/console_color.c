@@ -12,7 +12,14 @@
 
 #include <console.h>
 
+// XXX : Not really good solution. Symbols are conflicting, need to move all to separate .a libs
+
+#ifdef PHANTOM_GENODE
+#else
+
 void    console_set_message_color()     { console_set_fg_color( COLOR_LIGHTGREEN ); }
 void    console_set_error_color()       { console_set_fg_color( COLOR_LIGHTRED ); }
 void    console_set_warning_color()     { console_set_fg_color( COLOR_YELLOW ); }
 void    console_set_normal_color()      { console_set_fg_color( COLOR_LIGHTGRAY ); }
+
+#endif

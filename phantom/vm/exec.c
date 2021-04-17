@@ -63,6 +63,13 @@ static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj,
 int debug_print_instr = 0;
 int debug_trace = 0;
 
+#ifdef PHANTOM_GENODE
+
+debug_print_instr = 0;
+debug_trace = 0;
+
+#endif
+
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
 #define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
 
