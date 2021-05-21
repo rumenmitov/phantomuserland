@@ -1,3 +1,5 @@
+#include <hal.h>
+
 
 // A: Probably can be kept as is. Only windows and drivers require semaphores
 

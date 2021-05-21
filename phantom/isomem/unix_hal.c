@@ -29,7 +29,7 @@
 #include "vm/internal_da.h"
 #include "vm/alloc.h"
 #include "hal.h"
-#include "main.h"
+// #include "main.h"
 #include "vm/alloc.h"
        
 #include "unixhal.h"
@@ -38,9 +38,7 @@
 
 struct hardware_abstraction_level    	hal;
 
-int phantom_is_a_real_kernel() { return 0; }
-
-
+int phantom_is_a_real_kernel() { return 1; }
 
 void hal_init( vmem_ptr_t va, long vs )
 {
@@ -115,7 +113,6 @@ void    hal_halt()
     exit(1);
 }
 
-extern int sleep(int);
 void hal_sleep_msec( int miliseconds )
 {
     //usleep(1000*miliseconds);
@@ -137,16 +134,8 @@ void hal_sleep_msec( int miliseconds )
 // volatile int phantom_virtual_machine_snap_request = 0;
 
 
-void phantom_thread_wait_4_snap()
-{
-    // Just return
-}
 
 
-//void phantom_activate_thread()
-//{
-    // Threads do not work in this mode
-//}
 
 
 void hal_exit_kernel_thread()
@@ -154,116 +143,11 @@ void hal_exit_kernel_thread()
     panic("hal_exit_kernel_thread");
 }
 
-void phantom_snapper_wait_4_threads()
-{
-    // Do nothing in non-kernel version
-    // Must be implemented if no-kernel multithread will be done
-}
-
-
-void phantom_snapper_reenable_threads()
-{
-    //
-}
-
 #include <vm/stacks.h>
 
-// int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t this, struct data_area_4_thread *tc ) )
-// {
-//     // push zero to obj stack
 
-//     pvm_ostack_push( tc->_ostack, pvm_create_string_object("no sync in hosted env") );
-//     return 0; // throw!
-// }
-
-/*
-int phantom_dev_keyboard_getc(void)
-{
-    return getchar();
-}
-*/
-
-
-
-
-/*
-//#if OLD_VM_SLEEP
-void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
-{
-    / *if(phantom_virtual_machine_stop_request)
-    {
-        if(DEBUG) printf("Thread will die now\n");
-        pthread_exit(0);
-    }* /
-
-
-    //phantom_virtual_machine_threads_stopped++;
-
-#if OLD_VM_SLEEP
-    while(thda->sleep_flag)
-        sleep(1);
-#else
-#warning sleep?
-    sleep(1);
-#endif
-    //phantom_virtual_machine_threads_stopped--;
-
-}
-*/
-/* dz off
-
-void phantom_thread_put_asleep( struct data_area_4_thread *thda )
-{
-    thda->sleep_flag++;
-    // NB! This will work if called from SYS only! That's
-    // ok since no other bytecode instr can call this.
-    // Real sleep happens in phantom_thread_sleep_worker
-}
-
-
-void phantom_thread_wake_up( struct data_area_4_thread *thda )
-{
-    thda->sleep_flag--;
-}
-#endif
-*/
-
-void phantom_wakeup_after_msec(long msec)
-{
-    hal_sleep_msec(msec);
-}
-
-
-phantom_thread_t * get_current_thread() { return 0; }
-
-
-void *get_thread_owner( phantom_thread_t *t ) { return 0; }
-
-
-
-void panic(const char *fmt, ...)
-{
-    va_list vl;
-
-    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPanic: ");
-    va_start(vl, fmt);
-    vprintf(fmt, vl);
-    va_end(vl);
-
-    //save_mem(mem, size);
-    getchar();
-    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPress Enter from memcheck...");
-    pvm_memcheck();
-    //printf("\nPress Enter...");	getchar();
-    exit(1);
-}
-
-
-
-static void *dm_mem, *dm_copy;
-static int dm_size = 0;
+// static void *dm_mem, *dm_copy;
+// static int dm_size = 0;
 // void setDiffMem( void *mem, void *copy, int size )
 // {
 //     dm_mem = mem;
@@ -332,43 +216,13 @@ void hal_sti() {}
 void hal_cli() {}
 
 
-// void wire_page_for_addr( void *addr, size_t len ) {}
-
-// void unwire_page_for_addr( void *addr, size_t len ) {}
-
-
 struct wtty *get_thread_ctty( struct phantom_thread *t )
 {
     return 0;
 }
-
-/*
-errno_t wtty_putc_nowait( struct wtty *wt, int ch )
-{
-    putchar(ch);
-    return 0;
-}
-*/
-
-#if 0
-int dbg_add_command(void (*func)(int, char **), const char *name, const char *desc)
-{
-    return 0;
-}
-
-#else
 int GET_CPU_ID() { return 0; }
 
 void hal_cpu_reset_real() { exit(33); }
-
-// void run_test( void )
-// {
-// 	printf("sorry, not in hosted env\n");
-// }
-
-#endif
-
-
 
 // errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
 // errno_t phantom_disconnect_object( struct data_area_4_connection *da ) { return ENOMEM; }
@@ -401,46 +255,6 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 
 
 
-int hal_mutex_init(hal_mutex_t *m, const char *name)
-{
-    m->impl = unix_hal_mutex_init(name);
-    assert( m->impl );
-    return 0;
-}
-
-int hal_mutex_lock(hal_mutex_t *m)
-{
-    assert(m->impl);
-    return unix_hal_mutex_lock(m->impl);
-}
-
-int hal_mutex_unlock(hal_mutex_t *m)
-{
-    assert(m->impl);
-    return unix_hal_mutex_unlock(m->impl);
-}
-
-
-int hal_mutex_is_locked(hal_mutex_t *m)
-{
-    assert(m->impl);
-    return unix_hal_mutex_is_locked(m->impl);
-}
-
-
-errno_t hal_mutex_destroy(hal_mutex_t *m)
-{
-    struct phantom_mutex_impl *mi = m->impl;
-
-    //if(mi->owner != 0)        panic("locked mutex killed");
-    free(mi);
-
-    m->impl = 0;
-
-    return 0;
-}
-
-
 void console_set_fg_color( struct rgba_t c )
 {
 }
@@ -456,14 +270,6 @@ void vm_map_page_mark_unused( addr_t page_start)
 
 
 
-
-time_t time(time_t *);
-
-//time_t fast_time(void)
-long fast_time(void)
-{
-    return time(0);
-}
 
 
 #warning stub
@@ -544,7 +350,7 @@ volatile int * snap_catch_va = &dummy_snap_catch;
 
 
 
-void check_global_lock_entry_count(void) {}
+// void check_global_lock_entry_count(void) {}
 
 
 // void vm_lock_persistent_memory() {}
