@@ -53,7 +53,7 @@
 
 //#include <kernel/ia32/cpu.h>
 //#include <kernel/ia32/mmx.h>
-#include <kernel/trap.h>
+// #include <kernel/trap.h>
 
 //#define volatile /* */
 
@@ -324,6 +324,13 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
             return 0; // trap supposed to be open now
         }
 #endif
+
+        // TODO: GENODE BINDINGS
+        addr_t fa = 0; // TODO put it to trap_state!
+        //ts->cr2 = fa;
+        addr_t ip = 0;
+        int is_write = 0;
+
 
         {
             unsigned long addr = fa;

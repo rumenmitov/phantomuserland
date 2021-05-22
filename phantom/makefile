@@ -53,3 +53,9 @@ vmonly-clean:
 	# $(MAKE) -C libc clean
 	$(MAKE) -C vm clean
 
+
+vm-engine::
+	$(MAKE) -C isomem
+
+vm-engine-clean::
+	$(MAKE) -C isomem clean

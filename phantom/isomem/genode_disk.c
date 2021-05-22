@@ -65,6 +65,15 @@ void driver_genode_disk_init(){
 
 // Main function for performing I/O
 int driver_genode_disk_asyncIO(struct phantom_disk_partition *part, pager_io_request *rq ){
+    
+    // assert(part->specific != 0);
+
+    // Temp! Rewrite!
+    //assert(p->base == 0 );
+
+    genode_disk_dev_t *vd = (genode_disk_dev_t *)part->specific;
+
+
 	int sect = rq->blockNo;
 	int n = rq->nSect;
 	physaddr_t pa = rq->phys_page;
@@ -91,4 +100,4 @@ void driver_genode_disk_read(genode_disk_dev_t *vd, physaddr_t data, size_t len,
 void driver_genode_disk_write(genode_disk_dev_t *vd, physaddr_t data, size_t len, pager_io_request *rq, int sect){
 }
 
-}
+

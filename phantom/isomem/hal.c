@@ -24,6 +24,7 @@
 
 #include <hal.h>
 
+#include <stdarg.h>
 
 
 struct hardware_abstraction_level    	hal;

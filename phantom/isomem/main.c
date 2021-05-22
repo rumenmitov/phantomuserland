@@ -1,7 +1,44 @@
 
+
+
+#define DEBUG_MSG_PREFIX "boot"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_info 0
+#define debug_level_error 10
+
+#include <phantom_types.h>
+#include <phantom_libc.h>
+#include <string.h>
+#include <kernel/vm.h>
+#include <kernel/init.h>
+#include <kernel/boot.h>
+#include <kernel/page.h>
+
+//#include <ia32/phantom_pmap.h>
+
+#include <hal.h>
+#include <multiboot.h>
+#include <elf.h>
+#include <unix/uuprocess.h>
+
+
+
+#include "misc.h"
+#include <kernel/config.h>
+#include <kernel/board.h>
+
+
 #include <kernel/amap.h>
 
 static amap_t ram_map;
+
+// File specific macros
+
+#define MEM_SIZE 0x100000000LL
+#define N_OBJMEM_PAGES ((1024L*1024*32)/4096)
+#define PHANTOM_VERSION_STR "0.2"
+
 
 // Init functions
 
@@ -130,7 +167,6 @@ int main(int argc, char **argv, char **envp)
     hal_init((void *)PHANTOM_AMAP_START_VM_POOL, N_OBJMEM_PAGES*4096L);
 
     // Threads startup
-    {
     arch_threads_init();
     // phantom_threads_init(); // Inits phantom/kernel
 
