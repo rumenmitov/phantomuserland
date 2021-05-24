@@ -66,7 +66,7 @@ void driver_genode_disk_init(){
 // Main function for performing I/O
 int driver_genode_disk_asyncIO(struct phantom_disk_partition *part, pager_io_request *rq ){
     
-    // assert(part->specific != 0);
+    // assert(part->specific != 0); // TODO : Causes a compilation error!!!
 
     // Temp! Rewrite!
     //assert(p->base == 0 );

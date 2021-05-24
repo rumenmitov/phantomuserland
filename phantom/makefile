@@ -59,3 +59,22 @@ vm-engine::
 
 vm-engine-clean::
 	$(MAKE) -C isomem clean
+
+vm-isomem::
+	$(MAKE) -C gl
+	$(MAKE) -C libtuned
+	$(MAKE) -C libphantom
+	$(MAKE) -C libwin
+	$(MAKE) -C libfreetype
+	$(MAKE) -C vm
+	$(MAKE) -C isomem
+	$(MAKE) -C isomem pvm_isomem
+
+vm-isomem-clean::
+	$(MAKE) -C gl clean
+	$(MAKE) -C libtuned clean
+	$(MAKE) -C libphantom clean
+	$(MAKE) -C libwin clean
+	$(MAKE) -C libfreetype clean
+	$(MAKE) -C vm clean
+	$(MAKE) -C isomem clean

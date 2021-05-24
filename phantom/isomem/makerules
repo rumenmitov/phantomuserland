@@ -1,7 +1,12 @@
 # include ../../config.mk 
 
 
-all: $(TARGET) 
+all: $(TARGET)
+
+COMMON_LIB= ../lib/libtuned.a  ../lib/libphantom.a ../lib/libwin.a ../lib/libfreetype.a ../lib/libphantom.a ../lib/libphantom_vm.a
+
+pvm_isomem: main.o
+	$(CC) -m64 -g -o $@ $(COMMON_LIB)  isomem.a -lbsd -lpthread -lc
 
 
 # ifeq ($(ARCH),ia32)

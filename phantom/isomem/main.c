@@ -39,6 +39,9 @@ static amap_t ram_map;
 #define N_OBJMEM_PAGES ((1024L*1024*32)/4096)
 #define PHANTOM_VERSION_STR "0.2"
 
+// Genode specific
+
+#include "genode_disk.h"
 
 // Init functions
 
@@ -117,14 +120,15 @@ phantom_multiboot_main()
 
     // Now time for kernel main
 
-    main(main_argc, main_argv, main_env);
-    panic("returned from main");
+    // main(main_argc, main_argv, main_env);
 }
 
 
 
 int main(int argc, char **argv, char **envp)
 {
+    phantom_multiboot_main();
+
     (void) envp;
 
     snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
@@ -201,6 +205,8 @@ int main(int argc, char **argv, char **envp)
     /*
     phantom_find_drivers( 0 );
     */
+
+    // XXX : Find a better way to declare devices in persistent layer
 
     // Generally OK, but don't need to be here
     /*
@@ -422,6 +428,7 @@ int main(int argc, char **argv, char **envp)
     phantom_shutdown(0);
     //pressEnter("will reboot");
 
+    panic("returned from main");
     return 0;
 }
 
@@ -434,6 +441,12 @@ void start_phantom()
     //pressEnter("will init paging dev");
 
     SHOW_FLOW0( 5, "Will init paging dev... ");
+
+    // A: Assuming we can init all of genode stuff here
+    driver_genode_disk_probe(); // <- Will init virtual dev
+    driver_genode_disk_init();  // <- Will register device in Phantom and create necessary structs
+
+
 #if !PAGING_PARTITION
     // TODO size?
     init_paging_device( &pdev, "wd1", 1024*20); //4096 );
