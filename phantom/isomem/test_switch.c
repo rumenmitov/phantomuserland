@@ -138,7 +138,7 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(crypt);
 
     // moved here to test first - rewritten
-    TEST(ports);
+    // TEST(ports);
 
 
     // TODO mem leak! out of mem for 200!
@@ -147,7 +147,7 @@ void run_test( const char *test_name, const char *test_parm )
         TEST(sem);
     }
 
-    TEST(wtty);
+    // TEST(wtty);
 
     TEST(pool);
 
@@ -168,14 +168,15 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(amap);
 
     TEST(cbuf);
-    TEST(udp_send);
-    TEST(udp_syslog);
-    TEST(resolver);
+    // XXX : Some tests were commented since Genode version doesn't provide network support yet
+    // TEST(udp_send);
+    // TEST(udp_syslog);
+    // TEST(resolver);
 
-    TEST(tftp);
+    // TEST(tftp);
 
 
-    TEST(tcp_connect);
+    // TEST(tcp_connect);
 
 
     // These are long
@@ -183,7 +184,7 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(timed_call);
 
     // must test after timed calls for it depends on them
-    TEST(ports);
+    // TEST(ports);
 
 
     // These are very long, do 'em last
