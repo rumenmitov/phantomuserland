@@ -43,3 +43,8 @@ int trap_panic(struct trap_state *ts)
 {
     _stub_print();
 }
+
+void dump_ss(struct trap_state *st)
+{
+    _stub_print();
+}

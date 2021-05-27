@@ -40,20 +40,20 @@ struct hardware_abstraction_level    	hal;
 
 int phantom_is_a_real_kernel() { return 1; }
 
-void hal_init( vmem_ptr_t va, long vs )
-{
-    printf("Unix HAL init @%p\n", va);
+// void hal_init( vmem_ptr_t va, long vs )
+// {
+//     printf("Unix HAL init @%p\n", va);
 
-    unix_hal_init();
+//     unix_hal_init();
 
-    hal.object_vspace = va;
-    hal.object_vsize = vs;
+//     hal.object_vspace = va;
+//     hal.object_vsize = vs;
 
-    pvm_alloc_init( va, vs );
+//     pvm_alloc_init( va, vs );
 
-    //hal_start_kernel_thread( (void*)&unixhal_debug_srv_thread );
-    hal_start_kernel_thread( (void*)&winhal_debug_srv_thread );
-}
+//     //hal_start_kernel_thread( (void*)&unixhal_debug_srv_thread );
+//     hal_start_kernel_thread( (void*)&winhal_debug_srv_thread );
+// }
 
 void hal_disable_preemption()
 {
@@ -105,13 +105,13 @@ errno_t hal_set_current_thread_priority(int p)
 
 
 
-void    hal_halt()
-{
-    //fflush(stderr);
-    printf("\n\nhal halt called, exiting.\n");
-    getchar();
-    exit(1);
-}
+// void    hal_halt()
+// {
+//     //fflush(stderr);
+//     printf("\n\nhal halt called, exiting.\n");
+//     getchar();
+//     exit(1);
+// }
 
 void hal_sleep_msec( int miliseconds )
 {
@@ -211,9 +211,9 @@ int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int w
 }
 
 
-int hal_save_cli() { return 1; }
-void hal_sti() {}
-void hal_cli() {}
+// int hal_save_cli() { return 1; }
+// void hal_sti() {}
+// void hal_cli() {}
 
 
 struct wtty *get_thread_ctty( struct phantom_thread *t )
@@ -260,10 +260,10 @@ void console_set_fg_color( struct rgba_t c )
 }
 
 
-void vm_map_page_mark_unused( addr_t page_start)
-{
-    //printf("asked to mark page unused\n");
-}
+// void vm_map_page_mark_unused( addr_t page_start)
+// {
+//     //printf("asked to mark page unused\n");
+// }
 
 
 

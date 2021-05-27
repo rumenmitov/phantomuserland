@@ -7,6 +7,7 @@
 
 #include <stdarg.h>
 #include <threads.h>
+#include "genode_misc.h"
 
 
 phantom_thread_t * get_current_thread() { return 0; }
@@ -49,25 +50,50 @@ errno_t t_current_set_death_handler( void (*handler)(phantom_thread_t *tp) )
     return 0;
 }
 
-
-
-
-void phantom_thread_wait_4_snap()
-{
-    // Just return
+errno_t         t_current_get_priority( int *prio){
+    _stub_print();
+    *prio = 0;
+    return 0;
 }
 
-void phantom_snapper_wait_4_threads()
+void            t_migrate_to_boot_CPU(void){
+    _stub_print();
+}
+
+void            t_smp_enable(int yn){
+    _stub_print();
+}
+
+// mark myself as snapper thread
+errno_t         t_set_snapper_flag(void)
 {
-    // Do nothing in non-kernel version
-    // Must be implemented if no-kernel multithread will be done
+    _stub_print();
+    return 0;
+}
+
+ //< Enable or disable access to paged memory - calls arch pagemap func.
+void            t_set_paged_mem(bool enable)
+{
+    _stub_print();
 }
 
 
-void phantom_snapper_reenable_threads()
-{
-    //
-}
+// void phantom_thread_wait_4_snap()
+// {
+//     // Just return
+// }
+
+// void phantom_snapper_wait_4_threads()
+// {
+//     // Do nothing in non-kernel version
+//     // Must be implemented if no-kernel multithread will be done
+// }
+
+
+// void phantom_snapper_reenable_threads()
+// {
+//     //
+// }
 
 
 //void phantom_activate_thread()

@@ -135,7 +135,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(misc);
 
-    TEST(crypt);
+    // TEST(crypt);
 
     // moved here to test first - rewritten
     // TEST(ports);
@@ -168,7 +168,6 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(amap);
 
     TEST(cbuf);
-    // XXX : Some tests were commented since Genode version doesn't provide network support yet
     // TEST(udp_send);
     // TEST(udp_syslog);
     // TEST(resolver);
@@ -188,17 +187,17 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are very long, do 'em last
-    TEST(threads);
+    // TEST(threads);
 
     TEST(absname);
 
 #ifndef ARCH_ia32
 //    TEST(sem);
-    TEST(01_threads);
+    // TEST(01_threads);
 #endif
 
-    TEST(rectangles);
-    TEST(video);
+    // TEST(rectangles);
+    // TEST(video);
 
 
     //TEST(video);
