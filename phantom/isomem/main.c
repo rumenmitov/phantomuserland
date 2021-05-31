@@ -43,6 +43,12 @@ static amap_t ram_map;
 
 #include "genode_disk.h"
 
+// Headless video driver
+
+struct drv_video_screen_t        *video_drv = 0;
+
+extern int pvm_video_init(); // We need it only here
+
 // Init functions
 
 void
@@ -278,6 +284,8 @@ int main(int argc, char **argv, char **envp)
     /*
     phantom_start_video_driver();
     */
+
+    pvm_video_init();   // Initializing headless video
 
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );

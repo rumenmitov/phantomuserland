@@ -1,5 +1,12 @@
 #include "genode_disk.h"
 
+// #include <debug_ext.h>
+
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
+
+#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 

@@ -67,6 +67,7 @@ vm-isomem::
 	$(MAKE) -C libwin
 	$(MAKE) -C libfreetype
 	$(MAKE) -C vm
+	$(MAKE) -C vm pvm_headless_screen
 	$(MAKE) -C isomem
 	$(MAKE) -C isomem pvm_isomem
 

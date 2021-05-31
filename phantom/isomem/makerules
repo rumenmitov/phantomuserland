@@ -3,10 +3,11 @@
 
 all: $(TARGET)
 
-COMMON_LIB= ../lib/libtuned.a  ../lib/libphantom.a ../lib/libwin.a ../lib/libfreetype.a ../lib/libphantom.a ../lib/libphantom_vm.a
+COMMON_LIB = ../lib/libphantom_vm.a ../vm/headless_screen.o ../lib/libwin.a isomem.a ../lib/libtuned.a   ../lib/libfreetype.a 
+# HLS_VIDEO = ../vm/headless_screen.o
 
 pvm_isomem: main.o
-	$(CC) -m64 -g -o $@ $(COMMON_LIB)  isomem.a -lbsd -lpthread -lc
+	$(CC) -m64 -g -o $@ main.o $(COMMON_LIB)  -lbsd -lpthread -lc
 
 
 # ifeq ($(ARCH),ia32)

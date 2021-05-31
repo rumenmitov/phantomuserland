@@ -78,6 +78,22 @@ void            t_set_paged_mem(bool enable)
 }
 
 
+void wake_sleeping_thread( void *arg )
+{
+    // arg is tid
+    _stub_print();
+}
+
+
+
+int
+hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg)
+{
+    _stub_print();
+    return 0;
+}
+
+
 // void phantom_thread_wait_4_snap()
 // {
 //     // Just return

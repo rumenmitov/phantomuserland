@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "vm.unixhal"
 #include <debug_ext.h>
-#define debug_level_flow 10
-#define debug_level_error 10
-#define debug_level_info 10
+// #define debug_level_flow 10
+// #define debug_level_error 10
+// #define debug_level_info 10
 
 #include <stdarg.h>
 #include <threads.h>
