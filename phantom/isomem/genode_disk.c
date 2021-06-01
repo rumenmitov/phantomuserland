@@ -1,10 +1,10 @@
-#include "genode_disk.h"
-
-// #include <debug_ext.h>
-
+#define DEBUG_MSG_PREFIX "GenodeDiskIO"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
+
+#include "genode_disk.h"
 
 #include <stdio.h>
 #include <stddef.h>
@@ -65,7 +65,7 @@ void driver_genode_disk_init(){
 
     if(err)
     {
-        SHOW_ERROR( 0, "Failed to register Genode disk!");
+        SHOW_ERROR0( 0, "Failed to register Genode disk!");
         return;
     }
 }

@@ -221,9 +221,12 @@ phantom_parse_cmd_line( const char* cmdline )
 }
 
 // See debug_ext.h
-int debug_max_level_flow  = 255;
-int debug_max_level_info  = 255;
-int debug_max_level_error = 255;
+// int debug_max_level_flow  = 255;
+// int debug_max_level_info  = 255;
+// int debug_max_level_error = 255;
+#define debug_level_flow 255
+#define debug_level_error 255
+#define debug_level_info 255
 
 int debug_boot_pause = 0;
 int bootflag_no_vesa = 0;

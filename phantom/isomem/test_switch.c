@@ -143,9 +143,11 @@ void run_test( const char *test_name, const char *test_parm )
 
     // TODO mem leak! out of mem for 200!
     //for( i = 200; i; i-- )
+    /* //   TODO : Uncomment
     {
         TEST(sem);
     }
+    */
 
     // TEST(wtty);
 
@@ -153,9 +155,11 @@ void run_test( const char *test_name, const char *test_parm )
 
     // check if starting many threads eats memory
     //for( i = 200; i; i-- )
+    /* //   TODO : Uncomment
     {
         TEST(many_threads);
     }
+    */
 
 #ifdef ARCH_mips
 //    TEST(sem);
@@ -166,8 +170,9 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(physalloc_gen);
     TEST(malloc);
     TEST(amap);
-
+    /* //   TODO : Uncomment
     TEST(cbuf);
+    */
     // TEST(udp_send);
     // TEST(udp_syslog);
     // TEST(resolver);
@@ -179,8 +184,10 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are long
+    /* //   TODO : Uncomment
     TEST(dpc);
     TEST(timed_call);
+    */
 
     // must test after timed calls for it depends on them
     // TEST(ports);
@@ -188,8 +195,10 @@ void run_test( const char *test_name, const char *test_parm )
 
     // These are very long, do 'em last
     // TEST(threads);
-
+    
+    /* //   TODO : Uncomment
     TEST(absname);
+    */
 
 #ifndef ARCH_ia32
 //    TEST(sem);

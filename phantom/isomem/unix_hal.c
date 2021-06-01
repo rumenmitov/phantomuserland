@@ -38,8 +38,6 @@
 
 struct hardware_abstraction_level    	hal;
 
-int phantom_is_a_real_kernel() { return 1; }
-
 // void hal_init( vmem_ptr_t va, long vs )
 // {
 //     printf("Unix HAL init @%p\n", va);

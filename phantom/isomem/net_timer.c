@@ -1,3 +1,13 @@
+#include <kernel/net_timer.h>
+#include "genode_misc.h"
+
+
+int cancel_net_timer(net_timer_event *e)
+{
+    _stub_print();
+    return 0;
+}
+
 // #include <kernel/config.h>
 
 // // used elsewhere

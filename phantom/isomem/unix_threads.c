@@ -7,6 +7,7 @@
 
 #include <stdarg.h>
 #include <threads.h>
+#include <pthread.h>
 #include "genode_misc.h"
 
 
@@ -91,6 +92,22 @@ hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg)
 {
     _stub_print();
     return 0;
+}
+
+
+tid_t get_current_tid(void)
+{
+    _stub_print();
+    return (int)pthread_self();
+}
+
+/**
+ *
+ * Adds flag to sleep flags of thread, removes thread from
+ * runnable set, unlocks the lock given, switches off to some other thread.
+ */
+void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked ){
+    _stub_print();
 }
 
 
