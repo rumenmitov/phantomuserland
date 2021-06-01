@@ -1,4 +1,5 @@
 #include <hal.h>
+#include "genode_misc.h"
 
 
 // A: Probably can be kept as is. Only windows and drivers require semaphores
@@ -54,6 +55,15 @@ void hal_spin_lock(hal_spinlock_t *sl)
 void hal_spin_unlock(hal_spinlock_t *sl)
 {
     _spin_unlock(&(sl->lock));
+}
+
+// Turns off interrupts too
+void    hal_wired_spin_lock(hal_spinlock_t *l){
+    _stub_print();
+}
+
+void    hal_wired_spin_unlock(hal_spinlock_t *l){
+    _stub_print();
 }
 
 // -----------------------------------------------------------------------
