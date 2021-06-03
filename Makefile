@@ -69,7 +69,19 @@ test::
 vmonly::
 	# building
 	$(MAKE) -C phantom vmonly
+
+vm-engine::
+	$(MAKE) -C phantom vm-engine
 	
+vm-engine-clean::
+	$(MAKE) -C phantom vm-engine-clean
+
+vm-isomem::
+	$(MAKE) -C phantom vm-isomem
+	
+vm-isomem-clean::
+	$(MAKE) -C phantom vm-isomem-clean
+
 vmonly-clean::
 	# cleaning
 	$(MAKE) -C phantom vmonly-clean

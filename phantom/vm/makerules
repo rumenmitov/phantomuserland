@@ -68,5 +68,9 @@ pvm_headless: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(HLS_TEST_OB
 	# $(CC) -m64 -g -nostdlib -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lbsd -lpthread
 	#	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
 
+pvm_headless_screen: headless_screen.o
+
+# pvm_isomem: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  isomem.a
+# 	$(CC) -m64 -g -nostdlib -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a isomem.a -lbsd -lpthread -lc
 
 #win_screen_win.o win_hal_win.o
