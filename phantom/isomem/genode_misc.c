@@ -1,6 +1,7 @@
 #include "genode_misc.h"
+#include "stdio.h"
 
-inline void _stub_print()
-{
-  printf("STUB: %s", __FUNCTION__);
+void _stub_print_func(char* func, char* file, char* line){
+    printf("STUB: %s\n", func);
 }
+

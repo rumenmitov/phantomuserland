@@ -65,8 +65,8 @@ int debug_trace = 0;
 
 #ifdef PHANTOM_GENODE
 
-debug_print_instr = 0;
-debug_trace = 0;
+// debug_print_instr = 0;
+// debug_trace = 0;
 
 #endif
 
