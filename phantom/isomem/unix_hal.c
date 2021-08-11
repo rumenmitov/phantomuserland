@@ -25,18 +25,15 @@
 
 #endif
 
-
 #include "vm/internal_da.h"
 #include "vm/alloc.h"
 #include "hal.h"
 // #include "main.h"
 #include "vm/alloc.h"
-       
+
 #include "unixhal.h"
 
-
-
-struct hardware_abstraction_level    	hal;
+struct hardware_abstraction_level hal;
 
 // void hal_init( vmem_ptr_t va, long vs )
 // {
@@ -65,44 +62,6 @@ void hal_enable_preemption()
 
 // vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
-
-tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
-{
-    flags &= ~THREAD_FLAG_VM; // ok with it
-    assert(!flags);
-
-    unsigned long tid = unix_hal_start_thread( thread, arg );
-
-    if( 0 == tid )
-        panic("can't start thread");
-
-    return tid;
-}
-
-
-
-void   hal_start_kernel_thread(void (*thread)(void))
-{
-    unsigned long tid = unix_hal_start_thread( (void *)thread, 0 );
-
-    if( 0 == tid )
-        panic("can't start thread");
-}
-
-void hal_set_current_thread_name( const char *name )
-{
-    (void) name;
-}
-
-
-errno_t hal_set_current_thread_priority(int p)
-{
-    (void) p;
-    return EINVAL;
-}
-
-
-
 // void    hal_halt()
 // {
 //     //fflush(stderr);
@@ -111,38 +70,21 @@ errno_t hal_set_current_thread_priority(int p)
 //     exit(1);
 // }
 
-void hal_sleep_msec( int miliseconds )
+void hal_sleep_msec(int miliseconds)
 {
     //usleep(1000*miliseconds);
     //sleep( ((miliseconds-1)/1000)+1 );
-    unix_hal_sleep_msec( miliseconds );
+    unix_hal_sleep_msec(miliseconds);
 }
-
-
-
-
-
 
 // alloc wants it
 // int phantom_virtual_machine_threads_stopped = 0;
-
 
 // no snaps here
 
 // volatile int phantom_virtual_machine_snap_request = 0;
 
-
-
-
-
-
-void hal_exit_kernel_thread()
-{
-    panic("hal_exit_kernel_thread");
-}
-
 #include <vm/stacks.h>
-
 
 // static void *dm_mem, *dm_copy;
 // static int dm_size = 0;
@@ -190,17 +132,15 @@ void hal_exit_kernel_thread()
 // #endif
 // }
 
+void event_q_put_global(ui_event_t *e) {}
 
-void event_q_put_global( ui_event_t *e ) {}
+void event_q_put_any(ui_event_t *e) {}
 
-void event_q_put_any( ui_event_t *e ) {}
-
-
-void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
+void event_q_put_win(int x, int y, int info, struct drv_video_window *focus)
 {
 }
 
-int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
+int drv_video_window_get_event(drv_video_window_t *w, struct ui_event *e, int wait)
 {
     printf("\nGetEvent!?\n");
     w->events_count--;
@@ -208,13 +148,11 @@ int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int w
     return 0;
 }
 
-
 // int hal_save_cli() { return 1; }
 // void hal_sti() {}
 // void hal_cli() {}
 
-
-struct wtty *get_thread_ctty( struct phantom_thread *t )
+struct wtty *get_thread_ctty(struct phantom_thread *t)
 {
     return 0;
 }
@@ -225,7 +163,6 @@ void hal_cpu_reset_real() { exit(33); }
 // errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
 // errno_t phantom_disconnect_object( struct data_area_4_connection *da ) { return ENOMEM; }
 // errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg) { return 0; }
-
 
 // -----------------------------------------------------------------------
 // debug_ext.h support
@@ -240,53 +177,35 @@ int debug_max_level_error = ~0;
 int debug_max_level_info = ~0;
 int debug_max_level_flow = ~0;
 
-
-
-void phantom_check_threads_pass_bytecode_instr_boundary( void )
+void phantom_check_threads_pass_bytecode_instr_boundary(void)
 {
     printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
 }
 
-
-
-
-
-
-
-void console_set_fg_color( struct rgba_t c )
+void console_set_fg_color(struct rgba_t c)
 {
 }
-
 
 // void vm_map_page_mark_unused( addr_t page_start)
 // {
 //     //printf("asked to mark page unused\n");
 // }
 
-
-
-
-
-
-
-
 #warning stub
 struct _key_event;
-void phantom_dev_keyboard_get_key( struct _key_event *out )
+void phantom_dev_keyboard_get_key(struct _key_event *out)
 {
-    while(1) hal_sleep_msec(10000);
+    while (1)
+        hal_sleep_msec(10000);
 }
 
-void phantom_set_console_getchar( int (*_getchar_impl)(void) )
+void phantom_set_console_getchar(int (*_getchar_impl)(void))
 {
 }
-
-
 
 // -----------------------------------------------------------
 // output
 // -----------------------------------------------------------
-
 
 #if 0
 
@@ -295,9 +214,6 @@ void debug_console_putc(int c)
     if( kout_f ) fputc( c, kout_f );
     else putchar(c);
 }
-
-
-
 
 #include <kernel/debug.h>
 
@@ -315,24 +231,20 @@ void lprintf(char const *fmt, ...)
     va_end(ap);
 }
 
-
 #endif
 
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
-
-
-
 //known call: int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
 
 int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback callback, void *args, int flags)
 {
-    (void) e;
-    (void) delay_ms;
-    (void) callback;
-    (void) args;
-    (void) flags;
+    (void)e;
+    (void)delay_ms;
+    (void)callback;
+    (void)args;
+    (void)flags;
 
     //panic("set_net_timer");
     lprintf("set_net_timer called, backtrace (\"gdb bt\") me\n");
@@ -342,16 +254,11 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
 
 static int dummy_snap_catch;
 
-volatile int * snap_catch_va = &dummy_snap_catch;
+volatile int *snap_catch_va = &dummy_snap_catch;
 
 #include <exceptions.h>
 
-
-
 // void check_global_lock_entry_count(void) {}
-
 
 // void vm_lock_persistent_memory() {}
 // void vm_unlock_persistent_memory() {}
-
-

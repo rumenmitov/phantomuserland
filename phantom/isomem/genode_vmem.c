@@ -51,7 +51,6 @@ void phantom_paging_init(void)
     phantom_paging_start();
 }
 
-
 void phantom_paging_start(void)
 {
     _stub_print();
@@ -66,19 +65,17 @@ void phantom_paging_start(void)
  * \return cr3 value for threads lib to save.
  * 
 **/
-int32_t arch_switch_pdir( bool paged_mem_enable )
+int32_t arch_switch_pdir(bool paged_mem_enable)
 {
     _stub_print();
     return 0;
 }
 
-
-int32_t arch_get_pdir( bool paged_mem_enable )
+int32_t arch_get_pdir(bool paged_mem_enable)
 {
     _stub_print();
     return 0;
 }
-
 
 int arch_is_object_land_access_enabled() //< check if current thread attempts to access object space having access disabled
 {
@@ -88,55 +85,57 @@ int arch_is_object_land_access_enabled() //< check if current thread attempts to
 
 #endif
 
+/* 
+*
+* Virtual memory control
+*
+*/
 
-void phantom_map_page(linaddr_t la, pt_entry_t mapping )
-{
-    _stub_print();
-}
-
-
-void phantom_unmap_page(linaddr_t la )
-{
-    _stub_print();
-}
-
-
-int phantom_is_page_accessed(linaddr_t la )
-{
-    _stub_print();
-    return 0;
-}
-
-int phantom_is_page_modified(linaddr_t la )
-{
-    _stub_print();
-    return 0;
-}
-
-
-
-void
-phantom_dump_pdir()
-{
-    _stub_print();
-}
-
-
-void arch_cpu_invalidate_TLB_range(addr_t start, addr_t end)
-{
-    _stub_print();
-}
-
-void arch_cpu_invalidate_TLB_list(addr_t pages[], int num_pages)
-{
-    _stub_print();
-}
-
+// Used to map and unmap pages
 void hal_page_control_etc(
-                            physaddr_t  p, void *page_start_addr,
-                            page_mapped_t mapped, page_access_t access,
-                            u_int32_t flags
-                        )
+    physaddr_t p, void *page_start_addr,
+    page_mapped_t mapped, page_access_t access,
+    u_int32_t flags)
 {
     _stub_print();
 }
+
+// TODO : Delete if unused
+
+// void phantom_map_page(linaddr_t la, pt_entry_t mapping )
+// {
+//     _stub_print();
+// }
+
+// void phantom_unmap_page(linaddr_t la )
+// {
+//     _stub_print();
+// }
+
+// int phantom_is_page_accessed(linaddr_t la )
+// {
+//     _stub_print();
+//     return 0;
+// }
+
+// int phantom_is_page_modified(linaddr_t la )
+// {
+//     _stub_print();
+//     return 0;
+// }
+
+// void
+// phantom_dump_pdir()
+// {
+//     _stub_print();
+// }
+
+// void arch_cpu_invalidate_TLB_range(addr_t start, addr_t end)
+// {
+//     _stub_print();
+// }
+
+// void arch_cpu_invalidate_TLB_list(addr_t pages[], int num_pages)
+// {
+//     _stub_print();
+// }
