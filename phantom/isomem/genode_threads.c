@@ -169,21 +169,21 @@ errno_t t_set_snapper_flag(void)
 
 // TODO : Remove if not needed
 
-void phantom_thread_wait_4_snap()
-{
-    // Just return
-}
+// void phantom_thread_wait_4_snap()
+// {
+//     // Just return
+// }
 
-void phantom_snapper_wait_4_threads()
-{
-    // Do nothing in non-kernel version
-    // Must be implemented if no-kernel multithread will be done
-}
+// void phantom_snapper_wait_4_threads()
+// {
+//     // Do nothing in non-kernel version
+//     // Must be implemented if no-kernel multithread will be done
+// }
 
-void phantom_snapper_reenable_threads()
-{
-    //
-}
+// void phantom_snapper_reenable_threads()
+// {
+//     //
+// }
 
 // void phantom_activate_thread()
 // {
