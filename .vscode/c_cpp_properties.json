@@ -31,6 +31,13 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/genode_env/include/base-2020-08-27/include",
+                "${workspaceFolder}/genode_env/include/base-2020-08-27/include/spec/64bit",
+                "${workspaceFolder}/genode_env/include/base-2020-08-27/include/spec/x86",
+                "${workspaceFolder}/genode_env/include/base-2020-08-27/include/spec/x86_64",
+                "${workspaceFolder}/genode_env/include/base-nova-2020-08-24/include",
+                "${workspaceFolder}/genode_env/include/os-2020-08-19/include",
+                "${workspaceFolder}/genode_env/include/block-session-2020-05-26/include",
                 "${workspaceFolder}/include/genode_libc/libc",
                 "${workspaceFolder}/include/genode_libc/openlibm",
                 "${workspaceFolder}/include/genode_libc/spec/x86_64/libc",
@@ -51,7 +58,7 @@
                 "databaseFilename": ""
             },
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c89",
+            "cStandard": "c11",
             "cppStandard": "c++17",
             "forcedInclude": [
                 "${workspaceFolder}/include/kernel/config.h",

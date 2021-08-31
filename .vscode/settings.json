@@ -123,7 +123,8 @@
       "misc.h": "c",
       "connect.h": "c",
       "stdio.h": "c",
-      "wrappers.h": "c"
+      "wrappers.h": "c",
+      "cdefs.h": "c"
     },
     "cmake.configureOnOpen": false
   }
