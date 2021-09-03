@@ -1,3 +1,4 @@
+#ifdef PHANTOM_THREADS_STUB
 
 #define DEBUG_MSG_PREFIX "vm.unixhal"
 #include <debug_ext.h>
@@ -189,3 +190,5 @@ errno_t t_set_snapper_flag(void)
 // {
 //     // Threads do not work in this mode
 // }
+
+#endif

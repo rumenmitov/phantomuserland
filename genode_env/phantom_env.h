@@ -26,7 +26,7 @@ namespace Phantom
         }
     };
 
-    Main *main_obj;
+    extern Main *main_obj;
 
     void test_obj_space(addr_t const addr_obj_space);
     void test_block_device(Disk_backend &disk);

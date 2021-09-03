@@ -11,12 +11,16 @@
 #include <base/allocator_avl.h>
 #include <block_session/connection.h>
 
+#include <libc/component.h>
+
 #include "phantom_env.h"
 #include "disk_backend.h"
 #include "phantom_vmem.h"
 #include "phantom_threads.h"
 
 #include "phantom_entrypoints.h"
+
+Phantom::Main *Phantom::main_obj = nullptr;
 
 void Phantom::test_obj_space(addr_t const addr_obj_space)
 {
@@ -85,7 +89,7 @@ void Phantom::test_block_device(Phantom::Disk_backend &disk)
 	log("Done!");
 }
 
-void Component::construct(Genode::Env &env)
+void Libc::Component::construct(Libc::Env &env)
 {
 	log("--- Phantom env test ---");
 
@@ -125,14 +129,14 @@ void Component::construct(Genode::Env &env)
 			error("opening block session was denied!");
 		}
 
-		/*
-		* Starting Phantom
-		*/
+		// /*
+		// * Starting Phantom
+		// */
 
-		int p_argc = 1;
-		char **p_argv = nullptr;
-		char **p_envp = nullptr;
-		phantom_main_entry_point(p_argc, p_argv, p_envp);
+		// int p_argc = 1;
+		// char **p_argv = nullptr;
+		// char **p_envp = nullptr;
+		// phantom_main_entry_point(p_argc, p_argv, p_envp);
 
 		/*
 		 * Tests
@@ -140,4 +144,27 @@ void Component::construct(Genode::Env &env)
 	}
 
 	log("--- finished Phantom env test ---");
+
+	env.exec_static_constructors();
+
+	Libc::with_libc([]()
+					{
+						int p_argc = 1;
+						char **p_argv = nullptr;
+						char **p_envp = nullptr;
+						phantom_main_entry_point(p_argc, p_argv, p_envp);
+					});
+}
+
+int main()
+{
+
+	/*
+		* Starting Phantom
+		*/
+
+	int p_argc = 1;
+	char **p_argv = nullptr;
+	char **p_envp = nullptr;
+	phantom_main_entry_point(p_argc, p_argv, p_envp);
 }

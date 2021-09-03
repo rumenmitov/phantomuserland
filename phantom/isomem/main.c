@@ -49,6 +49,8 @@ struct drv_video_screen_t        *video_drv = 0;
 
 extern int pvm_video_init(); // We need it only here
 
+extern void wait_for_continue();
+
 // Init functions
 
 void
@@ -129,10 +131,15 @@ phantom_multiboot_main()
     // main(main_argc, main_argv, main_env);
 }
 
+// int main(int argc, char **argv, char **envp)
+// {
+//     phantom_main_entry_point(argc, argv, envp);
+// }
 
-
-int main(int argc, char **argv, char **envp)
+int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
+    printf("Waiting...\n");
+    // wait_for_continue();
     phantom_multiboot_main();
 
     (void) envp;

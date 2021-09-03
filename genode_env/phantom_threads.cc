@@ -11,15 +11,17 @@
 #include "phantom_env.h"
 #include "phantom_threads.h"
 
+#include <base/child.h>
+
 // Important to keep this typedef before threads.h
 typedef int errno_t;
-
-#include <threads.h>
 
 using namespace Phantom;
 
 extern "C"
 {
+
+#include <threads.h>
 
     /*
 *
@@ -30,12 +32,14 @@ extern "C"
 
     int hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg)
     {
+        Genode::log("Starting new phantom kernel thread with args!");
         // Actually, no distinction between regular and kernel thread since in both cases we will be in userspace
         return main_obj->_threads_repo.createThread(thread, arg);
     }
 
     void hal_start_kernel_thread(void (*thread)(void))
     {
+        Genode::log("Starting new phantom kernel thread!");
         main_obj->_threads_repo.createThread(thread);
     }
 
@@ -43,10 +47,16 @@ extern "C"
     {
         // XXX : Seems that the legit way is to return from Thread::entry
         main_obj->_env.cpu().kill_thread(Thread::myself()->cap());
+
+        while (true)
+        {
+            Genode::error("Error: Phantom kernel thread %s was not terminated!", Thread::myself()->name().string());
+        }
     }
 
     tid_t hal_start_thread(void (*thread)(void *arg), void *arg, int flags)
     {
+        Genode::log("Starting new phantom thread!");
         main_obj->_threads_repo.createThread(thread, arg, flags);
         return 0;
     }
@@ -102,7 +112,12 @@ extern "C"
         return 0;
     }
 
-    // errno_t t_get_ctty(tid_t tid, struct wtty **ct) { return ENOENT; }
+    errno_t t_get_ctty(tid_t tid, struct wtty **ct)
+    {
+        (void)tid;
+        (void)ct;
+        return 1;
+    }
 
     /*
 *
@@ -136,6 +151,7 @@ extern "C"
     }
     errno_t t_set_owner(tid_t tid, void *owner)
     {
+        (void)tid;
         ((PhantomGenericThread *)Thread::myself())->_info.owner = owner;
         return 0;
     }
@@ -148,18 +164,21 @@ extern "C"
 
     void t_smp_enable(int yn)
     {
+        (void)yn;
         // _stub_print();
     }
 
     //< Enable or disable access to paged memory - calls arch pagemap func.
     void t_set_paged_mem(bool enable)
     {
+        (void)enable;
         // _stub_print();
     }
 
     // TODO : Rework sleeping threads to use blockades or timers!
     void wake_sleeping_thread(void *arg)
     {
+        (void)arg;
         // arg is tid
         // _stub_print();
     }
@@ -171,6 +190,8 @@ extern "C"
  */
     void thread_block(int sleep_flag, hal_spinlock_t *lock_to_be_unlocked)
     {
+        (void)sleep_flag;
+        (void)lock_to_be_unlocked;
         // _stub_print();
     }
 
