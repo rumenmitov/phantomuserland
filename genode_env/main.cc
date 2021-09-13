@@ -22,18 +22,18 @@
 
 Phantom::Main *Phantom::main_obj = nullptr;
 
-void Phantom::test_obj_space(addr_t const addr_obj_space)
+void Phantom::test_obj_space()
 {
 
 	// Reading from mem
 
 	log("Reading from obj.space");
 
-	addr_t read_addr = addr_obj_space;
+	addr_t read_addr = main_obj->_vmem_adapter.OBJECT_SPACE_START;
 
 	log("  read     mem                         ",
 		(sizeof(void *) == 8) ? "                " : "",
-		Hex_range<addr_t>(OBJECT_SPACE_START, OBJECT_SPACE_SIZE), " value=",
+		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " value=",
 		Hex(*(unsigned *)(read_addr)));
 
 	// Writing to mem
@@ -42,7 +42,7 @@ void Phantom::test_obj_space(addr_t const addr_obj_space)
 	*((unsigned *)read_addr) = 256;
 
 	log("    wrote    mem   ",
-		Hex_range<addr_t>(OBJECT_SPACE_START, OBJECT_SPACE_SIZE), " with value=",
+		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " with value=",
 		Hex(*(unsigned *)read_addr));
 
 	// Reading again
@@ -50,7 +50,7 @@ void Phantom::test_obj_space(addr_t const addr_obj_space)
 	log("Reading from obj.space");
 	log("  read     mem                         ",
 		(sizeof(void *) == 8) ? "                " : "",
-		Hex_range<addr_t>(OBJECT_SPACE_START, OBJECT_SPACE_SIZE), " value=",
+		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " value=",
 		Hex(*(unsigned *)(read_addr)));
 }
 
@@ -95,26 +95,7 @@ void Libc::Component::construct(Libc::Env &env)
 
 	{
 		/*
-		 * Initialize object space region.
-		 */
-		Rm_connection rm(env);
-
-		Region_map_client rm_obj_space(rm.create(OBJECT_SPACE_SIZE));
-		Dataspace_client rm_obj_space_client(rm_obj_space.dataspace());
-
-		Phantom::Local_fault_handler fault_handler(env, rm_obj_space);
-
-		void *ptr_obj_space = env.rm().attach(rm_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
-		addr_t const addr_obj_space = reinterpret_cast<addr_t>(ptr_obj_space);
-		log("Addr ", addr_obj_space);
-		// log("Size ", rm_obj_space_client.size());
-		// log(" region top        ",
-		// 	Hex_range<addr_t>(addr_obj_space, rm_obj_space_client.size()));
-
-		Phantom::test_obj_space(addr_obj_space);
-
-		/*
-		 * Setup Main object and disk backend
+		 * Setup Main object
 		 */
 		try
 		{
@@ -122,25 +103,13 @@ void Libc::Component::construct(Libc::Env &env)
 			static Phantom::Main main(env);
 			Phantom::main_obj = &main;
 
+			Phantom::test_obj_space();
 			Phantom::test_block_device(main._disk);
 		}
 		catch (Genode::Service_denied)
 		{
 			error("opening block session was denied!");
 		}
-
-		// /*
-		// * Starting Phantom
-		// */
-
-		// int p_argc = 1;
-		// char **p_argv = nullptr;
-		// char **p_envp = nullptr;
-		// phantom_main_entry_point(p_argc, p_argv, p_envp);
-
-		/*
-		 * Tests
-		 */
 	}
 
 	log("--- finished Phantom env test ---");
@@ -154,17 +123,4 @@ void Libc::Component::construct(Libc::Env &env)
 						char **p_envp = nullptr;
 						phantom_main_entry_point(p_argc, p_argv, p_envp);
 					});
-}
-
-int main()
-{
-
-	/*
-		* Starting Phantom
-		*/
-
-	int p_argc = 1;
-	char **p_argv = nullptr;
-	char **p_envp = nullptr;
-	phantom_main_entry_point(p_argc, p_argv, p_envp);
 }
