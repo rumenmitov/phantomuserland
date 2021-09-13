@@ -1,3 +1,5 @@
+#ifdef PHANTOM_VMEM_STUB
+
 /**
  *
  * Phantom OS
@@ -139,3 +141,5 @@ void hal_page_control_etc(
 // {
 //     _stub_print();
 // }
+
+#endif
