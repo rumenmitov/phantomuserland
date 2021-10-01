@@ -27,7 +27,12 @@
 #include <hal.h>
 #include <machdep.h>
 
+#include <kernel/physalloc.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "phantom_env.h"
+// #include "phantom_vmem.h"
 
 //#include "genode_misc.h"
 
@@ -98,7 +103,25 @@ void hal_page_control_etc(
     page_mapped_t mapped, page_access_t access,
     u_int32_t flags)
 {
-    // Phantom::main_obj.
+    bool writeable = false;
+    if (access == page_readwrite or access == page_rw)
+    {
+        writeable = true;
+    }
+
+    // Phantom::main_obj->_vme
+    if (mapped == page_map)
+    {
+        Phantom::main_obj->_vmem_adapter.map_page(p, (addr_t)page_start_addr, writeable);
+    }
+    else if (mapped == page_unmap)
+    {
+        Phantom::main_obj->_vmem_adapter.unmap_page((addr_t)page_start_addr);
+    }
+    else
+    {
+        warning("IO mapping is not supported yet");
+    }
 }
 
 /*
@@ -107,14 +130,16 @@ void hal_page_control_etc(
 *
 */
 
+#if 0 // Disabled since implementing higher level interface (HAL)
+
 void phantom_phys_alloc_init_static(physalloc_t *arena, u_int32_t n_alloc_units, void *mapbuf)
 {
-    _stub_print();
+    // _stub_print();
 }
 
 void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
 {
-    _stub_print();
+    // _stub_print();
 }
 
 errno_t phantom_phys_alloc_page(physalloc_t *arena, physalloc_item_t *ret)
@@ -135,4 +160,48 @@ errno_t phantom_phys_alloc_region(physalloc_t *arena, physalloc_item_t *ret, siz
 void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t n_pages)
 {
     _stub_print();
+}
+
+#endif
+
+/*
+*
+* HAL functions to allocate/free phys/virtual memory
+*
+*/
+
+errno_t hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not memory
+{
+}
+
+void hal_free_vaddress(void *addr, int num)
+{
+}
+
+void hal_init_physmem_alloc(void)
+{
+}
+
+void hal_init_physmem_alloc_thread(void)
+{
+    // #if USE_RESERVE
+    //     hal_start_thread( replentishThread, 0, THREAD_FLAG_KERNEL );
+    // #endif
+    //     dbg_add_command(&cmd_mem_stat, "mem", "Physical memory stats");
+}
+
+errno_t hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
+{
+}
+
+void hal_free_phys_pages(physaddr_t paddr, int npages)
+{
+}
+
+errno_t hal_alloc_phys_page(physaddr_t *result)
+{
+}
+
+void hal_free_phys_page(physaddr_t paddr) // alloc and not map - WILL PANIC if page is mapped!
+{
 }

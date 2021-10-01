@@ -6,13 +6,11 @@
 
 #include "disk_backend.h"
 #include "phantom_threads.h"
+#include "phantom_vmem.h"
 
 namespace Phantom
 {
     using namespace Genode;
-
-    class Local_fault_handler;
-    class Vmem_adapter;
 
     struct Main
     {

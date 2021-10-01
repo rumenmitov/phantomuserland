@@ -1,18 +1,24 @@
 #ifndef GENODE_PHANTOM_VMEM_H
 #define GENODE_PHANTOM_VMEM_H
 
-#include "phantom_env.h"
 #include <rm_session/connection.h>
 #include <region_map/client.h>
 #include <dataspace/client.h>
 #include <base/attached_ram_dataspace.h>
 #include <base/heap.h>
+#include <base/entrypoint.h>
+
+#include "phantom_env.h"
+
+#include <arch/arch-page.h>
 
 using namespace Genode;
 
-static const addr_t OBJECT_SPACE_SIZE = 0x80000000;
-static const addr_t OBJECT_SPACE_START = 0x80000000;
-static const size_t PAGE_SIZE = 4096;
+namespace Phantom
+{
+    class Local_fault_handler;
+    class Vmem_adapter;
+};
 
 /**
  * Region-manager fault handler resolves faults by attaching new dataspaces
@@ -20,9 +26,11 @@ static const size_t PAGE_SIZE = 4096;
 class Phantom::Local_fault_handler : public Genode::Entrypoint
 {
 private:
-    Env &_env;
+    Genode::Env &_env;
     Region_map &_region_map;
     Signal_handler<Local_fault_handler> _handler;
+    size_t _page_size;
+
     volatile unsigned _fault_cnt{0};
 
     void _handle_fault()
@@ -38,19 +46,20 @@ private:
             ", pf_addr=", Hex(state.addr, Hex::PREFIX));
 
         log("allocate dataspace and attach it to sub region map");
-        Dataspace_capability ds = _env.ram().alloc(PAGE_SIZE);
-        _region_map.attach_at(ds, state.addr & ~(PAGE_SIZE - 1));
+        Dataspace_capability ds = _env.ram().alloc(_page_size);
+        _region_map.attach_at(ds, state.addr & ~(_page_size - 1));
 
         log("returning from handle_fault");
     }
 
 public:
-    Local_fault_handler(Genode::Env &env, Region_map &region_map)
+    Local_fault_handler(Genode::Env &env, Region_map &region_map, size_t page_size)
         : Entrypoint(env, sizeof(addr_t) * 2048, "local_fault_handler",
                      Affinity::Location()),
           _env(env),
           _region_map(region_map),
-          _handler(*this, *this, &Local_fault_handler::_handle_fault)
+          _handler(*this, *this, &Local_fault_handler::_handle_fault),
+          _page_size(page_size)
     {
         region_map.fault_handler(_handler);
 
@@ -69,25 +78,31 @@ public:
 
 struct Phantom::Vmem_adapter
 {
+
+    const addr_t OBJECT_SPACE_SIZE = 0x80000000;
+    const addr_t OBJECT_SPACE_START = 0x80000000;
+    // TODO : defined as a macro that is required for other Phantom, need to fix!!!
+    // const size_t PAGE_SIZE = 4096;
+
     const unsigned int _phys_rm_size = 1024 * 1024 * 512;
 
-    Env &_env;
-    Rm_connection _rm{_env};
+    Genode::Env &_env;
+    Genode::Rm_connection _rm{_env};
 
     // Attached to env's rm
-    Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
+    Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
 
     // Not attached fully, but pages from it supposed to be mapped on object space
-    Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
+    Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
     // Heap (allocator) that allocates dataspace per each allocated page and maps it on _pseudo_phys_rm
-    Sliced_heap _pseudo_phys_heap{_env.ram(), _pseudo_phys_rm};
+    Genode::Sliced_heap _pseudo_phys_heap{_env.ram(), _pseudo_phys_rm};
 
     Vmem_adapter(Env &env) : _env(env)
     {
 
-        Phantom::Local_fault_handler fault_handler(env, _obj_space);
+        Phantom::Local_fault_handler fault_handler(env, _obj_space, PAGE_SIZE);
         // ATTENTION! _obj_space is attached to the env's rm!
-        void *ptr_obj_space = env.rm().attach(_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
+        env.rm().attach(_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
     }
 
     void alloc_phantom_phys_page(void **addr)
@@ -102,12 +117,14 @@ struct Phantom::Vmem_adapter
         _pseudo_phys_heap.free(addr, PAGE_SIZE);
     }
 
-    void map_page(addr_t phys_addr, addr_t virt_addr)
+    void map_page(addr_t phys_addr, addr_t virt_addr, bool writeable)
     {
         if (virt_addr >= OBJECT_SPACE_START && virt_addr < OBJECT_SPACE_START + OBJECT_SPACE_SIZE)
         {
             // TODO : Error handling
-            _obj_space.attach_at(_pseudo_phys_rm.dataspace(), virt_addr - OBJECT_SPACE_START, PAGE_SIZE, phys_addr);
+            // _obj_sp
+            _obj_space.attach(_pseudo_phys_rm.dataspace(), PAGE_SIZE, phys_addr, true, virt_addr - OBJECT_SPACE_START, false, writeable);
+            // _obj_space.attach_at(_pseudo_phys_rm.dataspace(), virt_addr - OBJECT_SPACE_START, PAGE_SIZE, phys_addr);
         }
         else
         {

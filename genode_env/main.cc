@@ -22,6 +22,12 @@
 
 Phantom::Main *Phantom::main_obj = nullptr;
 
+namespace Phantom
+{
+	void test_obj_space();
+	void test_block_device();
+};
+
 void Phantom::test_obj_space()
 {
 
