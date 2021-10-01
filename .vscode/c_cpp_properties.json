@@ -42,12 +42,13 @@
                 "${workspaceFolder}/include/genode_libc/openlibm",
                 "${workspaceFolder}/include/genode_libc/spec/x86_64/libc",
                 "${workspaceFolder}/include/genode-amd64",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "/home/anton/genode/repos/libports/include"
             ],
             "defines": [
                 "PHANTOM_GENODE=1"
             ],
-            "intelliSenseMode": "linux-clang-x64",
+            "intelliSenseMode": "linux-gcc-x64",
             "browse": {
                 "path": [
                     "/usr/include",
