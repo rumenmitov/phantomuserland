@@ -51,15 +51,16 @@ static int paging_inited = 0;
 //     return 1;
 // }
 
+void phantom_paging_start(void)
+{
+    // _stub_print();
+}
+
 void phantom_paging_init(void)
 {
     // _stub_print();
     phantom_paging_start();
-}
-
-void phantom_paging_start(void)
-{
-    // _stub_print();
+    paging_inited = 1;
 }
 
 #if CONF_DUAL_PAGEMAP
@@ -103,6 +104,8 @@ void hal_page_control_etc(
     page_mapped_t mapped, page_access_t access,
     u_int32_t flags)
 {
+    (void)flags;
+
     bool writeable = false;
     if (access == page_readwrite or access == page_rw)
     {
@@ -172,10 +175,32 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
 errno_t hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not memory
 {
+    // XXX : Probably, can be optimized in future
+    void *temp_res = nullptr;
+
+    // alloc_aligned() is used internally by alloc(). It also allows to set the from and to parameters
+    bool alloc_ok = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned(PAGE_SIZE * num, &temp_res,
+                                                                               log2(sizeof(addr_t)),
+                                                                               0,
+                                                                               main_obj->_vmem_adapter.OBJECT_SPACE_SIZE)
+                        .ok();
+
+    *result = (void *)((char *)temp_res + main_obj->_vmem_adapter.OBJECT_SPACE_START);
+
+    if (!alloc_ok)
+    {
+        Genode::error("Failed to allocate %d pages in object space!", num);
+        return 1; // XXX : Not sure if it is ok
+    }
+
+    return 0;
 }
 
 void hal_free_vaddress(void *addr, int num)
 {
+    // num = number of pages
+    void *obj_space_addr = (void *)((char *)addr - main_obj->_vmem_adapter.OBJECT_SPACE_START);
+    main_obj->_vmem_adapter._obj_space_allocator.free(obj_space_addr, num);
 }
 
 void hal_init_physmem_alloc(void)
@@ -192,16 +217,31 @@ void hal_init_physmem_alloc_thread(void)
 
 errno_t hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
 {
+    void *temp_res = nullptr;
+    bool alloc_ok = main_obj->_vmem_adapter._pseudo_phys_heap.alloc(PAGE_SIZE * npages, &temp_res);
+
+    *result = (physaddr_t)temp_res;
+
+    if (!alloc_ok)
+    {
+        Genode::error("Failed to allocate %d pseudo physical pages! (probably, OOM)", npages);
+        return 1; // XXX : Not sure if it is ok
+    }
+
+    return 0;
 }
 
 void hal_free_phys_pages(physaddr_t paddr, int npages)
 {
+    main_obj->_vmem_adapter._pseudo_phys_heap.free((void *)paddr, npages);
 }
 
 errno_t hal_alloc_phys_page(physaddr_t *result)
 {
+    return hal_alloc_phys_pages(result, 1);
 }
 
 void hal_free_phys_page(physaddr_t paddr) // alloc and not map - WILL PANIC if page is mapped!
 {
+    hal_free_phys_pages(paddr, 1);
 }

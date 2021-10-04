@@ -4,7 +4,6 @@
 #include <rm_session/connection.h>
 #include <region_map/client.h>
 #include <dataspace/client.h>
-#include <base/attached_ram_dataspace.h>
 #include <base/heap.h>
 #include <base/entrypoint.h>
 
@@ -76,6 +75,8 @@ public:
     }
 };
 
+// class Phantom::Constrained_allocator
+
 struct Phantom::Vmem_adapter
 {
 
@@ -89,13 +90,16 @@ struct Phantom::Vmem_adapter
     Genode::Env &_env;
     Genode::Rm_connection _rm{_env};
 
-    // Attached to env's rm
-    Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
-
     // Not attached fully, but pages from it supposed to be mapped on object space
     Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
     // Heap (allocator) that allocates dataspace per each allocated page and maps it on _pseudo_phys_rm
     Genode::Sliced_heap _pseudo_phys_heap{_env.ram(), _pseudo_phys_rm};
+
+    // Attached to env's rm
+    Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
+    // TODO : modify allocator to fit the size of obj. space. Should be simple, need to
+    //        create a derived class and tune alloc() to handle appropriate size
+    Genode::Allocator_avl _obj_space_allocator{0};
 
     Vmem_adapter(Env &env) : _env(env)
     {
