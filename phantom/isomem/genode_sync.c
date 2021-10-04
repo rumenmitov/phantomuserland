@@ -9,56 +9,35 @@
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
-    m->impl = unix_hal_mutex_init(name);
-    assert(m->impl);
-    return 0;
+    _stub_print();
 }
 
 int hal_mutex_lock(hal_mutex_t *m)
 {
-    assert(m->impl);
-    return unix_hal_mutex_lock(m->impl);
+    _stub_print();
 }
 
 int hal_mutex_unlock(hal_mutex_t *m)
 {
-    assert(m->impl);
-    return unix_hal_mutex_unlock(m->impl);
+    _stub_print();
 }
 
 int hal_mutex_is_locked(hal_mutex_t *m)
 {
-    assert(m->impl);
-    return unix_hal_mutex_is_locked(m->impl);
+    _stub_print();
 }
 
 errno_t hal_mutex_destroy(hal_mutex_t *m)
 {
-    struct phantom_mutex_impl *mi = m->impl;
-
-    //if(mi->owner != 0)        panic("locked mutex killed");
-    free(mi);
-
-    m->impl = 0;
-
-    return 0;
+    _stub_print();
 }
 
-static hal_mutex_t *heap_lock = 0; // won't be used until assigned
+// static hal_mutex_t *heap_lock = 0; // won't be used until assigned
 
 // Called after initing threads (and mutexes)
 void heap_init_mutex(void)
 {
-    // Mutex init uses malloc! First allocate it (malloc will run unprotected),
-    // then assign, turning on protection
-
-    static hal_mutex_t mutex;
-    if (hal_mutex_init(&mutex, "Heap") < 0)
-    {
-        panic("error creating heap mutex\n");
-    }
-
-    heap_lock = &mutex;
+    _stub_print();
 }
 
 /*
@@ -71,18 +50,18 @@ void heap_init_mutex(void)
 
 int hal_sem_acquire(hal_sem_t *s)
 {
-    (void)s;
-    hal_sleep_msec(10);
-    return 0;
+    _stub_print();
 }
 
 void hal_sem_release(hal_sem_t *s)
 {
+    _stub_print();
     (void)s;
 }
 
 int hal_sem_init(hal_sem_t *s, const char *name)
 {
+    _stub_print();
     (void)s;
     (void)name;
     return 0;
