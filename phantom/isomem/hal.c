@@ -45,7 +45,7 @@ void hal_init( vmem_ptr_t va, long vs )
     printf("HAL init: %s %s, VM @ 0x%x\n", arch_name, board_name, hal.object_vspace );
     pvm_alloc_init( va, vs );
 
-    hal_init_vm_map();
+    // hal_init_vm_map();
 
     hal_time_init();
 }

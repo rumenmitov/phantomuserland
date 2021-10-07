@@ -50,15 +50,15 @@ struct hardware_abstraction_level hal;
 //     hal_start_kernel_thread( (void*)&winhal_debug_srv_thread );
 // }
 
-void hal_disable_preemption()
-{
-    unix_hal_disable_preemption();
-}
+// void hal_disable_preemption()
+// {
+//     unix_hal_disable_preemption();
+// }
 
-void hal_enable_preemption()
-{
-    unix_hal_enable_preemption();
-}
+// void hal_enable_preemption()
+// {
+//     unix_hal_enable_preemption();
+// }
 
 // vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
@@ -70,12 +70,12 @@ void hal_enable_preemption()
 //     exit(1);
 // }
 
-void hal_sleep_msec(int miliseconds)
-{
-    //usleep(1000*miliseconds);
-    //sleep( ((miliseconds-1)/1000)+1 );
-    unix_hal_sleep_msec(miliseconds);
-}
+// void hal_sleep_msec(int miliseconds)
+// {
+//     //usleep(1000*miliseconds);
+//     //sleep( ((miliseconds-1)/1000)+1 );
+//     unix_hal_sleep_msec(miliseconds);
+// }
 
 // alloc wants it
 // int phantom_virtual_machine_threads_stopped = 0;

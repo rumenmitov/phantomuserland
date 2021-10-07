@@ -166,9 +166,9 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(01_threads);
 #endif
 
-    TEST(physmem);
-    TEST(physalloc_gen);
-    TEST(malloc);
+    // TEST(physmem);
+    // TEST(physalloc_gen);
+    // TEST(malloc);
     TEST(amap);
     /* //   TODO : Uncomment
     TEST(cbuf);

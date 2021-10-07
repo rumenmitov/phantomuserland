@@ -130,3 +130,8 @@ void Libc::Component::construct(Libc::Env &env)
 						phantom_main_entry_point(p_argc, p_argv, p_envp);
 					});
 }
+
+int main()
+{
+	log("What are we doing here???");
+}
