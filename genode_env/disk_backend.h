@@ -62,6 +62,11 @@ public:
     Genode::size_t block_size() const { return _info.block_size; }
     bool writable() const { return _info.writeable; }
 
+    Block::Session::Info getInfo()
+    {
+        return _info;
+    }
+
     void sync()
     {
         Genode::Mutex::Guard guard(_session_mutex);

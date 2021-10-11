@@ -57,7 +57,7 @@ struct disk_q
 /** initialize disk_q structure. */
 void phantom_init_disk_q(struct disk_q *q, void (*startIo)( struct disk_q *q ) );
 
-phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *private, int unit, void (*startIoFunc)( struct disk_q *q ) );
+phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *is_private, int unit, void (*startIoFunc)( struct disk_q *q ) );
 
 /** @} */
 
