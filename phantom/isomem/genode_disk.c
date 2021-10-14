@@ -4,14 +4,14 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "genode_disk.h"
-
 // Required to access vmem functions
 #include <hal.h>
 
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "genode_disk.h"
 
 static int seq_number = 0;
 static genode_disk_dev_t vdev;
@@ -39,6 +39,14 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
     ret->specific = vd;
 
     // important since it is used to break request in the parts
+    // XXX: Seems that Phantom has 512 bytes size hardcoded for the partition
+    //      (though, it is a default settings)
+    if (vd->block_size != 512)
+    {
+        SHOW_ERROR0(0, "Block size of the partition is not 512 bytes!");
+        return 0;
+    }
+
     ret->block_size = vd->block_size;
 
     // ret->dequeue = vioDequeue;
@@ -46,7 +54,7 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
     // ret->fence = vioFence;
     // ret->trim = vioTrim;
 
-    //strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );
+    // strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );
     strlcpy(ret->name, vd->name, PARTITION_NAME_LEN);
 
     return ret;
@@ -82,7 +90,7 @@ int driver_genode_disk_asyncIO(struct phantom_disk_partition *part, pager_io_req
     // assert(part->specific != 0); // TODO : Causes a compilation error!!!
 
     // Temp! Rewrite!
-    //assert(p->base == 0 );
+    // assert(p->base == 0 );
 
     int block_size = vdev.block_size;
 

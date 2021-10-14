@@ -7,22 +7,16 @@
 extern "C"
 {
 
-#include <genode_disk.h>
-
-// Required to access vmem functions
-#include <hal.h>
-
-    static int seq_number = 0;
-    static genode_disk_dev_t vdev;
-    static char vdev_name[32] = "GenodeDisk0";
+#include <genode_disk_private.h>
 
     void driver_genode_update_disk_dev(genode_disk_dev_t *dest)
     {
         auto info = main_obj->_disk.getInfo();
+        static char name[] = "GenodeDisk0";
 
         dest->block_count = info.block_count;
         dest->block_size = info.block_size;
-        dest->name = "GenodeDisk0";
+        dest->name = name;
     }
 
     void driver_genode_disk_read(genode_disk_dev_t *vd, void *dest, int block_no, size_t len)
