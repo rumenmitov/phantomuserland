@@ -1,3 +1,5 @@
+#ifdef PHANTOM_SYNC_STUB
+
 #include <hal.h>
 #include "genode_misc.h"
 
@@ -183,3 +185,5 @@ errno_t hal_cond_destroy(hal_cond_t *c)
 
     return 0;
 }
+
+#endif

@@ -1,4 +1,6 @@
 #include <base/mutex.h>
+#include <base/semaphore.h>
+#include <base/blockade.h>
 
 extern "C"
 {
