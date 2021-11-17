@@ -1,3 +1,5 @@
+#ifdef PHANTOM_UNSORTED_STUB
+
 #include <hal.h>
 #include "genode_misc.h"
 
@@ -15,3 +17,5 @@ void hal_enable_preemption()
 {
     _stub_print();
 }
+
+#endif
