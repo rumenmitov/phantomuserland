@@ -23,7 +23,7 @@ extern "C"
 
     struct phantom_thread
     {
-        int tid = 0;
+        long tid = 0;
         void *owner = 0;
         int prio = 0;
     };
@@ -64,7 +64,7 @@ struct Phantom::PhantomGenericThread : public Genode::Thread
     }
 };
 
-struct Phantom::PhantomThread : PhantomGenericThread
+struct Phantom::PhantomThread : public PhantomGenericThread
 {
     // TODO: Probably, add tid, owner e.t.c here as fields
 
@@ -81,7 +81,7 @@ struct Phantom::PhantomThread : PhantomGenericThread
     }
 };
 
-struct Phantom::PhantomThreadWithArgs : PhantomGenericThread
+struct Phantom::PhantomThreadWithArgs : public PhantomGenericThread
 {
     void (*_thread_entry)(void *arg);
     void *_args;
@@ -130,18 +130,29 @@ public:
 
     int createThread(void (*thread_entry)(void))
     {
-        return addThread(new (_heap) PhantomThread(_env, thread_entry));
+        PhantomThread *new_thread = new (_heap) PhantomThread(_env, thread_entry);
+        int res = addThread(new_thread);
+
+        new_thread->start();
+
+        return res;
     }
 
     int createThread(void (*thread_entry)(void *arg), void *args)
     {
-        return addThread(new (_heap) PhantomThreadWithArgs(_env, thread_entry, args));
+        PhantomThreadWithArgs *new_thread = new (_heap) PhantomThreadWithArgs(_env, thread_entry, args);
+        int res = addThread(new_thread);
+
+        new_thread->start();
+
+        return res;
     }
 
     int createThread(void (*thread_entry)(void *arg), void *args, int flags)
     {
         (&flags); // XXX: Seems that they are not used
-        return addThread(new (_heap) PhantomThreadWithArgs(_env, thread_entry, args));
+        // return addThread(new (_heap) PhantomThreadWithArgs(_env, thread_entry, args));
+        return createThread(thread_entry, args);
     }
 
     PhantomGenericThread *getThreadByTID(int tid)
