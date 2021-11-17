@@ -121,6 +121,9 @@ static void thread_run_func( void *arg )
 
 static void start_new_vm_thread(pvm_object_t new_thread)
 {
+
+    printf("DEBUG!!! STARTED VM THREAD\n");
+
     args_used++;
 
     //int tid = hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM|THREAD_FLAG_USER);

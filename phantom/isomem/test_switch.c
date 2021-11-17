@@ -151,7 +151,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     // TEST(wtty);
 
-    TEST(pool);
+    // TEST(pool);
 
     // check if starting many threads eats memory
     //for( i = 200; i; i-- )
@@ -166,9 +166,9 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(01_threads);
 #endif
 
-    // TEST(physmem);
+    TEST(physmem);
     // TEST(physalloc_gen);
-    // TEST(malloc);
+    TEST(malloc);
     TEST(amap);
     /* //   TODO : Uncomment
     TEST(cbuf);

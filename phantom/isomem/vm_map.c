@@ -42,6 +42,10 @@
 #include <ia32/phantom_pmap.h>
 #endif
 
+#ifdef PHANTOM_GENODE
+#include <arch/arch_vmem_util.h>
+#endif
+
 #include <time.h>
 
 
@@ -494,6 +498,10 @@ vm_map_init(unsigned long page_count)
 #endif
 
 #ifdef ARCH_arm
+#endif
+
+#ifdef PHANTOM_GENODE
+    genode_register_page_fault_handler(vm_map_page_fault_handler);
 #endif
 
 #ifndef HAVE_PGFAULT_HANDLER

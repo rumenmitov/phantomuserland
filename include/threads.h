@@ -136,6 +136,7 @@ void vm_release_snap_lock(int count); // update vm_{un}lock_persistent_memory co
 // -----------------------------------------------------------------------
 
 // returns thread id, does not check for thread death
+tid_t hal_start_kernel_thread_arg_dh(void (*thread)(void *), void *arg, void (*death_handler)(phantom_thread_t *));
 tid_t hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
 tid_t hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
 

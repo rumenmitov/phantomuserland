@@ -1,7 +1,7 @@
 /*
-* Envrionment for Phantom OS
-* Based on rm_nested example and rump block device backend
-*/
+ * Envrionment for Phantom OS
+ * Based on rm_nested example and rump block device backend
+ */
 
 #include <base/component.h>
 #include <rm_session/connection.h>
@@ -35,7 +35,7 @@ void Phantom::test_obj_space()
 
 	log("Reading from obj.space");
 
-	addr_t read_addr = main_obj->_vmem_adapter.OBJECT_SPACE_START;
+	addr_t read_addr = main_obj->_vmem_adapter.OBJECT_SPACE_START + 10;
 
 	log("  read     mem                         ",
 		(sizeof(void *) == 8) ? "                " : "",
@@ -127,8 +127,7 @@ void Libc::Component::construct(Libc::Env &env)
 						int p_argc = 1;
 						char **p_argv = nullptr;
 						char **p_envp = nullptr;
-						phantom_main_entry_point(p_argc, p_argv, p_envp);
-					});
+						phantom_main_entry_point(p_argc, p_argv, p_envp); });
 }
 
 int main()

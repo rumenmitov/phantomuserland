@@ -36,7 +36,8 @@ phantom_kernel_trap( struct trap_state *ts )
 int
 phantom_check_user_trap( struct trap_state *ts )
 {
-    _stub_print();
+    // _stub_print();
+    return 1;   // Return 1 to say that everything is ok
 }
 
 int trap_panic(struct trap_state *ts)

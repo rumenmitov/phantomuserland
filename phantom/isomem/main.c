@@ -140,6 +140,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
     printf("Waiting...\n");
     // wait_for_continue();
+
+    // TODO : Check if it is ok to place it here
+    // run_test( "all", "" );
+
     phantom_multiboot_main();
 
     (void) envp;
@@ -360,6 +364,8 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     }
 #endif
 
+    run_test( "all", "" );
+
     // Probably not needed
     /*
 #ifdef ARCH_ia32
@@ -449,6 +455,9 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 void start_phantom()
 {
+
+    printf("DEBUG!!! STARTING PHANTOM\n");
+
     //pressEnter("will start Phantom");
     SHOW_FLOW0( 2, "Will init snap interlock... ");
     phantom_snap_threads_interlock_init();
