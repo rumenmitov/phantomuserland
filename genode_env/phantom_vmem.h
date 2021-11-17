@@ -11,6 +11,8 @@
 
 #include <arch/arch-page.h>
 
+#include <arch/arch_vmem_trap_state.h>
+
 using namespace Genode;
 
 namespace Phantom
@@ -30,10 +32,24 @@ private:
     Signal_handler<Local_fault_handler> _handler;
     size_t _page_size;
 
+    // Handler set by Phantom init routine
+    int (*_pf_handler)(void *address, int write, int ip, struct trap_state *ts) = nullptr;
+
     volatile unsigned _fault_cnt{0};
+
+    int test_pf_handler(void *address, int write, int ip, struct trap_state *ts)
+    {
+        warning("Test page fault handler!");
+        log("PF: addr=%p, ip=%p, write=%d, ts.state=%d", address, write, ip, ts->state);
+        Dataspace_capability ds = _env.ram().alloc(_page_size);
+        _region_map.attach_at(ds, (Genode::addr_t)address & ~(_page_size - 1));
+        return 0;
+    }
 
     void _handle_fault()
     {
+        log("Reached fault handler");
+
         Region_map::State state = _region_map.state();
 
         _fault_cnt++;
@@ -44,9 +60,19 @@ private:
                                                                                                                       : "READY",
             ", pf_addr=", Hex(state.addr, Hex::PREFIX));
 
-        log("allocate dataspace and attach it to sub region map");
-        Dataspace_capability ds = _env.ram().alloc(_page_size);
-        _region_map.attach_at(ds, state.addr & ~(_page_size - 1));
+        struct trap_state ts_stub;
+        ts_stub.state = 0;
+
+        // Calling external handler
+        // TODO : fix IP
+        if (_pf_handler != nullptr)
+        {
+            _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
+        }
+        else
+        {
+            test_pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
+        }
 
         log("returning from handle_fault");
     }
@@ -65,6 +91,12 @@ public:
         log("fault handler: waiting for fault signal");
     }
 
+    // Have to intialize it dynamically since Phantom registers page fault handler after intialization of object space
+    void register_fault_handler(int (*pf_handler)(void *address, int write, int ip, struct trap_state *ts))
+    {
+        _pf_handler = pf_handler;
+    }
+
     void dissolve() { Entrypoint::dissolve(_handler); }
 
     unsigned fault_count()
@@ -80,23 +112,27 @@ public:
 struct Phantom::Vmem_adapter
 {
 
-    const addr_t OBJECT_SPACE_SIZE = 0x80000000;
     const addr_t OBJECT_SPACE_START = 0x80000000;
+    const addr_t OBJECT_SPACE_SIZE = 0x40000000;
     // TODO : defined as a macro that is required for other Phantom, need to fix!!!
     // const size_t PAGE_SIZE = 4096;
 
-    const unsigned int _phys_rm_size = 1024 * 1024 * 512;
+    const unsigned int _phys_rm_size = 0x40000000;
 
     Genode::Env &_env;
     Genode::Rm_connection _rm{_env};
 
+    // Attached to env's rm
+    Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
+    // fault handler (will register handler in rm as well)
+    Phantom::Local_fault_handler fault_handler{_env, _obj_space, PAGE_SIZE};
+
     // Not attached fully, but pages from it supposed to be mapped on object space
+    // Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
     Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
     // Heap (allocator) that allocates dataspace per each allocated page and maps it on _pseudo_phys_rm
     Genode::Sliced_heap _pseudo_phys_heap{_env.ram(), _pseudo_phys_rm};
 
-    // Attached to env's rm
-    Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
     // TODO : modify allocator to fit the size of obj. space. Should be simple, need to
     //        create a derived class and tune alloc() to handle appropriate size
     Genode::Allocator_avl _obj_space_allocator{0};
@@ -104,9 +140,17 @@ struct Phantom::Vmem_adapter
     Vmem_adapter(Env &env) : _env(env)
     {
 
-        Phantom::Local_fault_handler fault_handler(env, _obj_space, PAGE_SIZE);
-        // ATTENTION! _obj_space is attached to the env's rm!
-        env.rm().attach(_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
+        // Initializing obj space allocator
+        _obj_space_allocator.add_range(OBJECT_SPACE_START, OBJECT_SPACE_SIZE);
+
+        // ATTENTION! _obj_space is attached to the env's rm!void         *ptr_top  = env.rm().attach(rm_top.dataspace());
+        // void *ptr_obj = env.rm().attach(_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
+        void *ptr_obj = env.rm().attach_at(_obj_space.dataspace(), OBJECT_SPACE_START, OBJECT_SPACE_SIZE);
+
+        Dataspace_client rm_obj_client(_obj_space.dataspace());
+        addr_t const addr_obj = reinterpret_cast<addr_t>(ptr_obj);
+        log(" region obj.space        ",
+            Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
     }
 
     void alloc_phantom_phys_page(void **addr)

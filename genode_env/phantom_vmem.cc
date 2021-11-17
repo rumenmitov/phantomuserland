@@ -5,16 +5,16 @@
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Intel ia32 page table support.
- * 
+ *
  * CONF_DUAL_PAGEMAP:
- * 
- * We keep two page directories. One covers all memory, other excludes 
+ *
+ * We keep two page directories. One covers all memory, other excludes
  * persistent (paged) memory range. Two pagemaps are switched to enable/
  * disable persistent memory access for current thread.
- * 
+ *
  * TODO rename all funcs to arch_ prefix
  *
-**/
+ **/
 
 #define DEBUG_MSG_PREFIX "paging"
 #include <debug_ext.h>
@@ -26,21 +26,19 @@
 #include <stdint.h>
 
 #include "phantom_env.h"
-// #include "phantom_vmem.h"
-
-//#include "genode_misc.h"
 
 extern "C"
 {
 
+#include <arch/arch_vmem_util.h>
 #include <machdep.h>
 #include <hal.h>
 
     /*
-    *
-    *  Paging
-    *
-    */
+     *
+     *  Paging
+     *
+     */
 
     static int paging_inited = 0;
 
@@ -65,13 +63,13 @@ extern "C"
 
 #if CONF_DUAL_PAGEMAP
     /**
- * \brief Enable or disable paged mem access. Must be called just 
- * from t_set_paged_mem() in threads lib, as it saves cr3 state for 
- * thread switch.
- * 
- * \return cr3 value for threads lib to save.
- * 
-**/
+     * \brief Enable or disable paged mem access. Must be called just
+     * from t_set_paged_mem() in threads lib, as it saves cr3 state for
+     * thread switch.
+     *
+     * \return cr3 value for threads lib to save.
+     *
+     **/
     // int32_t arch_switch_pdir(bool paged_mem_enable)
     // {
     //     _stub_print();
@@ -92,11 +90,11 @@ extern "C"
 
 #endif
 
-    /* 
-    *
-    * Virtual memory control
-    *
-    */
+    /*
+     *
+     * Virtual memory control
+     *
+     */
 
     // Used to map and unmap pages
     void hal_page_control_etc(
@@ -105,6 +103,13 @@ extern "C"
         u_int32_t flags)
     {
         (void)flags;
+
+        // Check if we are in object space
+        if (!hal_addr_is_in_object_vmem(page_start_addr))
+        {
+            Genode::error("Trying to map outside obj.space! ", page_start_addr);
+            return;
+        }
 
         bool writeable = false;
         if (access == page_readwrite or access == page_rw)
@@ -128,10 +133,10 @@ extern "C"
     }
 
     /*
-    *
-    *  Physical Allocation
-    *
-    */
+     *
+     *  Physical Allocation
+     *
+     */
 
 #if 0 // Disabled since implementing higher level interface (HAL)
 
@@ -168,10 +173,10 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 #endif
 
     /*
-    *
-    * HAL functions to allocate/free phys/virtual memory
-    *
-    */
+     *
+     * HAL functions to allocate/free phys/virtual memory
+     *
+     */
 
     errno_t hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not memory
     {
@@ -179,17 +184,21 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
         void *temp_res = nullptr;
 
         // alloc_aligned() is used internally by alloc(). It also allows to set the from and to parameters
-        bool alloc_ok = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned(PAGE_SIZE * num, &temp_res,
-                                                                                   log2(sizeof(addr_t)),
-                                                                                   0,
-                                                                                   main_obj->_vmem_adapter.OBJECT_SPACE_SIZE)
-                            .ok();
 
-        *result = (void *)((char *)temp_res + main_obj->_vmem_adapter.OBJECT_SPACE_START);
+        Genode::log("Allocation avail=", main_obj->_vmem_adapter._obj_space_allocator.avail(), " consumed=", main_obj->_vmem_adapter._obj_space_allocator.consumed());
+
+        Genode::Range_allocator::Alloc_return alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned(PAGE_SIZE * num, &temp_res,
+                                                                                                                     log2(PAGE_SIZE),
+                                                                                                                     main_obj->_vmem_adapter.OBJECT_SPACE_START,
+                                                                                                                     main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE);
+
+        bool alloc_ok = alloc_res.ok();
+
+        *result = (void *)((char *)temp_res);
 
         if (!alloc_ok)
         {
-            Genode::error("Failed to allocate %d pages in object space!", num);
+            Genode::error("Failed to allocate %d pages in object space!", num, (int)alloc_res.value);
             return 1; // XXX : Not sure if it is ok
         }
 
@@ -199,7 +208,7 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     void hal_free_vaddress(void *addr, int num)
     {
         // num = number of pages
-        void *obj_space_addr = (void *)((char *)addr - main_obj->_vmem_adapter.OBJECT_SPACE_START);
+        void *obj_space_addr = (void *)((char *)addr);
         main_obj->_vmem_adapter._obj_space_allocator.free(obj_space_addr, num);
     }
 
@@ -244,5 +253,17 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     void hal_free_phys_page(physaddr_t paddr) // alloc and not map - WILL PANIC if page is mapped!
     {
         hal_free_phys_pages(paddr, 1);
+    }
+
+    // Required by page fault handler. It is always enabled, so return 1
+    int arch_is_object_land_access_enabled()
+    {
+        return 1;
+    }
+
+    int genode_register_page_fault_handler(int (*pf_handler)(void *address, int write, int ip, struct trap_state *ts))
+    {
+        main_obj->_vmem_adapter.fault_handler.register_fault_handler(pf_handler);
+        return 0;
     }
 }
