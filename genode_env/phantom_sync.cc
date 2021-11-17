@@ -19,6 +19,7 @@ extern "C"
 {
 
 #include <hal.h>
+#include <stdlib.h>
 
     /*
      *
@@ -28,7 +29,8 @@ extern "C"
 
     int hal_mutex_init(hal_mutex_t *m, const char *name)
     {
-        main_obj->_heap.alloc(sizeof(Genode::Mutex), (void **)&m->impl->lock);
+        m->impl = (phantom_mutex_impl *)malloc(sizeof(struct phantom_mutex_impl));
+        m->impl->lock = (Genode::Mutex *)malloc(sizeof(Genode::Mutex));
         construct_at<Genode::Mutex>(m->impl->lock);
 
         m->impl->name = name;
@@ -59,7 +61,9 @@ extern "C"
     errno_t hal_mutex_destroy(hal_mutex_t *m)
     {
         m->impl->lock->~Mutex();
-        main_obj->_heap.free(m->impl->lock, sizeof(Genode::Mutex));
+        // main_obj->_heap.free(m->impl->lock, sizeof(Genode::Mutex));
+        free(m->impl->lock);
+        free(m->impl);
         m->impl->lock = 0;
         return 0;
     }
@@ -83,7 +87,9 @@ extern "C"
 
     int hal_sem_init(hal_sem_t *s, const char *name)
     {
-        main_obj->_heap.alloc(sizeof(Genode::Semaphore), (void **)&s->impl->sem);
+        // main_obj->_heap.alloc(sizeof(Genode::Semaphore), (void **)&s->impl->sem);
+        s->impl = (phantom_sem_impl *)malloc(sizeof(struct phantom_sem_impl));
+        s->impl->sem = (Genode::Semaphore *)malloc(sizeof(Genode::Semaphore));
         construct_at<Genode::Semaphore>(s->impl->sem);
 
         s->impl->name = name;
@@ -94,7 +100,9 @@ extern "C"
     void hal_sem_destroy(hal_sem_t *s)
     {
         s->impl->sem->~Semaphore();
-        main_obj->_heap.free(s->impl->sem, sizeof(Genode::Semaphore));
+        // main_obj->_heap.free(s->impl->sem, sizeof(Genode::Semaphore));
+        free(s->impl->sem);
+        free(s->impl);
         s->impl->sem = 0;
     }
 
@@ -130,9 +138,12 @@ extern "C"
 
     int hal_cond_init(hal_cond_t *c, const char *name)
     {
-        main_obj->_heap.alloc(sizeof(Genode::Blockade), (void **)&c->impl->blockade);
+        c->impl = (phantom_cond_impl *)malloc(sizeof(phantom_cond_impl));
+        // main_obj->_heap.alloc(sizeof(Genode::Blockade), (void **)&c->impl->blockade);
+        c->impl->blockade = (Genode::Blockade *)malloc(sizeof(Genode::Blockade));
         construct_at<Genode::Blockade>(c->impl->blockade);
-        main_obj->_heap.alloc(sizeof(Genode::Mutex), (void **)&c->impl->mutex);
+        // main_obj->_heap.alloc(sizeof(Genode::Mutex), (void **)&c->impl->mutex);
+        c->impl->mutex = (Genode::Mutex *)malloc(sizeof(Genode::Mutex));
         construct_at<Genode::Mutex>(c->impl->mutex);
 
         c->impl->name = name;
@@ -206,10 +217,13 @@ extern "C"
         }
 
         c->impl->blockade->~Blockade();
-        main_obj->_heap.free(c->impl->blockade, sizeof(Genode::Blockade));
+        // main_obj->_heap.free(c->impl->blockade, sizeof(Genode::Blockade));
+        free(c->impl->blockade);
 
         c->impl->mutex->~Mutex();
-        main_obj->_heap.free(c->impl->blockade, sizeof(Genode::Mutex));
+        // main_obj->_heap.free(c->impl->mutex, sizeof(Genode::Mutex));
+        free(c->impl->mutex);
+        free(c->impl);
 
         c->impl = 0;
         return 0;
