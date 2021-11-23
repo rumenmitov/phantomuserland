@@ -40,7 +40,7 @@ void vm_enable_regular_snaps( void );
 // for scan like ops - divide in parts of about 1000 pages, do part under lock, 
 // if busy page happens, unlock and wait
 //
-hal_spinlock_t    vm_page_lock;
+// hal_spinlock_t    vm_page_lock;
 
 /* unused
 extern unsigned char      phantom_vm_generation; // system's current generation number

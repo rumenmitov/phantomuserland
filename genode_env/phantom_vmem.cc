@@ -187,10 +187,11 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
         Genode::log("Allocation avail=", main_obj->_vmem_adapter._obj_space_allocator.avail(), " consumed=", main_obj->_vmem_adapter._obj_space_allocator.consumed());
 
-        Genode::Range_allocator::Alloc_return alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned(PAGE_SIZE * num, &temp_res,
-                                                                                                                     log2(PAGE_SIZE),
-                                                                                                                     main_obj->_vmem_adapter.OBJECT_SPACE_START,
-                                                                                                                     main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE);
+        Genode::Range_allocator::Range alloc_range = {
+            main_obj->_vmem_adapter.OBJECT_SPACE_START,
+            main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE};
+
+        Genode::Range_allocator::Alloc_return alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned((Genode::size_t)PAGE_SIZE * num, &temp_res, log2(PAGE_SIZE), alloc_range);
 
         bool alloc_ok = alloc_res.ok();
 

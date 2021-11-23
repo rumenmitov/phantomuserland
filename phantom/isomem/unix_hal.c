@@ -33,7 +33,7 @@
 
 #include "unixhal.h"
 
-struct hardware_abstraction_level hal;
+// struct hardware_abstraction_level hal;
 
 // void hal_init( vmem_ptr_t va, long vs )
 // {

@@ -86,7 +86,7 @@ void register_init_record( struct init_record *ir );
 // Stop serving
 #define STOP_LEVEL_STOP         3
 
-volatile int  phantom_stop_level; // zero on noraml operation, 1-2-3 on stop
+extern volatile int  phantom_stop_level; // zero on noraml operation, 1-2-3 on stop
 
 void run_init_functions( int level );
 void run_stop_functions( int level );

@@ -18,7 +18,7 @@
 #include <phantom_libc.h>
 #include <phantom_assert.h>
 #include <kernel/stats.h>
-#include <kernel/profile.h>
+// #include <kernel/profile.h>
 #include <hal.h>
 
 // #include <kernel/interrupts.h>
