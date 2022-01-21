@@ -64,9 +64,13 @@ extern "C"
 
     void *phantom_thread_ep_wrapper(void *args)
     {
-        void (*thread)() = (void (*)())args;
+        void (*thread_to_run)(void) = (void (*)(void))args;
 
-        thread();
+        Genode::log("Starting thread without args! tid=", pthread_self(), " thread=", thread_to_run);
+
+        thread_to_run();
+
+        Genode::log("Finished thread without args! tid=", pthread_self(), " thread=", thread_to_run);
 
         return 0;
     }
@@ -82,15 +86,19 @@ extern "C"
         void *thread_args = wrapper->args;
         void (*death_handler)(phantom_thread_t *) = wrapper->death_handler;
 
-        Genode::log("Starting thread! thread=", thread, " args=", thread_args, " death_handler=", death_handler);
+        Genode::log("Starting thread! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
         // Unlocking parent thread
 
         hal_spin_unlock(&wrapper->spin);
 
+        Genode::log("Starting thread (Unlocked spin)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
+
         // Executing thread
 
         thread(thread_args);
+
+        Genode::log("Finishing thread (Starting DH)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
         // Executing death handler
         // XXX : Note that it will not be executed if thread was killed by someone
@@ -104,6 +112,8 @@ extern "C"
 
             death_handler(&thread_struct);
         }
+
+        Genode::log("Finishing thread (Finished DH)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
         return 0;
     }
@@ -120,7 +130,8 @@ extern "C"
         thread_args->thread = thread;
         thread_args->args = arg;
         thread_args->death_handler = death_handler;
-        thread_args->spin.lock = 1;
+        hal_spin_init(&thread_args->spin);
+        hal_spin_lock(&thread_args->spin);
 
         // Starting thread
 
@@ -136,6 +147,8 @@ extern "C"
 
         hal_spin_lock(&thread_args->spin);
 
+        log("Unlocked thread!");
+
         free(thread_args);
 
         return tid;
@@ -150,6 +163,8 @@ extern "C"
     {
         int tid;
         const pthread_attr_t *attr = 0;
+
+        log("!!!: THREAD=", thread);
 
         if (pthread_create((pthread_t *)&tid, attr, phantom_thread_ep_wrapper, (void *)thread))
         {
@@ -186,7 +201,7 @@ extern "C"
 
     errno_t t_current_set_death_handler(void (*handler)(phantom_thread_t *tp))
     {
-        Genode::warning("Attempted to set death handler! (", handler, ")  tid=", pthread_self());
+        Genode::warning("Attempted to set death handler! (", handler, ")  tid=", (long)pthread_self());
         return 0;
     }
 
@@ -225,14 +240,14 @@ extern "C"
     errno_t t_get_owner(int tid, void **owner)
     {
         (void)owner;
-        Genode::warning("Attempted to get owner of the thread! self=", pthread_self(), " tid=", tid);
+        Genode::warning("Attempted to get owner of the thread! self=", pthread_self(), " tid=", (long)tid);
         return 0;
     }
 
     errno_t t_current_get_priority(int *prio)
     {
         (void)prio;
-        Genode::warning("Attempted to get priority of the thread! tid=", pthread_self());
+        Genode::warning("Attempted to get priority of the thread! tid=", (long)pthread_self());
         return 0;
     }
 
@@ -240,7 +255,7 @@ extern "C"
     {
         (void)tid;
         (void)ct;
-        Genode::warning("Attempted to get ctty of the thread! tid=", pthread_self());
+        Genode::warning("Attempted to get ctty of the thread! tid=", (long)pthread_self());
         return 1;
     }
 

@@ -2,12 +2,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-
 void lprintf(char const *fmt, ...)
 {
-    va_list ap;
+    // va_list ap;
 
-    va_start(ap, fmt);
-    vprintf(stdout, ap);
-    va_end(ap);
+    // va_start(ap, fmt);
+    // vprintf(stdout, ap);
+    // va_end(ap);
 }

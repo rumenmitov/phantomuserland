@@ -94,7 +94,7 @@ static int dpc_threads = 0;
 #define MAX_DPC_IDLE_THREADS 6
 #define MIN_DPC_IDLE_THREADS 2
 
-static void dpc_thread(void)
+void dpc_thread(void)
 {
 
     printf("DEBUG: DPC THREAD STARTED!!!");

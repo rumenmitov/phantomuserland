@@ -153,17 +153,32 @@ struct Phantom::Vmem_adapter
             Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
     }
 
-    void alloc_phantom_phys_page(void **addr)
-    {
-        // TODO : Error handling
-        _pseudo_phys_heap.alloc(PAGE_SIZE, addr);
-    }
+    // void alloc_phantom_phys_page(void **addr)
+    // {
+    //     // TODO : Error handling
+    //     try
+    //     {
+    //         *addr = _pseudo_phys_heap.alloc(PAGE_SIZE);
+    //     }
+    //     catch (Out_of_caps)
+    //     {
+    //         Genode::log("Failed to allocate ", npages, " phys pages, Out_of_caps");
+    //     }
+    //     catch (Out_of_ram)
+    //     {
+    //         Genode::log("Failed to allocate ", npages, " phys pages, Out_of_ram");
+    //     }
+    //     catch (Service_denied)
+    //     {
+    //         Genode::log("Failed to allocate ", npages, " phys pages, Denied");
+    //     }
+    // }
 
-    void free_phantom_phys_page(void *addr)
-    {
-        // TODO : Error handling
-        _pseudo_phys_heap.free(addr, PAGE_SIZE);
-    }
+    // void free_phantom_phys_page(void *addr)
+    // {
+    //     // TODO : Error handling
+    //     _pseudo_phys_heap.free(addr, PAGE_SIZE);
+    // }
 
     void map_page(addr_t phys_addr, addr_t virt_addr, bool writeable)
     {

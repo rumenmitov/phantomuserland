@@ -49,7 +49,7 @@ struct drv_video_screen_t        *video_drv = 0;
 
 extern int pvm_video_init(); // We need it only here
 
-extern void wait_for_continue();
+// extern void wait_for_continue();
 
 // Init functions
 
@@ -141,8 +141,15 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     printf("Waiting...\n");
     // wait_for_continue();
 
-    // TODO : Check if it is ok to place it here
-    // run_test( "all", "" );
+    // Running adapters tests
+
+	if (!test_thread_creation())
+	{
+		printf("Test creation test failed!");
+		return;
+	}
+
+    // Running Phantom OS init routines
 
     phantom_multiboot_main();
 
@@ -302,10 +309,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     //hal_sleep_msec( 120000 );
 
     // vm86 and VESA die without page 0 mapped
-#if 1
-	// unmap page 0, catch zero ptr access
-	hal_page_control( 0, 0, page_unmap, page_noaccess );
-#endif
+// #if 1
+// 	// unmap page 0, catch zero ptr access
+// 	hal_page_control( 0, 0, page_unmap, page_noaccess );
+// #endif
 
     // Let's skip. Probably, should be reimplemented
     /*

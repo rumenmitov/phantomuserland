@@ -181,7 +181,7 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     errno_t hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not memory
     {
         // XXX : Probably, can be optimized in future
-        void *temp_res = nullptr;
+        // void *temp_res = nullptr;
 
         // alloc_aligned() is used internally by alloc(). It also allows to set the from and to parameters
 
@@ -191,19 +191,29 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
             main_obj->_vmem_adapter.OBJECT_SPACE_START,
             main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE};
 
-        Genode::Range_allocator::Alloc_return alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned((Genode::size_t)PAGE_SIZE * num, &temp_res, log2(PAGE_SIZE), alloc_range);
+        // Genode::Allocator::Alloc_result alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned((Genode::size_t)PAGE_SIZE * num, (unsigned)log2(PAGE_SIZE), alloc_range);
 
-        bool alloc_ok = alloc_res.ok();
+        bool is_ok = false;
 
-        *result = (void *)((char *)temp_res);
+        // Range_allocator::Range_result
+        //     alloc_res =
+        main_obj->_vmem_adapter
+            ._obj_space_allocator
+            .alloc_aligned(
+                (Genode::size_t)PAGE_SIZE * num,
+                (unsigned)log2(PAGE_SIZE),
+                alloc_range)
+            .with_result([&](void *addr)
+                         { 
+                            *result = addr;
+                            is_ok = true; },
+                         [&](Range_allocator::Alloc_error err)
+                         {
+                             log("Failed to allocate ", num, " pages in obj space! err:", err);
+                             is_ok = false;
+                         });
 
-        if (!alloc_ok)
-        {
-            Genode::error("Failed to allocate %d pages in object space!", num, (int)alloc_res.value);
-            return 1; // XXX : Not sure if it is ok
-        }
-
-        return 0;
+        return is_ok ? 0 : 1;
     }
 
     void hal_free_vaddress(void *addr, int num)
@@ -227,18 +237,29 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
     errno_t hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
     {
-        void *temp_res = nullptr;
-        bool alloc_ok = main_obj->_vmem_adapter._pseudo_phys_heap.alloc(PAGE_SIZE * npages, &temp_res);
 
-        *result = (physaddr_t)temp_res;
-
-        if (!alloc_ok)
+        try
         {
-            Genode::error("Failed to allocate %d pseudo physical pages! (probably, OOM)", npages);
-            return 1; // XXX : Not sure if it is ok
+            void *temp_res = nullptr;
+            temp_res = main_obj->_vmem_adapter._pseudo_phys_heap.alloc(PAGE_SIZE * npages);
+
+            *result = (physaddr_t)temp_res;
+            return 0;
+        }
+        catch (Out_of_caps)
+        {
+            Genode::log("Failed to allocate ", npages, " phys pages, Out_of_caps");
+        }
+        catch (Out_of_ram)
+        {
+            Genode::log("Failed to allocate ", npages, " phys pages, Out_of_ram");
+        }
+        catch (Service_denied)
+        {
+            Genode::log("Failed to allocate ", npages, " pages, Denied");
         }
 
-        return 0;
+        return 1; // XXX : Not sure if it is ok
     }
 
     void hal_free_phys_pages(physaddr_t paddr, int npages)

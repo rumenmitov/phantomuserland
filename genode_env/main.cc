@@ -20,6 +20,8 @@
 
 #include "phantom_entrypoints.h"
 
+#include "test_threads.h"
+
 Phantom::Main *Phantom::main_obj = nullptr;
 
 namespace Phantom
@@ -95,39 +97,56 @@ void Phantom::test_block_device(Phantom::Disk_backend &disk)
 	log("Done!");
 }
 
+void setup_adapters(Libc::Env &env)
+{
+	static Phantom::Main main(env);
+	Phantom::main_obj = &main;
+
+	log("Start obj_space test!");
+	Phantom::test_obj_space();
+	log("Finished obj_space test!");
+	log("Starting block device test!");
+	Phantom::test_block_device(main._disk);
+	log("Finished block device test!");
+}
+
+// extern "C" void wait_for_continue(void);
+
 void Libc::Component::construct(Libc::Env &env)
 {
-	log("--- Phantom env test ---");
 
-	{
-		/*
-		 * Setup Main object
-		 */
-		try
+	Libc::with_libc([&]()
+					{
+		log("--- Phantom env test ---");
+
+		log("Waiting for continue");
+		// wait_for_continue();
+		log("GO");
+
 		{
-
-			static Phantom::Main main(env);
-			Phantom::main_obj = &main;
-
-			Phantom::test_obj_space();
-			Phantom::test_block_device(main._disk);
+			/*
+			* Setup Main object
+			*/
+			try
+			{
+				setup_adapters(env);
+			}
+			catch (Genode::Service_denied)
+			{
+				error("opening block session was denied!");
+			}
 		}
-		catch (Genode::Service_denied)
-		{
-			error("opening block session was denied!");
-		}
-	}
 
-	log("--- finished Phantom env test ---");
+		log("--- finished Phantom env test ---");
 
-	env.exec_static_constructors();
+		env.exec_static_constructors(); });
 
 	Libc::with_libc([]()
 					{
-						int p_argc = 1;
-						char **p_argv = nullptr;
-						char **p_envp = nullptr;
-						phantom_main_entry_point(p_argc, p_argv, p_envp); });
+		int p_argc = 1;
+		char **p_argv = nullptr;
+		char **p_envp = nullptr;
+		phantom_main_entry_point(p_argc, p_argv, p_envp); });
 }
 
 int main()

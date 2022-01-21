@@ -6,7 +6,7 @@
  *
  * HAL bindings for unix, compiled with Phantom headers.
  *
-**/
+ **/
 
 #define DEBUG_MSG_PREFIX "vm.unixhal"
 #include <debug_ext.h>
@@ -236,7 +236,7 @@ void lprintf(char const *fmt, ...)
 // -----------------------------------------------------------
 // -----------------------------------------------------------
 
-//known call: int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
+// known call: int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
 
 int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback callback, void *args, int flags)
 {
@@ -246,7 +246,7 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
     (void)args;
     (void)flags;
 
-    //panic("set_net_timer");
+    // panic("set_net_timer");
     lprintf("set_net_timer called, backtrace (\"gdb bt\") me\n");
 
     return -1; // ERR_GENERAL - todo - errno_t
