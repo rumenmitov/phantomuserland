@@ -1,153 +1,89 @@
-# Welcome to Phantom OS #
+# Phantom OS Genode port
 
-Phantom OS is a persistent operating system. Its primary goal
-is to provide environment for programs that does survive OS
-reboot. Such an environment greatly simplifies software development
-and makes it possible to write programs that, for example, do not need filesystem.
+This repository contains a port of Phantom OS to Genode OS framework.
 
-Nevertheless, Phantom supports filesystems and all of the modern OS features.
+## Intro
 
-For the details please refer to the [Phantom OS Programmer's guide](https://phantomdox.readthedocs.io/en/latest/).
+It is a new effort of developing Phantom OS. Porting Phantom OS to Genode should make it more stable, secure, portable. The main goal of this project is to make Phantom OS suitable for real-life applications and future research.
 
-For the questions and discussion please visit [chat](https://gitter.im/PhantomOS/HowTo) or [Google Group](https://groups.google.com/forum/?pli=1#!forum/phantom-os).
+Phantom OS is an `orthogonally persistent` `managed code` general-purpose operating system.
+- `Orthogonally persistent`. In short, it implies that all data objects in the system are stored in a big virtual memory the content of which is not erased between restarts (even unexpected ones).
+- `Managed code`. In our case, all userspace programs are executed in bytecode inside a language virtual machine. 
 
-## What Phantom OS is ##
+Orthogonal persistence is an old concept and research on this topic almost stopped in the early 2000s. We believe that with the modern hardware (and, possibly, future hardware like Intel Optane) this concept might become relevant again. With this project, we would like to provide a foundation for testing the OP hypothesis in the modern environment. Moreover, we believe that a persistent operating system based on microkernels together with managed code userspace might become a platform suitable for industrial applications and might attract the attention of researchers and developers.
 
-*   [Phantom OS Programmer's guide](https://phantomdox.readthedocs.io/en/latest/)
-*   [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
-*   [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
-*   [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
+Potentially, this operating system can be used in a wide range of use cases. However, currently, we are focusing on IoT so that embedded programmers will be able to focus more on business logic.
 
-Basically, most of code we (the original team) upload is very straighforward
-and, sometimes, dumb. That, to some extent, is on purpose. We want to have
-a working system first and polish it next. Besides, not all the concepts and
-design desicions are final, so it is of no use to finalize all the 
-implementation desisions now as well.
+> This section is lacking details intentionally to make it simpler. If you want to learn more about orthogonal persistence and our hypotheses, the corresponding paper will be published soon!
 
-Code is known to compile successfully with cygwin/linux gcc 4.3.4.
-Only ia32 target is most complete and stable, arm port is in active development
-but very instable, mips port is just started - compiles and can breath for a
-second :), amd64 port is incomplete and does not compile at all.
+> Also if you want to learn more about Phantom OS refer to its official documentation https://phantomdox.readthedocs.io/en/latest/
 
-[How to take part](https://github.com/dzavalishin/phantomuserland/wiki/HowToTakePart)
+## Current status
 
-## Current state ##
+What is done:
 
-See [ChangeLog](https://github.com/dzavalishin/phantomuserland/wiki/ChangeLog), look at [ScreenShots](https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots), and here is the last one:
+- [x] Phantom Virtual Machine is able to work on Genode in 64 bits
+- [x] The subset of kernel sources required to run PVM in a persistent environment
+- [x] Adapters from Genode to Phantom OS low-level interfaces are implemented
 
-![](https://github.com/dzavalishin/phantomuserland/blob/master/doc/images/Phantom_screen_Controls_21_10_2019.png?raw=true)
+What is in progress:
 
-More screenshots:  <https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots>
+- [ ] The debugging and testing of adapters is in progress
 
-## Dox ##
+What are the future plans:
 
-[![Documentation Status](https://readthedocs.org/projects/phantomdox/badge/?version=latest)](https://phantomdox.readthedocs.io/en/latest/?badge=latest)
-     
-[Web Documentation](https://phantomdox.readthedocs.io/en/latest/) and [PDF](https://buildmedia.readthedocs.org/media/pdf/phantomdox/latest/phantomdox.pdf), and there's a lot of info in 
-[WIKI](https://github.com/dzavalishin/phantomuserland/wiki)
+- [ ] Finish the port
+  - [ ] Make PVM work in persistent environment
+  - [ ] Rework driver system
+  - [ ] Rework and enable networking
+  - [ ] Rework and enable graphics
+- [ ] Add support to more languages using a WebAssembly runtime
 
-## Build ##
+### Project layout
 
-  Set '''PHANTOM_HOME''' environment variable to the path to Phantom repository root directory,
-  "make all" there.
+For now, this repository contains a lot of unused old code since the porting process is still in progress. Directories containing sources that are actually used are:
 
-  In Windows you will need Cygwin to do that. <http://www.cygwin.com>
-  Select, at least: gcc4, subversion, binutils, make, gdb
-  (see etc/cygwin_get.cmd)
-  
-  See also [TOOLCHAIN](https://github.com/dzavalishin/phantomuserland/blob/master/TOOLCHAIN)
+- `/include` - contains Phantom OS headers
+- `/include/genode-amd64` - contains architecture specific headers
+- `/include/genode-libc` - contains Genode's libc headers
+- `/phantom/isomem` - the set of sources from the old kernel that implement persistent memory layer
+  - `/phantom/isomem/genode_*.cc` - source files containing stubs for interfaces that should be implemented in Genode. Some of them are disabled using conditional compilation with `PHANTOM_THREADS_STUB` macro
+- `/genode_env` - adapters to Genode that are implementing Phantom OS low-level interfaces
+- `/phantom/vm` - Phantom Virtual Machine
 
-## Run ##
+and PVM dependencies (graphics subsystem):
 
-  Run phantom.cmd/phantom.sh in /run
-  
-  See doc/RUNNING for more details
+- `/phantom/libfreetype`
+- `/phantom/gl`
+- `/phantom/libwin`
 
-## Debug ##
+> The detailed description of the adapters will be added soon
 
-  Run QEMU (see above) and then - gdb in /oldtree/kernel/phantom
+## How to contribute?
 
-  Kernel console is logged to /run/serial0.log 
+This project requires both research and development. Several ideas for research topics and development tasks are described in this section. If you are interested in any of them, feel free to contact us.
 
-  Kernel is able to send logging info to syslogd by UDP.
-  Currently syslogd address is hardcoded in net_misc.c.
+### Research
 
-## Directories ##
+During this work we identified several interesting research topics:
 
-* oldtree/kernel/phantom - kernel 
-* phantom                - libs and unix userland (user/apps)
-* plib/sys/src           - native phantom userland code
-* run                    - QEMU run/test environment
-* tools/plc              - phantom language compiler / java bytecode translator
+- *Persistent errors and how to deal with them*. Since every object is allowed to live as long as it wants to, errors within them will live as well. The best case is when we can restore from one of the previous snapshots, however, we might encounter the situation when this fault is recurring. 
+- *Connection between persistent and transient (non-persistent) worlds*. One of the main OP issues is that it is some sort of "closed" system where communications to other systems and even hardware devices should not affect the consistency of the persistent state.
+- *Distributed persistent space*. The idea is to connect several instances of Phantom OS that would share a single global address space. In this scenario mechanisms for accessing, migrating objects should be researched as well as situations when some of the peers go offline.
+- *Formal verification*. In a persistent system, the model of accessing data as well as the model of communication between other devices or systems are different. All data is assumed to be located in single-level persistent memory space and communication should be performed using special interfaces or protocols that would minimize side effects. We assume that those two factors might make formal verification of the programs easier.
+- *Real-time*. We assume that the concept of Phantom OS is capable to be at least soft real-time. However, we have not researched this topic in-depth yet.
 
-## Go on and take part ##
+### Development
 
-### Kernel and compiler
+We assume that several tasks mentioned earlier as our plans can be done in parallel:
 
-Creating an unusual operating system is a very interesting thing to do. There are challenges on each and every step.
-Just to start with:
+- Graphics system
+- Driver system
+- Networking
 
-* Persistent memory **garbage collector**. Suppose we're in a 64 bit world and persistent memory size is some 20 Tb. Current GC is incomplete.
-* If we touch memory too much snapshot engine will spend a lot of IO to store difference. Fast and good **allocator** can reduce IO load. There is one, but it could be better.
-* There's need for a fast alpha-blending **image transfer (bitblt)** code.
-* Unix subsystem is very limited. No **signal delivery**, for example. It waits for one who will implement missing parts.
-* It is theoretically possible to implement a **persistent Unix environment**. Quite challenging.
-* Drivers - current set is minimal, **AHCI driver** is not complete, **USB needs optimization**, some more must be ported or written.
-* It would be interesting to add **Python frontend** to Phantom compiler. Are you a Python fan? Can help?
-* Phantom bytecode supports classes, inheritance, but does not support interfaces. It is not really trivial to **implement interfaces** in an efficient way.
-* Even **simple JIT engine** will help a lot.
-* **TCP stack** is not ideal and needs someone to lend a hand.
+Also, if you want to participate in any of the current tasks feel free to contact us!
 
-### Porting Phantom
+## Contacts
 
-Ports to **ARM** and **MIPS** were started, but long time no progress. I look for one who can help with that.
-
-Bringing it to **64 bit Intel/AMD** is actual task too. 
-
-Current kernel is basically SMP ready, but **SMP support** is not finished completely.
-
-### Userland
-
-There's need to implement **demo applications for Phantom** - even simple ones will help.
-
-More serious task is to bring in some simple **HTML renderer** and get basic browser working.
-
-### Build and CI
-
-* There is a need for a **good CI setup** which can run system in a specific configurations and following special scenarios.
-* Bytecode engine needs to be tested with **random garbage execution**.
-* It is a good idea to keep **set of tools** that for sure build correct OS kernel. cc/binutils/qemu, etc.
-* Need setup to build **ISO image** of system to run on different machines and emulators.
-* There is real need to do **CI on a real hadrware**. Need corresponding scripts.
-
-If you feel interested to take part in a project, please leave me a note. An issue on a GitHub is ideal communications channel.
-
-[Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-
-## Badges ##
-
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8eec7d75d73b4a93b45a1befa3b70696)](https://www.codacy.com/manual/dzavalishin/phantomuserland?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dzavalishin/phantomuserland&amp;utm_campaign=Badge_Grade)
-
-[![Build Status](https://travis-ci.com/dzavalishin/phantomuserland.svg?branch=master)](https://travis-ci.com/dzavalishin/phantomuserland)
-
-[![Code coverage][COVERAGE_BADGE]][COVERAGE_LINK]
-
-[COVERAGE_LINK]:https://scan.coverity.com/projects/dzavalishin-phantomuserland
-
-[COVERAGE_BADGE]:https://scan.coverity.com/projects/8024/badge.svg
-
-## Communications ##
-
-Easiest way is to [Write e-mail to Dmitry Zavalishin](mailto:dz@dz.ru)
-
-Or leave a message in [Google group](https://groups.google.com/forum/#!forum/phantom-os)
-
-Or leave an issue in [tracker](https://github.com/dzavalishin/phantomuserland/issues)
-
-Here is an [Phantom Web Site](http://phantomos.org/), but since you're here you
-better look at [Wiki](https://github.com/dzavalishin/phantomuserland/wiki).
-
-<hr>
-
-Best regards, Dmitry Zavalishin,
-<dz@dz.ru>
+a.antonov@innopolis.ru - Anton Antonov, author of the port
+dz@dz.ru - Dmitry Zavalishin, author of Phantom OS
