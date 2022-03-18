@@ -143,11 +143,11 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     // Running adapters tests
 
-	if (!test_thread_creation())
-	{
-		printf("Test creation test failed!");
-		return;
-	}
+	// if (!test_thread_creation())
+	// {
+	// 	printf("Test creation test failed!\n");
+	// 	return;
+	// }
 
     // Running Phantom OS init routines
 

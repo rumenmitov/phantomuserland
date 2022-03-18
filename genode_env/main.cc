@@ -20,94 +20,69 @@
 
 #include "phantom_entrypoints.h"
 
-#include "test_threads.h"
+#include "tests_hal.h"
+#include "tests_adapters.h"
 
 Phantom::Main *Phantom::main_obj = nullptr;
 
-namespace Phantom
-{
-	void test_obj_space();
-	void test_block_device();
-};
-
-void Phantom::test_obj_space()
-{
-
-	// Reading from mem
-
-	log("Reading from obj.space");
-
-	addr_t read_addr = main_obj->_vmem_adapter.OBJECT_SPACE_START + 10;
-
-	log("  read     mem                         ",
-		(sizeof(void *) == 8) ? "                " : "",
-		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " value=",
-		Hex(*(unsigned *)(read_addr)));
-
-	// Writing to mem
-
-	log("Writing to obj.space");
-	*((unsigned *)read_addr) = 256;
-
-	log("    wrote    mem   ",
-		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " with value=",
-		Hex(*(unsigned *)read_addr));
-
-	// Reading again
-
-	log("Reading from obj.space");
-	log("  read     mem                         ",
-		(sizeof(void *) == 8) ? "                " : "",
-		Hex_range<addr_t>(main_obj->_vmem_adapter.OBJECT_SPACE_START, main_obj->_vmem_adapter.OBJECT_SPACE_SIZE), " value=",
-		Hex(*(unsigned *)(read_addr)));
-}
-
-// Block test function
-
-void Phantom::test_block_device(Phantom::Disk_backend &disk)
-{
-	char buffer[512] = {0};
-	char test_word[] = "Hello, World!";
-	bool success = false;
-
-	// Write then read
-
-	memcpy(buffer, test_word, strlen(test_word));
-
-	log("Writing to the disk");
-	success = disk.submit(Disk_backend::Operation::WRITE, true, 1024, 512, buffer);
-	log("Competed write (", success, ")");
-
-	memset(buffer, 0x0, 512);
-
-	log("Reading from the disk");
-	success = disk.submit(Disk_backend::Operation::READ, false, 1024, 512, buffer);
-	log("Competed read (", success, ")");
-
-	log("Comparing results");
-	if (strcmp(buffer, test_word) == 0)
-	{
-		log("Single write-read test was successfully passed!");
-	}
-	else
-	{
-		log("Single write-read test was failed!");
-	}
-
-	log("Done!");
-}
-
 void setup_adapters(Libc::Env &env)
 {
-	static Phantom::Main main(env);
-	Phantom::main_obj = &main;
+	static Phantom::Main local_main(env);
+	Phantom::main_obj = &local_main;
+}
 
-	log("Start obj_space test!");
-	Phantom::test_obj_space();
-	log("Finished obj_space test!");
+void test_adapters()
+{
+	log("Checking if main_obj is initialized");
+	log(&Phantom::main_obj->_vmem_adapter);
+
+	// log("Start obj_space test!");
+	// Phantom::test_obj_space();
+	// log("Finished obj_space test!");
+
+	log("Starting remapping test!");
+	test_remapping();
+	log("finished remapping test!");
+
 	log("Starting block device test!");
-	Phantom::test_block_device(main._disk);
+	Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
 	log("Finished block device test!");
+}
+
+bool test_hal()
+{
+	bool ok = true;
+
+	// Phantom::test_hal_vmem_alloc();
+	log("--- Starting vmem alloc test");
+	if (!test_hal_vmem_alloc())
+	{
+		ok = false;
+		log("Failed vmem alloc test!");
+	}
+
+	log("--- Starting phys alloc test");
+	if (!test_hal_phys_alloc())
+	{
+		ok = false;
+		log("Failed phys alloc test!");
+	}
+
+	log("--- Starting virt addrs mapping test");
+	if (!test_hal_vmem_mapping())
+	{
+		ok = false;
+		log("Failed virt addrs mapping test!");
+	}
+
+	log("--- Starting virt addrs remapping test");
+	if (!test_hal_vmem_remapping())
+	{
+		ok = false;
+		log("Failed virt addrs remapping test!");
+	}
+
+	return ok;
 }
 
 // extern "C" void wait_for_continue(void);
@@ -115,9 +90,19 @@ void setup_adapters(Libc::Env &env)
 void Libc::Component::construct(Libc::Env &env)
 {
 
+	// Libc::with_libc([&]()
+	// 				{
+	// 	int p_argc = 1;
+	// 	char **p_argv = nullptr;
+	// 	char **p_envp = nullptr;
+	// 	phantom_main_entry_point(p_argc, p_argv, p_envp); });
+
+	// void *f_addr = 0x0;
+	// log(*((int *)f_addr));
+
 	Libc::with_libc([&]()
 					{
-		log("--- Phantom env test ---");
+		log("--- Phantom init ---");
 
 		log("Waiting for continue");
 		// wait_for_continue();
@@ -125,23 +110,34 @@ void Libc::Component::construct(Libc::Env &env)
 
 		{
 			/*
-			* Setup Main object
-			*/
+			 * Setup Main object
+			 */
 			try
 			{
+				log("--- Setting up adapters ---");
 				setup_adapters(env);
 			}
 			catch (Genode::Service_denied)
 			{
 				error("opening block session was denied!");
+				return;
 			}
 		}
 
+		log("--- Testing adapters ---");
+		test_adapters();
+
+		log("--- Testing HAL ---");
+		test_hal();
+
 		log("--- finished Phantom env test ---");
 
-		env.exec_static_constructors(); });
+		// env.exec_static_constructors(); <- This thing might break pthreads!
+		; });
 
-	Libc::with_libc([]()
+	// Actual Phantom code
+
+	Libc::with_libc([&]()
 					{
 		int p_argc = 1;
 		char **p_argv = nullptr;

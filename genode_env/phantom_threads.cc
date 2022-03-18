@@ -14,6 +14,8 @@
 #include <base/child.h>
 #include <cpu/memory_barrier.h>
 
+#include <libc/component.h>
+
 // Important to keep this typedef before threads.h
 typedef int errno_t;
 
@@ -62,7 +64,26 @@ extern "C"
         hal_spinlock_t spin;
     };
 
-    void *phantom_thread_ep_wrapper(void *args)
+    // struct phantom_thread_proxy_args
+    // {
+    //     void *(*thread)(void *);
+    //     void *args;
+    // };
+
+    // void *
+    // phantom_thread_proxy_func(void *raw_args)
+    // {
+
+    //     Genode::log("Thread proxy! tid=", pthread_self());
+
+    //     phantom_thread_proxy_args *args = (phantom_thread_proxy_args *)raw_args;
+
+    //     args->thread(args->args);
+
+    //     return 0;
+    // }
+
+    void phantom_argless_thread_func_wrapper(void *args)
     {
         void (*thread_to_run)(void) = (void (*)(void))args;
 
@@ -71,11 +92,9 @@ extern "C"
         thread_to_run();
 
         Genode::log("Finished thread without args! tid=", pthread_self(), " thread=", thread_to_run);
-
-        return 0;
     }
 
-    void *phantom_thread_ep_args_wrapper(void *raw_args)
+    void *phantom_thread_func_wrapper(void *raw_args)
     {
         // Genode::log("Entered EP with args!");
         phantom_thread_args *wrapper = (phantom_thread_args *)raw_args;
@@ -95,6 +114,9 @@ extern "C"
         Genode::log("Starting thread (Unlocked spin)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
         // Executing thread
+
+        // Libc::with_libc([&]()
+        //                 { thread(thread_args); });
 
         thread(thread_args);
 
@@ -136,9 +158,9 @@ extern "C"
         // Starting thread
 
         int tid;
-        const pthread_attr_t *attr = 0;
+        // const pthread_attr_t *attr = 0;
 
-        if (pthread_create((pthread_t *)&tid, attr, phantom_thread_ep_args_wrapper, thread_args))
+        if (pthread_create((pthread_t *)&tid, 0, phantom_thread_func_wrapper, thread_args))
         {
             Genode::error("Failed to create kernel thread with args!");
         }
@@ -161,15 +183,8 @@ extern "C"
 
     void hal_start_kernel_thread(void (*thread)(void))
     {
-        int tid;
-        const pthread_attr_t *attr = 0;
 
-        log("!!!: THREAD=", thread);
-
-        if (pthread_create((pthread_t *)&tid, attr, phantom_thread_ep_wrapper, (void *)thread))
-        {
-            Genode::error("Failed to create kernel thread without args!");
-        }
+        hal_start_kernel_thread_arg_dh(phantom_argless_thread_func_wrapper, (void *)thread, 0);
     }
 
     void hal_exit_kernel_thread()

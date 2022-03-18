@@ -105,11 +105,11 @@ extern "C"
         (void)flags;
 
         // Check if we are in object space
-        if (!hal_addr_is_in_object_vmem(page_start_addr))
-        {
-            Genode::error("Trying to map outside obj.space! ", page_start_addr);
-            return;
-        }
+        // if (!hal_addr_is_in_object_vmem(page_start_addr))
+        // {
+        //     Genode::error("Trying to map outside obj.space! ", page_start_addr);
+        //     return;
+        // }
 
         bool writeable = false;
         if (access == page_readwrite or access == page_rw)
@@ -178,7 +178,7 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
      *
      */
 
-    errno_t hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not memory
+    errno_t hal_alloc_vaddress(void **result, int n_pages) // alloc address of a page, but not memory
     {
         // XXX : Probably, can be optimized in future
         // void *temp_res = nullptr;
@@ -187,9 +187,9 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
         Genode::log("Allocation avail=", main_obj->_vmem_adapter._obj_space_allocator.avail(), " consumed=", main_obj->_vmem_adapter._obj_space_allocator.consumed());
 
-        Genode::Range_allocator::Range alloc_range = {
-            main_obj->_vmem_adapter.OBJECT_SPACE_START,
-            main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE};
+        // Genode::Range_allocator::Range alloc_range = {
+        //     main_obj->_vmem_adapter.OBJECT_SPACE_START,
+        //     main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE};
 
         // Genode::Allocator::Alloc_result alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned((Genode::size_t)PAGE_SIZE * num, (unsigned)log2(PAGE_SIZE), alloc_range);
 
@@ -199,17 +199,14 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
         //     alloc_res =
         main_obj->_vmem_adapter
             ._obj_space_allocator
-            .alloc_aligned(
-                (Genode::size_t)PAGE_SIZE * num,
-                (unsigned)log2(PAGE_SIZE),
-                alloc_range)
+            .try_alloc(n_pages * PAGE_SIZE)
             .with_result([&](void *addr)
-                         { 
-                            *result = addr;
-                            is_ok = true; },
+                         {
+                        *result = addr;
+                        is_ok = true; },
                          [&](Range_allocator::Alloc_error err)
                          {
-                             log("Failed to allocate ", num, " pages in obj space! err:", err);
+                             log("Failed to allocate ", n_pages, " pages in obj space! err:", err);
                              is_ok = false;
                          });
 
@@ -238,10 +235,19 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     errno_t hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
     {
 
+        // Genode::log("Phys alloc consumed ram : ", main_obj->_vmem_adapter._pseudo_phys_heap.consumed());
+        Genode::log("Phys alloc: numpages= : ", npages);
+
         try
         {
+            if (npages <= 0)
+            {
+                return 1;
+            }
+
             void *temp_res = nullptr;
-            temp_res = main_obj->_vmem_adapter._pseudo_phys_heap.alloc(PAGE_SIZE * npages);
+            // temp_res = main_obj->_vmem_adapter._pseudo_phys_heap.alloc(PAGE_SIZE * npages);
+            temp_res = main_obj->_vmem_adapter.alloc_pseudo_phys(npages);
 
             *result = (physaddr_t)temp_res;
             return 0;
@@ -264,7 +270,8 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
     void hal_free_phys_pages(physaddr_t paddr, int npages)
     {
-        main_obj->_vmem_adapter._pseudo_phys_heap.free((void *)paddr, npages);
+        // main_obj->_vmem_adapter._pseudo_phys_heap.free((void *)paddr, npages);
+        main_obj->_vmem_adapter.free_pseudo_phys((void *)paddr, npages);
     }
 
     errno_t hal_alloc_phys_page(physaddr_t *result)
@@ -285,6 +292,7 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
     int genode_register_page_fault_handler(int (*pf_handler)(void *address, int write, int ip, struct trap_state *ts))
     {
+        Genode::log("Registering page fault handler (", Hex((addr_t)pf_handler), ")!");
         main_obj->_vmem_adapter.fault_handler.register_fault_handler(pf_handler);
         return 0;
     }

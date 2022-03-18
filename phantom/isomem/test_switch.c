@@ -125,8 +125,8 @@ void run_test( const char *test_name, const char *test_parm )
     //int i;
 
 #ifndef ARCH_ia32
-    printf("sleeping 20 sec");
-    hal_sleep_msec(200000);
+    printf("sleeping 20 sec\n");
+    hal_sleep_msec(20000);
 #endif
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
