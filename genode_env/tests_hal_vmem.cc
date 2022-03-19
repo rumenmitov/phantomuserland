@@ -88,10 +88,10 @@ extern "C"
     {
         int cnt = 0;
 
-        main_obj->_vmem_adapter._pseudo_phys_ds_registry.for_each(
-            [&](Attached_ds_handle &ds)
+        main_obj->_vmem_adapter._pseudo_phys_pages_registry.for_each(
+            [&](Phys_region_handle &rh)
             {
-                (void)ds;
+                (void)rh;
                 cnt++;
             });
 
@@ -276,12 +276,12 @@ extern "C"
 
             log("Starting memcpy");
 
-            *(int *)va = i;
+            // *(int *)va = i;
 
-            // memcpy(va, buf, PAGE_SIZE);
+            memcpy(va, buf, PAGE_SIZE);
 
             hal_page_control_etc(pas[i], va, page_unmap, page_readwrite, 0);
-            hal_sleep_msec(1000);
+            // hal_sleep_msec(1000);
         }
 
         // verifying their values on separate pages

@@ -118,6 +118,35 @@ public:
 typedef Registered<Local_attached_ram_dataspace>
     Attached_ds_handle;
 
+struct Phys_region
+{
+    Genode::Ram_dataspace_capability _ram_ds;
+    addr_t _pseudo_addr;
+    size_t _num_pages;
+
+    // TODO : may be replaced with some singleton
+    Allocator &_addr_allocator;
+    Ram_allocator &_ram;
+
+    Phys_region(Ram_allocator &ram,
+                Allocator &addr_allocator,
+                size_t num_pages) : _ram_ds(ram.alloc(PAGE_SIZE * num_pages)),
+                                    _pseudo_addr((addr_t)addr_allocator.alloc(PAGE_SIZE * num_pages)),
+                                    _num_pages(num_pages),
+                                    _addr_allocator(addr_allocator),
+                                    _ram(ram)
+    {
+    }
+
+    virtual ~Phys_region()
+    {
+        _ram.free(_ram_ds);
+        _addr_allocator.free((void *)_pseudo_addr, PAGE_SIZE);
+    }
+};
+
+typedef Registered<Phys_region> Phys_region_handle;
+
 struct Phantom::Vmem_adapter
 {
 
@@ -137,21 +166,13 @@ struct Phantom::Vmem_adapter
     Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
     // fault handler (will register handler in rm as well)
     Phantom::Local_fault_handler fault_handler{_env, _obj_space, PAGE_SIZE};
-
-    // Not attached fully, but pages from it supposed to be mapped on object space
-    // Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
-    Genode::Region_map_client _pseudo_phys_rm{_rm.create(_phys_rm_size)};
-    // Heap (allocator) that allocates dataspace per each allocated page and maps it on _pseudo_phys_rm
-    // Genode::Heap _pseudo_phys_heap{_env.ram(), _env.rm()};
-
-    // Registry to keep track of attached dataspaces to the pseudo phys rm
-    Genode::Registry<Attached_ds_handle> _pseudo_phys_ds_registry{};
-
-    // TODO : modify allocator to fit the size of obj. space. Should be simple, need to
-    //        create a derived class and tune alloc() to handle appropriate size
+    // Object space virtual space allocator
     Genode::Allocator_avl _obj_space_allocator{&_metadata_heap};
 
-    // Attached_ram_dataspace _zero_pseudo_phys_page{_env.ram(), _pseudo_phys_rm, PAGE_SIZE * 2};
+    // Handles allocation of pseudo physical addresses
+    Genode::Allocator_avl _pseudo_phys_addr_allocator{&_metadata_heap};
+    // Registry to keep pages' dataspaces and their pseudo addresses
+    Genode::Registry<Phys_region_handle> _pseudo_phys_pages_registry{};
 
     Vmem_adapter(Env &env) : _env(env)
     {
@@ -159,7 +180,10 @@ struct Phantom::Vmem_adapter
         // Initializing obj space allocator
         _obj_space_allocator.add_range(OBJECT_SPACE_START + PAGE_SIZE * 0x10, OBJECT_SPACE_SIZE);
 
-        // ATTENTION! _obj_space is attached to the env's rm!void         *ptr_top  = env.rm().attach(rm_top.dataspace());
+        // Initializing pseudo phys allocator
+        _pseudo_phys_addr_allocator.add_range(PAGE_SIZE * 0x10, _phys_rm_size);
+
+        // ATTENTION! _obj_space is attached to the env's rm!
         // void *ptr_obj = env.rm().attach(_obj_space.dataspace(), 0, 0, true, OBJECT_SPACE_START, false, true);
         void *ptr_obj = env.rm().attach_at(_obj_space.dataspace(), OBJECT_SPACE_START, OBJECT_SPACE_SIZE);
 
@@ -167,60 +191,9 @@ struct Phantom::Vmem_adapter
         addr_t const addr_obj = reinterpret_cast<addr_t>(ptr_obj);
         log(" region obj.space        ",
             Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
-
-        // Dataspace_client pseudo_phys_ds(_pseudo_phys_rm.dataspace());
-
-        // Phantom expects physical addresses > 0x0. Let's allocate a single page
-        // XXX : allocating it bypassing the registry!
-
-        // if (_zero_pseudo_phys_page.local_addr<addr_t>() != 0)
-        // {
-        //     Genode::error("Failed to allocate pseudo phys page at zero address!");
-        // }
-
-        // void *zero_addr = alloc_pseudo_phys(1);
-
-        // if (zero_addr != 0)
-        // {
-        //     Genode::error("Failed to allocate pseudo phys page at zero address!");
-        // }
-
-        // map_page(0, OBJECT_SPACE_START, false);
-
-        // if ((addr_t)alloc_pseudo_phys(1) != 0)
-        // {
-        //     Genode::error("Failed to allocate pseudo phys page at zero address!");
-        // }
     }
 
     ~Vmem_adapter() {}
-
-    // void alloc_phantom_phys_page(void **addr)
-    // {
-    //     // TODO : Error handling
-    //     try
-    //     {
-    //         *addr = _pseudo_phys_heap.alloc(PAGE_SIZE);
-    //     }
-    //     catch (Out_of_caps)
-    //     {
-    //         Genode::log("Failed to allocate ", npages, " phys pages, Out_of_caps");
-    //     }
-    //     catch (Out_of_ram)
-    //     {
-    //         Genode::log("Failed to allocate ", npages, " phys pages, Out_of_ram");
-    //     }
-    //     catch (Service_denied)
-    //     {
-    //         Genode::log("Failed to allocate ", npages, " phys pages, Denied");
-    //     }
-    // }
-
-    // void free_phantom_phys_page(void *addr)
-    // {
-    //     // TODO : Error handling
-    //     _pseudo_phys_heap.free(addr, PAGE_SIZE);
-    // }
 
     void map_page(addr_t phys_addr, addr_t virt_addr, bool writeable)
     {
@@ -234,16 +207,36 @@ struct Phantom::Vmem_adapter
 
             // TODO : Error handling
             //        Handle 0 return address
-            // _obj_sp
-            // _obj_space.attach(_pseudo_phys_rm.dataspace(), PAGE_SIZE, phys_addr, true, virt_addr - OBJECT_SPACE_START, false, writeable);
 
-            Region_map::Local_addr laddr = _obj_space.attach(_pseudo_phys_rm.dataspace(), PAGE_SIZE, phys_addr, true, virt_addr - OBJECT_SPACE_START, false, writeable);
+            // Getting the region
+            Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
+
+            if (region == nullptr)
+            {
+                Genode::error("Mapping incorrect phys address [",
+                              Hex(phys_addr), "->", Hex(virt_addr),
+                              "]! Will not map");
+                return;
+            }
+
+            addr_t offset = phys_addr - region->_pseudo_addr;
+
+            Region_map::Local_addr laddr = _obj_space.attach(
+                region->_ram_ds,
+                PAGE_SIZE,
+                offset,
+                true,
+                virt_addr - OBJECT_SPACE_START,
+                false,
+                writeable);
+
+            if ((addr_t)laddr != virt_addr - OBJECT_SPACE_START)
+            {
+                error("Mapped addr does not correspond to virtual one! Got ",
+                      Hex((addr_t)laddr), " expected ", Hex(virt_addr - OBJECT_SPACE_START));
+            }
+
             log("Map returned laddr=", Hex((addr_t)laddr));
-
-            // _obj_space.attach_at(_pseudo_phys_rm.dataspace(), virt_addr - OBJECT_SPACE_START, PAGE_SIZE, phys_addr);
-
-            // _pseudo_phys_rm.attach(_obj_space.dataspace(), PAGE_SIZE, phys_addr);
-            // _obj_space.attach_at(_pseudo_phys_rm.dataspace(), virt_addr - OBJECT_SPACE_START, PAGE_SIZE, phys_addr);
         }
         else
         {
@@ -275,35 +268,44 @@ struct Phantom::Vmem_adapter
         // XXX : this implementation is not performant and should be replaced in the future
         // TODO : Add error handling
 
-        // Attached_ram_dataspace is RAI, so all allocations will be handled by it
-        Local_attached_ram_dataspace *ds = new (&_metadata_heap) Attached_ds_handle(
-            _pseudo_phys_ds_registry,
+        // Phys_page is RAII, so all allocations will be handled by it
+        Phys_region *page = new (&_metadata_heap) Phys_region_handle(
+            _pseudo_phys_pages_registry,
             _env.ram(),
-            _pseudo_phys_rm,
-            (size_t)(PAGE_SIZE * num_pages),
-            Genode::Cache::CACHED);
-        return ds->local_addr<void *>();
+            _pseudo_phys_addr_allocator,
+            num_pages);
+
+        return (void *)page->_pseudo_addr;
     }
 
     void free_pseudo_phys(void *addr, int npages)
     {
+        // XXX: It is naive and non efficient implementation. Should be improved later
+
         bool success = false;
 
-        _pseudo_phys_ds_registry.for_each(
-            [&](Attached_ds_handle &ds)
+        _pseudo_phys_pages_registry.for_each(
+            [&](Phys_region_handle &region)
             {
-                if (ds.local_addr<void *>() != addr)
+                if (region._pseudo_addr != (addr_t)addr)
                 {
                     return;
                 }
 
-                if (ds.size() != (size_t)(npages * PAGE_SIZE))
+                if (region._num_pages != (size_t)(npages))
                 {
-                    Genode::warning("free pseudo phys with incorrect number of pages: addr=", Hex((long)addr), " expected=", ds.size(), " received=", npages * PAGE_SIZE);
+                    Genode::warning(
+                        "free pseudo phys with incorrect number of pages: addr=",
+                        Hex((long)addr),
+                        " expected=",
+                        Hex(region._num_pages * PAGE_SIZE),
+                        " received=",
+                        Hex(npages * PAGE_SIZE));
+
                     return;
                 }
 
-                destroy(_metadata_heap, &ds);
+                destroy(_metadata_heap, &region);
                 success = true;
             });
 
@@ -311,6 +313,39 @@ struct Phantom::Vmem_adapter
         {
             Genode::warning("Failed to free pseudo phys: addr=", Hex((long)addr), " npages=", npages);
         }
+    }
+
+    Phys_region_handle *get_pseudo_phys_region(addr_t pseudo_phys_addr)
+    {
+
+        // TODO : Check if addr is page aligned
+
+        Phys_region_handle *res = nullptr;
+        bool success = false;
+
+        _pseudo_phys_pages_registry.for_each(
+            [&](Phys_region_handle &region)
+            {
+                if (success)
+                {
+                    return;
+                }
+
+                // Check if within the region
+                if (region._pseudo_addr <= pseudo_phys_addr &&
+                    pseudo_phys_addr < region._pseudo_addr + region._num_pages * PAGE_SIZE)
+                {
+                    res = &region;
+                    success = true;
+                }
+            });
+
+        if (!success)
+        {
+            Genode::warning("Phys addr not found: addr=", Hex((long)pseudo_phys_addr));
+        }
+
+        return res;
     }
 };
 
