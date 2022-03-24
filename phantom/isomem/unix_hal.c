@@ -173,9 +173,9 @@ void console_set_normal_color() { printf("\x1b[37m"); }
 void console_set_message_color(void) { printf("\x1b[34m"); }
 void console_set_warning_color(void) { printf("\x1b[33m"); }
 
-int debug_max_level_error = ~0;
-int debug_max_level_info = ~0;
-int debug_max_level_flow = ~0;
+int debug_max_level_error = 255;
+int debug_max_level_info = 255;
+int debug_max_level_flow = 255;
 
 void phantom_check_threads_pass_bytecode_instr_boundary(void)
 {

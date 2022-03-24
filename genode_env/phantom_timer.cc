@@ -1,21 +1,25 @@
 #include "phantom_env.h"
+#include <pthread.h>
 
 extern "C"
 {
 #include <hal.h>
+#include <threads.h>
 
 #include <kernel/timedcall.h>
 #include <kernel/stats.h>
 #include <kernel/board.h>
 
-    void board_init_kernel_timer(void)
-    {
-        main_obj->_timer_adapter.set_handler(hal_time_tick);
-    }
+    // Supposed to be called from libc context
+    // void board_init_kernel_timer(void)
+    // {
+    //     main_obj->_timer_adapter.set_handler(hal_time_tick);
+    // }
 
     static unsigned int msecDivider = 0;
     static unsigned int secDivider = 0;
 
+    // XXX : Important: it has to be executed from libc context
     //! Called from timer interrupt, tick_rate is in uSec
     void hal_time_tick(int tick_rate_us)
     {
@@ -34,6 +38,5 @@ extern "C"
                 stat_update_second_stats();
             }
         }
-        // putchar('^');
     }
 }

@@ -184,9 +184,8 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are long
-    //   TODO : Uncomment
     TEST(dpc);
-    TEST(timed_call);
+    // TEST(timed_call);
     
 
     // must test after timed calls for it depends on them

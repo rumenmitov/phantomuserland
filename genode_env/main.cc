@@ -133,12 +133,9 @@ void Libc::Component::construct(Libc::Env &env)
 		log("--- finished Phantom env test ---");
 
 		// env.exec_static_constructors(); <- This thing might break pthreads!
-		; });
 
-	// Actual Phantom code
+		// Actual Phantom code
 
-	Libc::with_libc([&]()
-					{
 		int p_argc = 1;
 		char **p_argv = nullptr;
 		char **p_envp = nullptr;

@@ -20,7 +20,13 @@ namespace Phantom
         Phantom::Disk_backend _disk{_env, _heap};
         Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
         Phantom::Vmem_adapter _vmem_adapter{_env};
-        Phantom::Timer_adapter _timer_adapter{_env};
+
+        // XXX : Timers are required for timed calls. However, they are almost not used
+        //       That is why it is temporary disabled. Moreover, it requires some improvements
+        //       - There are libc calls, but they are not working even with Libc::with_libc
+        //         Seems that they have to be implemented in separate thread
+
+        // Phantom::Timer_adapter _timer_adapter{_env};
 
         Main(Env &env) : _env(env)
         {
