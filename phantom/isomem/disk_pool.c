@@ -130,7 +130,9 @@ static void  	do_part_destroy(void *arg)
         pool_release_el( pp, p->baseh.h );
 }
 
+// unused!
 
+#if 0
 
 partition_handle_t      dpart_create( partition_handle_t base, long shift, long size)
 {
@@ -294,12 +296,13 @@ errno_t dpart_fence( partition_handle_t h )
 
 
 
-
 void dpart_release_async( pool_handle_t h )
 {
     pool_release_el( pp, h );
 }
 
+
+#endif
 
 
 

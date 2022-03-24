@@ -181,10 +181,11 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     //test_swi();
 #endif
 
-    // OK, to be reimplemented
-    board_init_kernel_timer();
     // OK, Inits queue and spinlock
     phantom_timed_call_init(); // Too late? Move up?
+    
+    // OK, to be reimplemented
+    board_init_kernel_timer();
 
 #if defined(ARCH_mips) && 0
     SHOW_FLOW0( 0, "test intr reg overflow" );
