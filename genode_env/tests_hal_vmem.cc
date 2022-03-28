@@ -2,6 +2,8 @@
 #include <base/registry.h>
 #include "phantom_env.h"
 
+using namespace Phantom;
+
 extern "C"
 {
 

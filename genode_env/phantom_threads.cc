@@ -9,7 +9,6 @@
 // #include "genode_misc.h"
 
 #include "phantom_env.h"
-#include "phantom_threads.h"
 
 #include <base/child.h>
 #include <cpu/memory_barrier.h>
@@ -25,6 +24,9 @@ extern "C"
 {
 
 #include <threads.h>
+// XXX: Needed only for phantom_create_thread()
+#include <thread_private.h>
+
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -207,9 +209,20 @@ extern "C"
         return 0;
     }
 
+    // XXX : Don't use this function! Use hal_start_thread() instead
+    phantom_thread_t *phantom_create_thread(void (*func)(void *), void *arg, int flags)
+    {
+
+        Genode::warning("Called phantom_create_thread(), using hal_start_thread() instead!");
+        hal_start_thread(func, arg, flags);
+
+        return nullptr;
+    }
+
     // XXX : If thread is killed this way, death handler will not be executed
     errno_t t_kill_thread(tid_t tid)
     {
+        Genode::warning("Thread killed using t_kill_thread. Death handler will not work. tid=", tid);
         pthread_cancel((pthread_t)((long)tid));
         return 0;
     }

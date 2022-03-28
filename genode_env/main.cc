@@ -16,7 +16,6 @@
 #include "phantom_env.h"
 #include "disk_backend.h"
 #include "phantom_vmem.h"
-#include "phantom_threads.h"
 
 #include "phantom_entrypoints.h"
 
@@ -41,7 +40,7 @@ void test_adapters()
 	// log("Finished obj_space test!");
 
 	log("Starting remapping test!");
-	test_remapping();
+	Phantom::test_remapping();
 	log("finished remapping test!");
 
 	log("Starting block device test!");

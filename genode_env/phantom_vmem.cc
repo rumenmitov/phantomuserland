@@ -27,6 +27,8 @@
 
 #include "phantom_env.h"
 
+using namespace Phantom;
+
 extern "C"
 {
 

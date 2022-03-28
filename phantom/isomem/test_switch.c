@@ -125,8 +125,8 @@ void run_test( const char *test_name, const char *test_parm )
     //int i;
 
 #ifndef ARCH_ia32
-    printf("sleeping 20 sec\n");
-    hal_sleep_msec(20000);
+    printf("sleeping 2 sec\n");
+    hal_sleep_msec(2000);
 #endif
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
@@ -193,7 +193,7 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are very long, do 'em last
-    // TEST(threads);
+    TEST(threads);
     
     /* //   TODO : Uncomment
     TEST(absname);

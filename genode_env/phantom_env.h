@@ -4,7 +4,6 @@
 #include <base/component.h>
 #include <base/heap.h>
 #include "disk_backend.h"
-#include "phantom_threads.h"
 #include "phantom_vmem.h"
 #include "phantom_timer.h"
 
@@ -18,7 +17,6 @@ namespace Phantom
         Heap _heap{_env.ram(), _env.rm()};
 
         Phantom::Disk_backend _disk{_env, _heap};
-        Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
         Phantom::Vmem_adapter _vmem_adapter{_env};
 
         // XXX : Timers are required for timed calls. However, they are almost not used
