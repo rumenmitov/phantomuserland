@@ -30,8 +30,8 @@ extern "C"
     int hal_mutex_init(hal_mutex_t *m, const char *name)
     {
         m->impl = (phantom_mutex_impl *)malloc(sizeof(struct phantom_mutex_impl));
-        m->impl->lock = (Genode::Mutex *)malloc(sizeof(Genode::Mutex));
-        construct_at<Genode::Mutex>(m->impl->lock);
+        m->impl->lock = (Phantom::Phantom_mutex_wrapper *)malloc(sizeof(Phantom::Phantom_mutex_wrapper));
+        construct_at<Phantom::Phantom_mutex_wrapper>(m->impl->lock);
 
         m->impl->name = name;
 
@@ -52,15 +52,14 @@ extern "C"
 
     int hal_mutex_is_locked(hal_mutex_t *m)
     {
-        (void)m;
-        // TODO : Implement using modified Mutexes!
-        Genode::warning("STUB: Checked if mutex locked. Returned false");
-        return 0;
+        int res = m->impl->lock->isLocked() ? 1 : 0;
+        log("Getting mutex state: ", m->impl->name, "={", res, "}");
+        return res;
     }
 
     errno_t hal_mutex_destroy(hal_mutex_t *m)
     {
-        m->impl->lock->~Mutex();
+        m->impl->lock->~Phantom_mutex_wrapper();
         // main_obj->_heap.free(m->impl->lock, sizeof(Genode::Mutex));
         free(m->impl->lock);
         free(m->impl);

@@ -13,3 +13,4 @@ extern "C" bool test_hal_vmem_alloc();
 extern "C" bool test_hal_phys_alloc();
 extern "C" bool test_hal_vmem_mapping();
 extern "C" bool test_hal_vmem_remapping();
+extern "C" bool test_hal_mutex_state();

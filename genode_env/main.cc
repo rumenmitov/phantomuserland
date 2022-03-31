@@ -81,6 +81,13 @@ bool test_hal()
 		log("Failed virt addrs remapping test!");
 	}
 
+	log("--- Starting mutex states test");
+	if (!test_hal_mutex_state())
+	{
+		ok = false;
+		log("Failed mutex states test!");
+	}
+
 	return ok;
 }
 
