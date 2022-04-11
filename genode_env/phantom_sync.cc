@@ -75,13 +75,15 @@ extern "C"
 
     int hal_sem_acquire(hal_sem_t *s)
     {
-        s->impl->sem->up();
+        log("Acquiring sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->down();
         return 0;
     }
 
     void hal_sem_release(hal_sem_t *s)
     {
-        s->impl->sem->down();
+        log("Releasing sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->up();
     }
 
     int hal_sem_init(hal_sem_t *s, const char *name)
@@ -89,7 +91,7 @@ extern "C"
         // main_obj->_heap.alloc(sizeof(Genode::Semaphore), (void **)&s->impl->sem);
         s->impl = (phantom_sem_impl *)malloc(sizeof(struct phantom_sem_impl));
         s->impl->sem = (Genode::Semaphore *)malloc(sizeof(Genode::Semaphore));
-        construct_at<Genode::Semaphore>(s->impl->sem);
+        construct_at<Genode::Semaphore>(s->impl->sem, 0);
 
         s->impl->name = name;
 

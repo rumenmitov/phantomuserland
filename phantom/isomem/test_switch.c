@@ -148,6 +148,8 @@ void run_test( const char *test_name, const char *test_parm )
         TEST(sem);
     }
     */
+   
+    TEST(sem);
 
     // TEST(wtty);
 
@@ -211,7 +213,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(rectangles);
     // TODO : Fix. Failing with seg fault
-    // TEST(video);
+    TEST(video);
 
 
     //TEST(video);

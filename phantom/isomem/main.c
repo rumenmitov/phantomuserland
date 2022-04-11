@@ -304,7 +304,17 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     phantom_start_video_driver();
     */
 
-    pvm_video_init();   // Initializing headless video
+    // XXX : Video initialization from pvm_headless. Should be replaced with actual video
+    {
+        pvm_video_init();   // Initializing headless video
+
+        // pvm_headless workaround
+        // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+
+        drv_video_init_windows();
+        init_main_event_q();
+        init_new_windows();
+    }
 
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );

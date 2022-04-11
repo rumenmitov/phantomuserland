@@ -101,6 +101,7 @@ again:
             queue_remove( &rect_list, pqel, pqel_t *, chain );
             goto again;
         }
+        // TODO: Memory leak???????
 
 
         // qe includes r - skip addition
@@ -234,28 +235,56 @@ static void repaint_q(void)
 
     //ASSERT_LOCKED_MUTEX( &rect_list_lock );
 
+    hal_mutex_lock( &rect_list_lock );
+
+    
+
+    {
+        pqel_t *temp_pqel;
+
+        printf("Printing scr painter queue:\n");
+        int idx = 0;
+        queue_iterate( &rect_list, temp_pqel, pqel_t *, chain )
+        {
+            printf("Q[%d] me=%p, prev=%p, next=%p\n", idx++, temp_pqel, temp_pqel->chain.prev, temp_pqel->chain.next);
+        }
+    }
+
     while(1)
     {
 #if USE_ZBUF_SHADOW
         scr_zbuf_apply_shadow();
 #endif
 
-        hal_mutex_lock( &rect_list_lock );
 
         if(paint_q_empty())
             break;
 
         queue_remove_first( &rect_list, pqel, pqel_t *, chain );
 
-        hal_mutex_unlock( &rect_list_lock );
+        // { 
+        //     queue_entry_t ___next;
+        //     (pqel) = (pqel_t *) ((&rect_list)->next);
+        //     ___next = (pqel)->chain.next;
+        //     if ((&rect_list) == ___next) 
+        //         (&rect_list)->prev = (&rect_list);
+        //     else 
+        //         ((pqel_t *)(___next))->chain.prev = (&rect_list); 
+        //     (&rect_list)->next = ___next; 
+        // }
 
-        rect_t r = pqel->r;
-        free(pqel);
+        printf("!!!: Processedd scr queue element!!!\n");
+
+        // TODO : REMOVE!!!
+        // break;
+
+        // rect_t r = pqel->r;
+        // free(pqel);
 
 #if !USE_ZBUF_SHADOW
-        scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?
+        // scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?
 #endif
-        paint_square_updown( &r );
+        // paint_square_updown( &r );
     }
 
     hal_mutex_unlock( &rect_list_lock );

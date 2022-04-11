@@ -38,7 +38,7 @@ int do_test_video(const char *test_parm)
 
     memset( &e1, 0, sizeof(e1) );
 
-    LOG_FLOW0( 0, "start video test" );
+    SHOW_FLOW0( 0, "start video test" );
 
     //window_handle_t w = 0;
 
@@ -68,7 +68,7 @@ int do_test_video(const char *test_parm)
     e1.w.rect.xsize = scr_get_xsize();
     e1.w.rect.ysize = scr_get_ysize();
 
-    for( i = 0; i < 300; i++ )
+    for( i = 0; i < 1; i++ )
     {
 #if USE_ZBUF_SHADOW
         scr_zbuf_request_reset_square( e1.w.rect.x, e1.w.rect.y, e1.w.rect.xsize, e1.w.rect.ysize );
@@ -84,7 +84,7 @@ int do_test_video(const char *test_parm)
     w_set_title( wb, "Move Test"  );
 
 
-    for( i = 0; i < 100; i++ )
+    for( i = 0; i < 1; i++ )
     {
         w_move( w, 110, 110 );
         w_move( w, 101, 101 );
@@ -95,7 +95,7 @@ int do_test_video(const char *test_parm)
     drv_video_window_free( wb );
     drv_video_window_free( w );
 
-    LOG_FLOW0( 0, "end video test" );
+    SHOW_FLOW0( 0, "end video test" );
 
     return 0;
 }

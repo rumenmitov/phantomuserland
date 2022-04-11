@@ -247,7 +247,7 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
     (void)flags;
 
     // panic("set_net_timer");
-    lprintf("set_net_timer called, backtrace (\"gdb bt\") me\n");
+    // lprintf("set_net_timer called, backtrace (\"gdb bt\") me\n");
 
     return -1; // ERR_GENERAL - todo - errno_t
 }

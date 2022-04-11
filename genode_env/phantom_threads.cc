@@ -63,7 +63,7 @@ extern "C"
         void (*thread)(void *);
         void *args;
         void (*death_handler)(phantom_thread_t *);
-        hal_spinlock_t spin;
+        hal_spinlock_t *spin;
     };
 
     // struct phantom_thread_proxy_args
@@ -111,7 +111,7 @@ extern "C"
 
         // Unlocking parent thread
 
-        hal_spin_unlock(&wrapper->spin);
+        hal_spin_unlock(wrapper->spin);
 
         Genode::log("Starting thread (Unlocked spin)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
@@ -151,11 +151,12 @@ extern "C"
         // Setting up wrapper struct
 
         phantom_thread_args *thread_args = (phantom_thread_args *)malloc(sizeof(phantom_thread_args));
+        thread_args->spin = (hal_spinlock_t *)malloc(sizeof(hal_spinlock_t));
         thread_args->thread = thread;
         thread_args->args = arg;
         thread_args->death_handler = death_handler;
-        hal_spin_init(&thread_args->spin);
-        hal_spin_lock(&thread_args->spin);
+        hal_spin_init(thread_args->spin);
+        hal_spin_lock(thread_args->spin);
 
         // Starting thread
 
@@ -169,7 +170,11 @@ extern "C"
 
         // Waiting till thread started
 
-        hal_spin_lock(&thread_args->spin);
+        Genode::memory_barrier();
+
+        Genode::error("!!! debug: spin=", Hex((addr_t)thread_args->spin));
+
+        hal_spin_lock(thread_args->spin);
 
         log("Unlocked thread!");
 
