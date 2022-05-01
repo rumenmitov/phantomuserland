@@ -170,9 +170,9 @@ extern "C"
 
         // Waiting till thread started
 
-        Genode::memory_barrier();
+        // Genode::memory_barrier();
 
-        Genode::error("!!! debug: spin=", Hex((addr_t)thread_args->spin));
+        // Genode::error("!!! debug: spin=", Hex((addr_t)thread_args->spin));
 
         hal_spin_lock(thread_args->spin);
 

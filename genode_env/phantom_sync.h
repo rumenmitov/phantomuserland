@@ -3,6 +3,9 @@
 #include <base/semaphore.h>
 #include <base/blockade.h>
 
+#include <pthread.h>
+#include <semaphore.h>
+
 namespace Phantom
 {
     class Phantom_mutex_wrapper;
@@ -11,23 +14,36 @@ namespace Phantom
 class Phantom::Phantom_mutex_wrapper
 {
 private:
-    Genode::Mutex _mutex{};
+    pthread_mutex_t _mutex = NULL;
 
     // Required since Genode implementation does not allow
     // to look up the state of the locks or mutexes
     // XXX : Used mainly in assertions
     volatile bool _is_locked = false;
-    Genode::Mutex _state_mutex{};
+    pthread_mutex_t _state_mutex = NULL;
 
     void updateMutexState(bool new_is_locked){
-        Genode::Mutex::Guard guard(_state_mutex);
+        pthread_mutex_lock(&_state_mutex);
+
         _is_locked = new_is_locked;
+
+        pthread_mutex_unlock(&_state_mutex);
     }
 
 public:
-    Phantom_mutex_wrapper() {}
 
-    ~Phantom_mutex_wrapper() {}
+    Phantom_mutex_wrapper(){
+        pthread_mutex_init(&_mutex, NULL);
+        pthread_mutex_init(&_state_mutex, NULL);
+    }
+
+    Phantom_mutex_wrapper(const Phantom::Phantom_mutex_wrapper&) = delete;
+    int operator=(const Phantom::Phantom_mutex_wrapper&) = delete;
+
+    ~Phantom_mutex_wrapper(){
+        pthread_mutex_destroy(&_mutex);
+        pthread_mutex_destroy(&_state_mutex);
+    }
 
     void acquire()
     {
@@ -37,12 +53,12 @@ public:
         // Assuming that nothing bad will happen if we say that
         // it is locked while we are locking it
 
-        _mutex.acquire();
+        pthread_mutex_lock(&_mutex);
     }
 
     void release()
     {
-        _mutex.release();
+        pthread_mutex_unlock(&_mutex);
 
         // XXX : Not a good place to preempt
         // Assuming that nothing bad will happen if we say that
@@ -53,8 +69,10 @@ public:
 
     bool isLocked()
     {
-        Genode::Mutex::Guard guard(_state_mutex);
-        return _is_locked;
+        pthread_mutex_lock(&_state_mutex);
+        bool res = _is_locked;
+        pthread_mutex_unlock(&_state_mutex);
+        return res;
     }
 };
 
@@ -69,7 +87,7 @@ extern "C"
 
     struct phantom_sem_impl
     {
-        Genode::Semaphore *sem;
+        sem_t sem;
         const char *name;
     };
 
