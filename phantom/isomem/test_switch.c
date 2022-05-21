@@ -186,7 +186,7 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are long
-    TEST(dpc);
+    // TEST(dpc);
 
     // XXX: timed calls are disabled for now
     //      they are mostly used in sync primitives, 
@@ -200,7 +200,7 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are very long, do 'em last
-    TEST(threads);
+    // TEST(threads);
     
     /* //   TODO : Uncomment
     TEST(absname);

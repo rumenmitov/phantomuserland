@@ -238,7 +238,6 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     {
 
         // Genode::log("Phys alloc consumed ram : ", main_obj->_vmem_adapter._pseudo_phys_heap.consumed());
-        Genode::log("Phys alloc: numpages= : ", npages);
 
         try
         {
@@ -252,6 +251,9 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
             temp_res = main_obj->_vmem_adapter.alloc_pseudo_phys(npages);
 
             *result = (physaddr_t)temp_res;
+
+            Genode::log("Phys alloc: numpages= : ", npages, " addr=", Hex((physaddr_t)temp_res));
+
             return 0;
         }
         catch (Out_of_caps)

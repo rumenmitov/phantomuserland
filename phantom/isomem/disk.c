@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 12
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -99,13 +99,13 @@ static errno_t partFence( struct phantom_disk_partition *p )
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
-    SHOW_FLOW( 3, "blk %d", blockNo );
+    SHOW_FLOW( 3, "blk %d [%d] (%d)", blockNo, nBlocks, isWrite );
 
     pager_io_request rq;
 
     pager_io_request_init( &rq );
 
-    rq.phys_page = (physaddr_t)phystokv(to); // why? redundant?
+    // rq.phys_page = (physaddr_t)phystokv(to); // why? redundant?
     rq.disk_page = blockNo;
 
     rq.blockNo = blockNo;
@@ -269,6 +269,8 @@ static void register_partition(phantom_disk_partition_t *p)
         printf("Too many partitions, skipping one (%.64s)\n", p->name );
         return;
     }
+
+    printf("DEBUG: REGISTRING A PARTITION!!!\n");
 
     partitions[nPartitions] = *p;
     //dump_partition(p);

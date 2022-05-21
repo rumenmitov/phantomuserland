@@ -11,6 +11,9 @@ extern "C"
 
 #include <genode_disk_private.h>
 
+    // XXX : Phantom expects this size of the block. Need to be fixed in the future
+    static int block_size = 512;
+
     void driver_genode_update_disk_dev(genode_disk_dev_t *dest)
     {
         auto info = main_obj->_disk.getInfo();
@@ -21,31 +24,32 @@ extern "C"
         dest->name = name;
     }
 
+    // Note: block_no and len should be in blocks!
     void driver_genode_disk_read(genode_disk_dev_t *vd, void *dest, int block_no, size_t len)
     {
         (void)vd;
 
-        if (len % PAGE_SIZE != 0)
+        if (len % block_size != 0)
         {
-            Genode::warning("Incorrect len for disk read, not block aligned! (addr=%d block=%d len=%d)", dest, block_no, len);
+            Genode::warning("Incorrect len for disk read, not block aligned! (addr=", dest, " block=", block_no, " len=", len, ")");
             return;
         }
 
         // TODO : Do we need to sync here?
-        main_obj->_disk.submit(Disk_backend::Operation::READ, true, block_no, len, dest);
+        main_obj->_disk.submit(Disk_backend::Operation::READ, false, block_no * block_size, len, dest);
     }
 
     void driver_genode_disk_write(genode_disk_dev_t *vd, void *src, int block_no, size_t len)
     {
         (void)vd;
 
-        if (len % PAGE_SIZE != 0)
+        if (len % block_size != 0)
         {
-            Genode::warning("Incorrect len for disk write, not block aligned! (addr=%d block=%d len=%d)", src, block_no, len);
+            Genode::warning("Incorrect len for disk write, not block aligned! (addr=", src, " block=", block_no, " len=", len, ")");
             return;
         }
 
         // TODO : Do we need to sync here?
-        main_obj->_disk.submit(Disk_backend::Operation::READ, true, block_no, len, src);
+        main_obj->_disk.submit(Disk_backend::Operation::WRITE, true, block_no * block_size, len, src);
     }
 }
