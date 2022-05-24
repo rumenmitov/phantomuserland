@@ -16,7 +16,6 @@
 #include "phantom_env.h"
 #include "disk_backend.h"
 #include "phantom_vmem.h"
-#include "phantom_threads.h"
 
 #include "phantom_entrypoints.h"
 
@@ -41,7 +40,7 @@ void test_adapters()
 	// log("Finished obj_space test!");
 
 	log("Starting remapping test!");
-	test_remapping();
+	Phantom::test_remapping();
 	log("finished remapping test!");
 
 	log("Starting block device test!");
@@ -80,6 +79,13 @@ bool test_hal()
 	{
 		ok = false;
 		log("Failed virt addrs remapping test!");
+	}
+
+	log("--- Starting mutex states test");
+	if (!test_hal_mutex_state())
+	{
+		ok = false;
+		log("Failed mutex states test!");
 	}
 
 	return ok;
@@ -133,12 +139,9 @@ void Libc::Component::construct(Libc::Env &env)
 		log("--- finished Phantom env test ---");
 
 		// env.exec_static_constructors(); <- This thing might break pthreads!
-		; });
 
-	// Actual Phantom code
+		// Actual Phantom code
 
-	Libc::with_libc([&]()
-					{
 		int p_argc = 1;
 		char **p_argv = nullptr;
 		char **p_envp = nullptr;

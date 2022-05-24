@@ -1,6 +1,8 @@
 #include "tests_adapters.h"
 #include "phantom_env.h"
 
+using namespace Phantom;
+
 bool Phantom::test_obj_space()
 {
 

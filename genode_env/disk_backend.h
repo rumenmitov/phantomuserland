@@ -107,14 +107,16 @@ public:
                                             opcode, offset / _info.block_size,
                                             length / _info.block_size);
 
-            Genode::log("Block: cnt=", packet.block_count());
-            Genode::log("       num=", packet.block_number());
-            Genode::log("       off=", packet.offset());
+            // Genode::log("Block: cnt=", packet.block_count());
+            // Genode::log("       num=", packet.block_number());
+            // Genode::log("       off=", packet.offset());
             // It is ok for the offset not to be equal to the defined one
 
             /* out packet -> copy data */
-            if (opcode == Block::Packet_descriptor::WRITE)
+            if (opcode == Block::Packet_descriptor::WRITE){
+                Genode::log("Block: writing");
                 Genode::memcpy(_session.tx()->packet_content(packet), data, length);
+            }
 
             _session.tx()->submit_packet(packet);
         }
@@ -131,6 +133,12 @@ public:
             Genode::memcpy(data, _session.tx()->packet_content(packet), length);
 
         bool succeeded = packet.succeeded();
+
+        Genode::log("Block: cnt=", packet.block_count());
+        Genode::log("       num=", packet.block_number());
+        Genode::log("       off=", packet.offset());
+        Genode::log("       siz=", packet.size());
+        Genode::log("        ok=", packet.succeeded());
 
         _session.tx()->release_packet(packet);
 

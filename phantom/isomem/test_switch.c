@@ -125,8 +125,8 @@ void run_test( const char *test_name, const char *test_parm )
     //int i;
 
 #ifndef ARCH_ia32
-    printf("sleeping 20 sec\n");
-    hal_sleep_msec(20000);
+    printf("sleeping 2 sec\n");
+    hal_sleep_msec(2000);
 #endif
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
@@ -148,6 +148,8 @@ void run_test( const char *test_name, const char *test_parm )
         TEST(sem);
     }
     */
+   
+    TEST(sem);
 
     // TEST(wtty);
 
@@ -184,12 +186,16 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are long
-    /* //   TODO : Uncomment
-    TEST(dpc);
-    TEST(timed_call);
-    */
+    // TEST(dpc);
+
+    // XXX: timed calls are disabled for now
+    //      they are mostly used in sync primitives, 
+    //      but we have ones from Genode
+    // TEST(timed_call);
+    
 
     // must test after timed calls for it depends on them
+    // XXX : Seem to be using deprecated API
     // TEST(ports);
 
 
@@ -205,12 +211,14 @@ void run_test( const char *test_name, const char *test_parm )
     // TEST(01_threads);
 #endif
 
-    // TEST(rectangles);
-    // TEST(video);
+    TEST(rectangles);
+    // TODO : Fix. Failing with seg fault
+    TEST(video);
 
 
     //TEST(video);
 
+    // XXX : Uses ports, and not much things using them. Therefore disabled
     //TEST(userland);
 
     printf("\n-----\n" );

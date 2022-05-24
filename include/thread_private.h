@@ -21,6 +21,10 @@
 #include <kernel/trap.h>
 #endif
 
+#ifdef PHANTOM_GENODE
+#include <kernel/pool.h>
+#endif
+
 #include <kernel/smp.h>
 
 #include <cpu_state.h>
@@ -66,6 +70,19 @@ extern int threads_inited;
 
 struct uuprocess;
 
+#ifdef PHANTOM_GENODE
+struct phantom_thread
+{
+    long tid;
+    void *owner;
+    int prio;
+    // XXX: Following is not really used. Kept for compatibility
+    //      Should be replaced after refactoring!
+    int sub_from_pers_mem_lock_count;
+    pool_handle_t ctty_h;
+    wtty_t *ctty_w;
+};
+#else
 struct phantom_thread
 {
     /** NB! Exactly first! Accessed from asm. */
@@ -179,6 +196,7 @@ struct phantom_thread
     bigtime_t                   max_sleep;
 #endif
 };
+#endif
 
 //extern volatile int             all_threads_snap_lock; // nonzero = can't begin a snapshot
 

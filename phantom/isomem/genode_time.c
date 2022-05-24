@@ -7,13 +7,6 @@ int hal_time_init()
     return 0;
 }
 
-//! Called from timer interrupt, tick_rate is in uSec
-void hal_time_tick(int tick_rate)
-{
-    _stub_print();
-}
-
-
 bigtime_t hal_system_time(void)
 {
     _stub_print();
