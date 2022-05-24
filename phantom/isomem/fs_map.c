@@ -11,9 +11,9 @@
 
 #define DEBUG_MSG_PREFIX "fs_map"
 #include "debug_ext.h"
-#define debug_level_flow 1
+#define debug_level_flow 10
 #define debug_level_error 10
-#define debug_level_info 1
+#define debug_level_info 10
 
 #include <phantom_libc.h>
 #include <string.h>
@@ -122,6 +122,21 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
         SHOW_INFO( 9, "part %s read phantom sb @%d", p->name, sbpos[i] );
         if( phantom_sync_read_block( p, buf, sbpos[i], 1 ) )
             continue;
+
+        // {
+        //     char marked_buf[512];
+        //     int j;
+        //     for (j=0;j<512;j++){
+        //         marked_buf[j] = 'A';
+        //     }
+            
+        //     phantom_sync_write_sector( p, marked_buf, sbpos[i], 1 );
+        // }
+
+        // hexdump((void*)buf, PAGE_SIZE, "sb", 0);
+        
+        if( debug_level_flow > 10) hexdump( buf, sizeof(buf), "", 0);
+
         SHOW_INFO0( 9, "calc phantom sb checksum" );
         if( phantom_calc_sb_checksum( sb ) )
         {

@@ -150,7 +150,7 @@ static void ev_push_event( struct ui_event *e )
 
 
 //! This thread delivers events from main Q to windows
-static void ev_push_thread()
+void ev_push_thread()
 {
     t_current_set_name("UIEventQ");
     // +1 so that it is a bit higher than regular sys threads

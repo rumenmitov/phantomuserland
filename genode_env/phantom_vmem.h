@@ -115,7 +115,7 @@ public:
 };
 
 // Handle to put inside registry (used inside vmem adapter)
-typedef Registered<Local_attached_ram_dataspace>
+typedef Registered<Phantom::Local_attached_ram_dataspace>
     Attached_ds_handle;
 
 struct Phys_region

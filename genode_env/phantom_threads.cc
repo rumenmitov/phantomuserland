@@ -9,7 +9,6 @@
 // #include "genode_misc.h"
 
 #include "phantom_env.h"
-#include "phantom_threads.h"
 
 #include <base/child.h>
 #include <cpu/memory_barrier.h>
@@ -25,6 +24,9 @@ extern "C"
 {
 
 #include <threads.h>
+// XXX: Needed only for phantom_create_thread()
+#include <thread_private.h>
+
 #include <pthread.h>
 #include <stdlib.h>
 
@@ -61,7 +63,7 @@ extern "C"
         void (*thread)(void *);
         void *args;
         void (*death_handler)(phantom_thread_t *);
-        hal_spinlock_t spin;
+        hal_spinlock_t *spin;
     };
 
     // struct phantom_thread_proxy_args
@@ -109,7 +111,7 @@ extern "C"
 
         // Unlocking parent thread
 
-        hal_spin_unlock(&wrapper->spin);
+        hal_spin_unlock(wrapper->spin);
 
         Genode::log("Starting thread (Unlocked spin)! tid=", pthread_self(), " thread=", thread, " args=", thread_args, " death_handler=", death_handler);
 
@@ -149,11 +151,12 @@ extern "C"
         // Setting up wrapper struct
 
         phantom_thread_args *thread_args = (phantom_thread_args *)malloc(sizeof(phantom_thread_args));
+        thread_args->spin = (hal_spinlock_t *)malloc(sizeof(hal_spinlock_t));
         thread_args->thread = thread;
         thread_args->args = arg;
         thread_args->death_handler = death_handler;
-        hal_spin_init(&thread_args->spin);
-        hal_spin_lock(&thread_args->spin);
+        hal_spin_init(thread_args->spin);
+        hal_spin_lock(thread_args->spin);
 
         // Starting thread
 
@@ -167,7 +170,11 @@ extern "C"
 
         // Waiting till thread started
 
-        hal_spin_lock(&thread_args->spin);
+        // Genode::memory_barrier();
+
+        // Genode::error("!!! debug: spin=", Hex((addr_t)thread_args->spin));
+
+        hal_spin_lock(thread_args->spin);
 
         log("Unlocked thread!");
 
@@ -207,9 +214,20 @@ extern "C"
         return 0;
     }
 
+    // XXX : Don't use this function! Use hal_start_thread() instead
+    phantom_thread_t *phantom_create_thread(void (*func)(void *), void *arg, int flags)
+    {
+
+        Genode::warning("Called phantom_create_thread(), using hal_start_thread() instead!");
+        hal_start_thread(func, arg, flags);
+
+        return nullptr;
+    }
+
     // XXX : If thread is killed this way, death handler will not be executed
     errno_t t_kill_thread(tid_t tid)
     {
+        Genode::warning("Thread killed using t_kill_thread. Death handler will not work. tid=", tid);
         pthread_cancel((pthread_t)((long)tid));
         return 0;
     }

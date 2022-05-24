@@ -3,7 +3,7 @@
 
 #define DEBUG_MSG_PREFIX "boot"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_info 0
 #define debug_level_error 10
 
@@ -181,10 +181,11 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     //test_swi();
 #endif
 
-    // OK, to be reimplemented
-    board_init_kernel_timer();
     // OK, Inits queue and spinlock
     phantom_timed_call_init(); // Too late? Move up?
+    
+    // OK, to be reimplemented
+    board_init_kernel_timer();
 
 #if defined(ARCH_mips) && 0
     SHOW_FLOW0( 0, "test intr reg overflow" );
@@ -303,7 +304,17 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     phantom_start_video_driver();
     */
 
-    pvm_video_init();   // Initializing headless video
+    // XXX : Video initialization from pvm_headless. Should be replaced with actual video
+    {
+        pvm_video_init();   // Initializing headless video
+
+        // pvm_headless workaround
+        // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+
+        drv_video_init_windows();
+        init_main_event_q();
+        init_new_windows();
+    }
 
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );

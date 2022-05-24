@@ -1,6 +1,6 @@
 #define DEBUG_MSG_PREFIX "GenodeDiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include "genode_disk.h"
+#include <arch/arch-page.h>
 
 static int seq_number = 0;
 static genode_disk_dev_t vdev;
@@ -21,6 +22,8 @@ phantom_device_t *driver_genode_disk_probe()
 {
 
     vdev.name = vdev_name;
+    vdev.block_size = 512;
+    vdev.block_count = 2095071;
 
     phantom_device_t *dev = (phantom_device_t *)malloc(sizeof(phantom_device_t));
     dev->name = "Genode disk";
@@ -43,7 +46,7 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
     //      (though, it is a default settings)
     if (vd->block_size != 512)
     {
-        SHOW_ERROR0(0, "Block size of the partition is not 512 bytes!");
+        SHOW_ERROR(0, "Block size of the partition is not 512 bytes! Got size=%d", vd->block_size);
         return 0;
     }
 
@@ -93,33 +96,66 @@ int driver_genode_disk_asyncIO(struct phantom_disk_partition *part, pager_io_req
     // assert(p->base == 0 );
 
     int block_size = vdev.block_size;
+    const int sector_size = 512;
 
     genode_disk_dev_t *vd = (genode_disk_dev_t *)part->specific;
 
-    int sect = rq->blockNo;
-    int n = rq->nSect;
+    // Getting data from rq
+    int blockNo = rq->blockNo;
+    int nSect = rq->nSect;
     physaddr_t pa = rq->phys_page;
 
-    int length_in_bytes = rq->nSect * vdev.block_size;
+    // Calculating size
+    int length_in_bytes = nSect * sector_size;
+    int length_in_pages = length_in_bytes / PAGE_SIZE + ((length_in_bytes % PAGE_SIZE) ? 1 : 0);
 
-    rq->parts = n;
+    // XXX : Seems to be not used
+    rq->parts = nSect;
 
     // TODO : Rework to be more efficient
     // TODO : IT SHOULD NOT HAPPEN IN OBJECT SPACE! Use another allocator
+    // TODO : Also, might result in some memory leaks
     // Need to write to pseudo phys page. It means that we need to map it first
     void *temp_mapping = NULL;
-    hal_alloc_vaddress(&temp_mapping, block_size);
-    hal_pages_control(pa, temp_mapping, length_in_bytes, page_map, rq->flag_pagein ? page_rw : page_ro);
+
+    SHOW_FLOW(3, "genode_asyncIO: [%c] pa=0x%x blockNo=0x%x nSect=%d size=0x%x len=%d len_in_pages=%d",
+        rq->flag_pagein ? 'r' : 'w', 
+        pa, 
+        rq->blockNo, 
+        rq->nSect, 
+        block_size, 
+        length_in_bytes, 
+        length_in_pages);
+    
+    if (length_in_bytes % block_size != 0){
+        SHOW_ERROR(0, "nSect is not block aligned! (blockNo=%d nSect=%d)", blockNo, nSect);
+    }
+
+    // Getting number of blocks to read by sectors
+    // const int io_buf_len = nSect * sector_size + (block_size - ((nSect * sector_size) % block_size));
+
+    hal_alloc_vaddress(&temp_mapping, length_in_pages );
+    hal_pages_control(pa, temp_mapping, length_in_pages, page_map, rq->flag_pagein ? page_rw : page_ro);
+
 
     // Now we can perform IO
     if (rq->flag_pageout)
-        driver_genode_disk_write(vd, pa, rq->blockNo, rq->nSect);
+        driver_genode_disk_write(vd, temp_mapping, rq->blockNo, length_in_bytes);
     else
-        driver_genode_disk_read(vd, pa, rq->blockNo, rq->nSect);
+        driver_genode_disk_read(vd, temp_mapping, rq->blockNo, length_in_bytes);
 
     // Now we can remove temporary mapping and dealloc address
-    hal_pages_control(0, temp_mapping, length_in_bytes, page_unmap, page_rw);
-    hal_free_vaddress(temp_mapping, block_size);
+    hal_pages_control(0, temp_mapping, length_in_pages, page_unmap, page_rw);
+    hal_free_vaddress(temp_mapping, length_in_pages);
+
+
+    // XXX : pager_io_request requires some finishing operations
+    //       But not sure what is required. One of the ideas is to use    
+    //       pager_io_request_done( rq );
+    //       But it is almost not used anywhere
+    // XXX : It is very controversial thing though. What will happen if we would like to check what operation it was?
+    rq->flag_pageout = 0;
+    rq->flag_pagein  = 0;
 
     // TODO : error handling
 

@@ -137,4 +137,6 @@ void phantom_dump_stats_buf(char *buf, int len);
 
 void stat_set_persistent_storage( struct persistent_kernel_stats *pdata );
 
+void stat_update_second_stats();
+
 #endif // STATS_H
