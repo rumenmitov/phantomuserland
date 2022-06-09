@@ -8,6 +8,8 @@
 #include <base/entrypoint.h>
 #include <base/registry.h>
 
+#include <libc/component.h>
+
 #include <cpu/memory_barrier.h>
 
 #include "phantom_env.h"
@@ -74,7 +76,9 @@ private:
         // TODO : fix IP
         if (_pf_handler != nullptr)
         {
-            _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
+            Libc::with_libc([&](){
+                _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
+            });
         }
         else
         {

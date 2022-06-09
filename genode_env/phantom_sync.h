@@ -47,13 +47,14 @@ public:
 
     void acquire()
     {
-        updateMutexState(true);
+
+        pthread_mutex_lock(&_mutex);
 
         // XXX : Not a good place to preempt
         // Assuming that nothing bad will happen if we say that
-        // it is locked while we are locking it
+        // it is locked after we are locking it
 
-        pthread_mutex_lock(&_mutex);
+        updateMutexState(true);
     }
 
     void release()

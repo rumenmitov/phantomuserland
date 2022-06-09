@@ -22,7 +22,7 @@ struct Phantom::Timer_adapter
 
     Genode::Mutex _handler_mutex{};
 
-    void (*_handler)(int tick_rate) = nullptr;
+    void (*_handler)(long long unsigned tick_rate) = nullptr;
 
     void handle_timer_tick(Genode::Duration duration)
     {
@@ -32,7 +32,7 @@ struct Phantom::Timer_adapter
             _handler(duration.trunc_to_plain_us().value);
     }
 
-    void set_handler(void (*handler)(int))
+    void set_handler(void (*handler)(long long unsigned tick_rate))
     {
         Genode::Mutex::Guard guard(_handler_mutex);
 

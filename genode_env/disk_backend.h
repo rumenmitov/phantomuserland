@@ -18,9 +18,9 @@ namespace Phantom
 
 /**
  * Block session connection
- * 
+ *
  * Imported from repos/dde_rump/src/lib/rump/io.cc
- * 
+ *
  */
 
 class Phantom::Disk_backend
@@ -28,6 +28,7 @@ class Phantom::Disk_backend
 protected:
     Genode::Env &_env;
     Genode::Heap &_heap;
+    Genode::Entrypoint &_ep;
 
     Genode::Allocator_avl _block_alloc{&_heap};
     Block::Connection<> _session{_env, &_block_alloc};
@@ -39,8 +40,18 @@ protected:
         using Block::Session;
 
         Session::Tag const tag{0};
-        _session.tx()->submit_packet(Session::sync_all_packet_descriptor(_info, tag));
-        _session.tx()->get_acked_packet();
+
+        while (!_session.tx()->try_submit_packet(Session::sync_all_packet_descriptor(_info, tag)));
+        
+        // Waiting for ack
+
+        // Creating an invalid packet
+        Block::Packet_descriptor packet = Block::Packet_descriptor(); 
+        
+        // Spinning while packet is invalid
+        while (packet.operation_type() == Block::Operation::Type::INVALID){
+            packet = _session.tx()->try_get_acked_packet();
+        }
     }
 
 public:
@@ -51,7 +62,7 @@ public:
         SYNC
     };
 
-    Disk_backend(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap)
+    Disk_backend(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap), _ep(env.ep())
     {
         Genode::log("block device with block size ", _info.block_size, " block count ",
                     _info.block_count, " writeable=", _info.writeable);
@@ -74,11 +85,12 @@ public:
     }
 
     /*
-    * Offset and length should be block aligned. Otherwise they may be cropped.
-    *
-    * XXX : 0 offset and 0 length may lead to qemu AHCI error
-    * `qemu-system-x86_64: ahci: PRDT length for NCQ command (0x1) is smaller than the requested size (0x2000000)`
-    */
+     * A synchronous operation
+     * Offset and length should be block aligned. Otherwise they may be cropped.
+     *
+     * XXX : 0 offset and 0 length may lead to qemu AHCI error
+     * `qemu-system-x86_64: ahci: PRDT length for NCQ command (0x1) is smaller than the requested size (0x2000000)`
+     */
     bool submit(Operation op, bool sync_req, Genode::int64_t offset, Genode::size_t length, void *data)
     {
         using namespace Block;
@@ -113,12 +125,16 @@ public:
             // It is ok for the offset not to be equal to the defined one
 
             /* out packet -> copy data */
-            if (opcode == Block::Packet_descriptor::WRITE){
+            if (opcode == Block::Packet_descriptor::WRITE)
+            {
                 Genode::log("Block: writing");
                 Genode::memcpy(_session.tx()->packet_content(packet), data, length);
             }
 
-            _session.tx()->submit_packet(packet);
+            // XXX : Busy waiting!!!
+            // _session.tx()->submit_packet(packet);
+            while (!_session.tx()->try_submit_packet(packet));
+            
         }
         catch (Block::Session::Tx::Source::Packet_alloc_failed)
         {
@@ -126,7 +142,18 @@ public:
             return false;
         }
 
-        Block::Packet_descriptor packet = _session.tx()->get_acked_packet();
+        // Block::Packet_descriptor packet = _session.tx()->get_acked_packet();
+
+        Genode::log("Block: getting ack");
+
+        // XXX:  Spinning until got the packet
+        while (!_session.tx()->ack_avail()){
+            _ep.wait_and_dispatch_one_io_signal();
+        }
+        Genode::log("Block: ack available");
+
+        Block::Packet_descriptor packet = _session.tx()->try_get_acked_packet();
+        Genode::log("Block: received ack");
 
         /* in packet */
         if (opcode == Block::Packet_descriptor::READ)
@@ -142,10 +169,12 @@ public:
 
         _session.tx()->release_packet(packet);
 
+        Genode::log("Block: performing sync");
+
         /* sync request */
         if (sync_req)
         {
-            _sync();
+            // _sync();
         }
 
         return succeeded;

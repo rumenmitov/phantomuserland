@@ -363,7 +363,10 @@ extern "C"
     void thread_block(int sleep_flag, hal_spinlock_t *lock_to_be_unlocked)
     {
         (void)sleep_flag;
-        (void)lock_to_be_unlocked;
+
+        // XXX : May be not that efficient. Used mainly while waiting disk IO
+        hal_spin_lock(lock_to_be_unlocked);
+
         // _stub_print();
     }
 
