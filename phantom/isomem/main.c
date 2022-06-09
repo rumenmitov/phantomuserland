@@ -384,6 +384,12 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     run_test( "all", "" );
 
+#ifdef PHANTOM_TESTS_ONLY 
+    printf("\n\n======================\n");
+    printf("Testing is done!\n");
+    return 0;
+#endif
+
     // Probably not needed
     /*
 #ifdef ARCH_ia32

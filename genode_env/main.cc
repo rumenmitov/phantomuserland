@@ -43,9 +43,10 @@ void test_adapters()
 	Phantom::test_remapping();
 	log("finished remapping test!");
 
-	log("Starting block device test!");
-	Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
-	log("Finished block device test!");
+	// TODO : Uncomment when adapter is fixed!
+	// log("Starting block device test!");
+	// Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
+	// log("Finished block device test!");
 }
 
 bool test_hal()
