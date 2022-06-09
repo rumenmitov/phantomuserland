@@ -221,6 +221,11 @@ void run_test( const char *test_name, const char *test_parm )
     // XXX : Uses ports, and not much things using them. Therefore disabled
     //TEST(userland);
 
+    
+    TEST(ps2_mouse);
+
+    TEST(vm_map);
+
     printf("\n-----\n" );
     if(nFailed)
         printf("some tests FAILED\n" );
