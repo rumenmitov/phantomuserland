@@ -71,8 +71,6 @@ typedef u_int32_t       phys_page_t;
 
 
 // next are for Unix emulation env
-typedef unsigned int 	_dev_t;
-typedef unsigned int 	dev_t;
 typedef unsigned int 	_ino_t;
 typedef unsigned int 	ino_t;
 typedef int		_pid_t;

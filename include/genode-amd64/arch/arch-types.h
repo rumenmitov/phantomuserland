@@ -1,28 +1,31 @@
-#include <stdint.h>
+// #include <base/stdint.h>
+
+// #include <stdint.h>
 
 #ifdef PHANTOM_GENODE
 #include <sys/types.h>
 #endif
 
-#ifndef __BIT_TYPES_DEFINED__
-#define __BIT_TYPES_DEFINED__
+// #ifndef __BIT_TYPES_DEFINED__
+// #define __BIT_TYPES_DEFINED__
 
-typedef __signed char int8_t;
-typedef unsigned char u_int8_t;
-typedef short int16_t;
-typedef unsigned short u_int16_t;
+// typedef __signed char int8_t;
+// typedef unsigned char u_int8_t;
+// typedef short int16_t;
+// typedef unsigned short u_int16_t;
 
-#ifndef __INT32_DEFINED__
-#define __INT32_DEFINED__
-typedef signed int int32_t;
-#endif
+// #ifndef __INT32_DEFINED__
+// #define __INT32_DEFINED__
+// typedef signed int int32_t;
+// #endif    
 
 // typedef unsigned int u_int32_t;
 
 // typedef signed long long int64_t;
 // typedef unsigned long long u_int64_t;
 
-#endif
+// #endif
+
 
 typedef void *vmem_ptr_t;
 typedef u_int64_t addr_t;
@@ -38,13 +41,13 @@ typedef u_int64_t linaddr_t;
 // typedef u_int64_t register_t;
 // #endif
 
-#ifndef _SIZE_T
-#define _SIZE_T
-#define _SIZE_T_DECLARED
-typedef unsigned intsize_t;
-// typedef int64_t ssize_t;
-// typedef u_int64_t size_t;
-#endif //_SIZE_T
+// #ifndef _SIZE_T
+// #define _SIZE_T
+// #define _SIZE_T_DECLARED
+// typedef unsigned intsize_t;
+// // typedef int64_t ssize_t;
+// // typedef u_int64_t size_t;
+// #endif //_SIZE_T
 
 // #ifndef _OFF_T
 // #define _OFF_T
@@ -65,7 +68,7 @@ typedef unsigned intsize_t;
  * a port in user space as an integer and
  * in kernel space as a pointer.
  */
-typedef unsigned int natural_t;
+// typedef unsigned int natural_t;
 
 /*
  * A vm_offset_t is a type-neutral pointer,
