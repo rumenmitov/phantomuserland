@@ -103,7 +103,7 @@ struct phantom_mutex_impl
 void * unix_hal_mutex_init(const char *name)
 {
     struct phantom_mutex_impl *impl;
-    impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    impl = ph_calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
     if(impl == 0) return 0;
 
 //    InitializeCriticalSection( &(impl->cs) );

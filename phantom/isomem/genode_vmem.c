@@ -25,7 +25,7 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <phantom_libc.h>
 
 #include <ia32/phantom_pmap.h>

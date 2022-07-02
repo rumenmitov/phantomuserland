@@ -14,7 +14,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 
 /*
 
@@ -44,7 +44,7 @@ errno_t json_parse_len(const char *js, int jslen, jsmntok_t **tokens, size_t *o_
     if( count < 0 )
         return EINVAL;
 
-    *tokens = calloc( count, sizeof(jsmntok_t) );
+    *tokens = ph_calloc( count, sizeof(jsmntok_t) );
     if( !*tokens )
         return ENOMEM;
 
@@ -53,7 +53,7 @@ errno_t json_parse_len(const char *js, int jslen, jsmntok_t **tokens, size_t *o_
 
     if( count != jsmn_parse( &parser, js, jslen, *tokens, count ) )
     {
-        free( *tokens );
+        ph_free( *tokens );
         *tokens = 0;
         return EINVAL;
     }

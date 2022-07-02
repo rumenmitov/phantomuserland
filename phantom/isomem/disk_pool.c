@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -103,7 +103,7 @@ static void * 	do_part_create(void *arg)
 {
     assert(arg == 0);
 
-    phantom_disk_partition_t *ret = calloc( 1, sizeof(phantom_disk_partition_t) );
+    phantom_disk_partition_t *ret = ph_calloc( 1, sizeof(phantom_disk_partition_t) );
 
     ret->shift = 0;
     ret->size = 0;

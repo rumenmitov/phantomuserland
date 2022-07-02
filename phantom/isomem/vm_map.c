@@ -405,7 +405,7 @@ vm_map_init(unsigned long page_count)
 
     int mapsize = vm_map_vm_page_count*sizeof(vm_page);
 
-    vm_map_map = (vm_page *)malloc( mapsize );
+    vm_map_map = (vm_page *)ph_malloc( mapsize );
     memset( vm_map_map, 0, mapsize );
     /*
     unsigned int i;

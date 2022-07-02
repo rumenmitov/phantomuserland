@@ -151,7 +151,7 @@ errno_t hal_irq_alloc( int irq, void (*func)(void *arg), void *_arg, int is_shar
     }
 
 
-    struct handler_q *out = malloc(sizeof(struct handler_q));
+    struct handler_q *out = ph_malloc(sizeof(struct handler_q));
     if(out == 0)
         return ENOMEM;
 

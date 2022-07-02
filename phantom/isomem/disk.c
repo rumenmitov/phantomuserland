@@ -18,7 +18,7 @@
 #include <pc/disk_partition.h>
 #include <phantom_disk.h>
 #include <assert.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <phantom_libc.h>
 #include <string.h>
 #include <kernel/vm.h>
@@ -281,7 +281,7 @@ static void register_partition(phantom_disk_partition_t *p)
 
 phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size)
 {
-    phantom_disk_partition_t *ret = calloc( 1, sizeof(phantom_disk_partition_t) );
+    phantom_disk_partition_t *ret = ph_calloc( 1, sizeof(phantom_disk_partition_t) );
 
     ret->block_size = 512;
     ret->shift = shift;

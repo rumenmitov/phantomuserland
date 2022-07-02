@@ -86,12 +86,12 @@ void *hash_init(unsigned int table_size, int next_ptr_offset,
 	struct hash_table *t;
 	unsigned int i;
 
-	t = (struct hash_table *)malloc(sizeof(struct hash_table));
+	t = (struct hash_table *)ph_malloc(sizeof(struct hash_table));
 	if(t == NULL) {
 		return NULL;
 	}
 
-	t->table = (struct hash_elem **)malloc(sizeof(void *) * table_size);
+	t->table = (struct hash_elem **)ph_malloc(sizeof(void *) * table_size);
 	for(i = 0; i<table_size; i++)
 		t->table[i] = NULL;
 	t->table_size = table_size;
@@ -117,8 +117,8 @@ int hash_uninit(void *_hash_table)
 	}
 #endif
 
-	free(t->table);
-	free(t);
+	ph_free(t->table);
+	ph_free(t);
 
 	return 0;
 }
@@ -213,7 +213,7 @@ struct hash_iterator *hash_open(void *_hash_table, struct hash_iterator *i)
 	struct hash_table *t = _hash_table;
 
 	if(i == NULL) {
-		i = (struct hash_iterator *)malloc(sizeof(struct hash_iterator));
+		i = (struct hash_iterator *)ph_malloc(sizeof(struct hash_iterator));
 		if(i == NULL)
 			return NULL;
 	}
@@ -227,7 +227,7 @@ void hash_close(void *_hash_table, struct hash_iterator *i, bool free_iterator)
 {
     (void) _hash_table;
     if(free_iterator)
-        free(i);
+        ph_free(i);
 }
 
 void hash_rewind(void *_hash_table, struct hash_iterator *i)

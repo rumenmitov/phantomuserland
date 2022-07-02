@@ -11,7 +11,7 @@
 // #include <string.h>
 // #include <stdio.h>
 // #include <phantom_assert.h>
-// #include <malloc.h>
+// #include <ph_malloc.h>
 
 // #include <kernel/physalloc.h>
 // #include <kernel/debug.h>
@@ -74,7 +74,7 @@
 // void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
 // {
 //     int n_map_elems = ((n_alloc_units-1)/8)+1;
-//     void *mapbuf = (void *)malloc(n_map_elems);
+//     void *mapbuf = (void *)ph_malloc(n_map_elems);
 //     do_phantom_phys_alloc_init(arena, n_alloc_units, n_map_elems, mapbuf);
 // }
 

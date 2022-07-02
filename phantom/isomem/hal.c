@@ -16,7 +16,7 @@
 #include <kernel/page.h>
 
 #include <phantom_libc.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 
 #include <threads.h>
 

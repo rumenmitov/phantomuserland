@@ -47,9 +47,9 @@ void stat_dump_all( int av, char **ac );
 
 static void phantom_init_stat_counters(void)
 {
-    stat_sec_counters		= calloc( sizeof(int), MAX_STAT_COUNTERS );
-    stat_per_sec_counters	= calloc( sizeof(int), MAX_STAT_COUNTERS );
-    to_zero_counters		= calloc( sizeof(int), MAX_STAT_COUNTERS );
+    stat_sec_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
+    stat_per_sec_counters	= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
+    to_zero_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
 
     memset( stat_sec_counters, 0, C_SIZE );
     memset( stat_per_sec_counters, 0, C_SIZE );

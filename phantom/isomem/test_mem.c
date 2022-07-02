@@ -68,7 +68,7 @@ int do_test_malloc(const char *test_parm)
     for( i = 0; i < max; i++ )
     {
         sz[i] = 13*i;
-        p[i] = malloc( sz[i] );
+        p[i] = ph_malloc( sz[i] );
         if( p[i] == 0 )
             return ENOMEM;
 
@@ -77,14 +77,14 @@ int do_test_malloc(const char *test_parm)
 
     for( i = 0; i < max; i += 2 )
     {
-        free( p[i] );
+        ph_free( p[i] );
         if( memnotchar( p[i+1], i+1, sz[i+1]) )
             return EINVAL;
     }
 
     for( i = 1; i < max; i += 2 )
     {
-        free( p[i] );
+        ph_free( p[i] );
     }
 
     return 0;

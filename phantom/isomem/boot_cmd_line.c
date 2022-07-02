@@ -146,7 +146,7 @@ phantom_parse_cmd_line( const char* cmdline )
     }
 
     // + 4 for final zeros
-    const char **vector = malloc( sizeof(void *) * (ntoken + 4 ));
+    const char **vector = ph_malloc( sizeof(void *) * (ntoken + 4 ));
 
     // Have env and/or boot opts?
     if(end_boot_opts >= 0)
@@ -320,7 +320,7 @@ phantom_process_boot_options(void)
 
         case 's':
             if(alen < 4 || arg[2] != '=') goto error;
-            if( syslog_dest_address_string ) free(syslog_dest_address_string);
+            if( syslog_dest_address_string ) ph_free(syslog_dest_address_string);
             syslog_dest_address_string = strdup( arg+3 );
             break;
 

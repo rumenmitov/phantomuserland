@@ -17,7 +17,7 @@
 
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -79,7 +79,7 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 
     assert(arena_size > 0);
 
-    pool_t *p = calloc( sizeof(pool_t), 1 );
+    pool_t *p = ph_calloc( sizeof(pool_t), 1 );
     assert( p );
 
     p->magic = next_magic++;
@@ -150,7 +150,7 @@ errno_t destroy_pool(pool_t *p)
     //hal_mutex_unlock( &p->mutex );
     POOL_UNLOCK(p);
 
-    free(p);
+    ph_free(p);
     return rc;
 }
 
@@ -226,15 +226,15 @@ void resize_pool( pool_t *p, int narenas )
 
 static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t *init )
 {
-    pool_arena_t *ret = calloc( sizeof(pool_arena_t), narenas );
+    pool_arena_t *ret = ph_calloc( sizeof(pool_arena_t), narenas );
 
     int i;
     for( i = 0; i < narenas; i++  )
     {
         ret[i].arena_size = arena_size;
         ret[i].nused = 0;
-        ret[i].ptrs = calloc( sizeof(void*), arena_size );
-        ret[i].refc = calloc( sizeof(int), arena_size );
+        ret[i].ptrs = ph_calloc( sizeof(void*), arena_size );
+        ret[i].refc = ph_calloc( sizeof(int), arena_size );
         assert(ret[i].ptrs);
         assert(ret[i].refc);
 
@@ -257,12 +257,12 @@ static void free_arenas( int narenas, pool_arena_t *a )
     for( i = 0; i < narenas; i++ )
     {
         assert( a[i].ptrs );
-        free( a[i].ptrs );
+        ph_free( a[i].ptrs );
         assert( a[i].refc );
-        free( a[i].refc );
+        ph_free( a[i].refc );
     }
 
-    free(a);
+    ph_free(a);
 }
 
 

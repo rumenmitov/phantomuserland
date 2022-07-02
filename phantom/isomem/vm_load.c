@@ -24,7 +24,7 @@
 #define debug_level_info 10
 
 #include <stdio.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <string.h>
 #include <assert.h>
 
@@ -79,7 +79,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
         return ENOENT;
     }
 
-    unsigned char *code = (unsigned char *)malloc(fsize);
+    unsigned char *code = (unsigned char *)ph_malloc(fsize);
     if( code == 0 )
     {
         SHOW_ERROR( 0, "can't alloc %d", fsize );
@@ -91,7 +91,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     if( ret || (fsize != nread) )
     {
         SHOW_ERROR( 0, "Can't read code: ret = %d", ret );
-        free( code );
+        ph_free( code );
         return EIO;
     }
 

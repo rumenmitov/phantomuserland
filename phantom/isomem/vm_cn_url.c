@@ -76,7 +76,7 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
         }
     }
 
-    free(url);
+    ph_free(url);
 
 //ret:
     if( e )

@@ -25,7 +25,7 @@ phantom_device_t *driver_genode_disk_probe()
     vdev.block_size = 512;
     vdev.block_count = 2095071;
 
-    phantom_device_t *dev = (phantom_device_t *)malloc(sizeof(phantom_device_t));
+    phantom_device_t *dev = (phantom_device_t *)ph_malloc(sizeof(phantom_device_t));
     dev->name = "Genode disk";
     dev->seq_number = seq_number++;
     dev->drv_private = &vdev;

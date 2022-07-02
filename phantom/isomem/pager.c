@@ -1210,7 +1210,7 @@ pager_refill_free_reserve()
                 // We are possibly still able to do a snap because
                 // superblock.free_start allocations are possibly available
                 // (btw we better try to reclaim superblock.free_start space
-                // in free()), and we can find out if we can make one
+                // in ph_free()), and we can find out if we can make one
                 // more snap...
                 break;
                 }
