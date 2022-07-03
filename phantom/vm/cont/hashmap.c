@@ -54,7 +54,7 @@ void hashmap_open(Hashmap *h, unsigned int initial_size)
             break;
         }
     }
-    h->table=calloc(table_size[h->table_size_index], sizeof(Entry *));
+    h->table=ph_calloc(table_size[h->table_size_index], sizeof(Entry *));
 }
 
 
@@ -68,7 +68,7 @@ void hashmap_close(Hashmap *h)
         while (e)
         {
             e_next = e->next_in_bucket;
-            free(e);
+            ph_free(e);
             e=e_next;
         }
     }
@@ -123,7 +123,7 @@ void hashmap_put(Hashmap *h, void *key, void *key_end,
         Entry *e = h->table[hashval];
         size_t keysize = key_end ? (key_end - key) : strlen(key)+1;
         size_t datasize = data_end ? (data_end - data) : strlen(data)+1;
-        Entry *n = (Entry *) malloc(sizeof(Entry) + keysize + datasize);
+        Entry *n = (Entry *) ph_malloc(sizeof(Entry) + keysize + datasize);
         void *keyspot = ((void*)n) + (sizeof(Entry));
         assert(n);
 
@@ -165,7 +165,7 @@ void hashmap_iterate_reset(iter *i)
 {
     if (i->state)
     {
-        free(i->state);
+        ph_free(i->state);
         i->state = 0;
     }
 }
@@ -178,7 +178,7 @@ void* hashmap_iterate(Hashmap *h, iter *i, void **value)
     if (i->state == 0)
     {
         i->reset = hashmap_iterate_reset;
-        i->state = calloc(1, sizeof(struct iter_state));
+        i->state = ph_calloc(1, sizeof(struct iter_state));
         first_time = 1;
     }
     s = (struct iter_state *) i->state;
@@ -217,7 +217,7 @@ void resize_up(Hashmap *h_old)
 
     h.used_slots=0;
     h.table_size_index=h_old->table_size_index + 1;
-    h.table=calloc(table_size[h.table_size_index], sizeof(Entry *));
+    h.table=ph_calloc(table_size[h.table_size_index], sizeof(Entry *));
 
     /*
      traverse the old hash table entries and re-link them into their
@@ -241,7 +241,7 @@ void resize_up(Hashmap *h_old)
     /*
      overwrite the old with the new
      */
-    free(h_old->table);
+    ph_free(h_old->table);
     h_old->table = h.table;
     h_old->table_size_index++;
 }

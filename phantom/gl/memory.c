@@ -7,15 +7,15 @@
 
 void gl_free(void *p)
 {
-    free(p);
+    ph_free(p);
 }
 
 void *gl_malloc(int size)
 {
-    return malloc(size);
+    return ph_malloc(size);
 }
 
 void *gl_zalloc(int size)
 {
-    return calloc(1, size);
+    return ph_calloc(1, size);
 }

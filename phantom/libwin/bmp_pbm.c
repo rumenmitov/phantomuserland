@@ -152,7 +152,7 @@ errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *_from )
 
     if( width * height > (4096*4096) ) return EINVAL;
 
-    *to = malloc(drv_video_bitmap_bytes( width, height ));
+    *to = ph_malloc(drv_video_bitmap_bytes( width, height ));
     if( *to == NULL ) return ENOMEM;
 
     drv_video_bitmap_t *bmp = *to;
@@ -199,7 +199,7 @@ errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from )
 {
     size_t bytes = drv_video_bitmap_bytes( from->xsize, from->ysize );
 
-    *to = malloc(bytes);
+    *to = ph_malloc(bytes);
     if( *to == NULL ) return ENOMEM;
 
     memcpy( *to, from, bytes );

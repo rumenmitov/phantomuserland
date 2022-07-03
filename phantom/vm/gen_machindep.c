@@ -14,7 +14,7 @@
 #include <kernel/page.h>
 #include <phantom_types.h>
 
-#include <malloc.h>
+#include <ph_malloc.h>
 
 #include "vm/root.h"
 #include "vm/internal_da.h"

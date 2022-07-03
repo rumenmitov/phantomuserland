@@ -154,7 +154,7 @@ void genflame( char *video, int vsize, int xsize )
 void flame(drv_video_window_t *w)
 {
     int vsize = w->xsize * w->ysize;
-    char *video = calloc( 1, vsize );
+    char *video = ph_calloc( 1, vsize );
 
     mkFlamePalette();
 
@@ -246,7 +246,7 @@ void videotest()
 
         printf("Size of %s is %ld\n", bpm, size );
 
-        char *data = malloc(size);
+        char *data = ph_malloc(size);
 
         fread( data, size, 1, f );
         fclose(f);
@@ -254,7 +254,7 @@ void videotest()
         struct drv_video_bitmap_t *bmp;
         int result = bmp_ppm_load( &bmp, data );
 
-        free(data);
+        ph_free(data);
 
         if(result)
             printf("can't parse %s: %d\n", bpm, result );
@@ -288,7 +288,7 @@ void videotest()
     }
 #endif
 
-    //drv_video_window_t *w = malloc(drv_video_window_bytes(140,80));
+    //drv_video_window_t *w = ph_malloc(drv_video_window_bytes(140,80));
     //w->xsize = 140;
     //w->ysize = 80;
 

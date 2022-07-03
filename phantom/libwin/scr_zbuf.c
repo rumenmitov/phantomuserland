@@ -48,12 +48,12 @@ static rect_t zbuf_rect;
 
 void scr_zbuf_init()
 {
-    if(zbuf) free(zbuf);
+    if(zbuf) ph_free(zbuf);
 
     zbsize = scr_get_xsize() * scr_get_ysize() * sizeof(zbuf_t);
     zbwidth = scr_get_xsize();
 
-    zbuf = malloc( zbsize );
+    zbuf = ph_malloc( zbsize );
 
     zbuf_rect.x = 0;
     zbuf_rect.y = 0;
@@ -63,7 +63,7 @@ void scr_zbuf_init()
     scr_zbuf_reset();
 
 #if USE_ZBUF_SHADOW
-    zbuf_shadow = malloc( zbsize );
+    zbuf_shadow = ph_malloc( zbsize );
     scr_zbuf_reset_shadow();
 #endif
 }

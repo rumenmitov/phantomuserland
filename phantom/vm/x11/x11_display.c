@@ -106,7 +106,7 @@ void drawbmp(Display *display, Window win, GC gc)
 static XImage *image;
 static void * prepare(Display *display, Window win, GC gc, int xsize, int ysize)
 {
-    char *newBuf = calloc( 4, xsize * ysize );
+    char *newBuf = ph_calloc( 4, xsize * ysize );
     if( newBuf == 0 ) return 0;
 
     image = XCreateImage (display,

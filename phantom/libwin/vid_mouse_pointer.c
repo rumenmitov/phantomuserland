@@ -66,10 +66,10 @@ void vid_mouse_draw_deflt()
 
 void vid_mouse_set_cursor_deflt(drv_video_bitmap_t *nc)
 {
-    if(screencopy) { free(screencopy); screencopy = 0; }
+    if(screencopy) { ph_free(screencopy); screencopy = 0; }
     mpointer = nc;
     if(mpointer)
-        screencopy = malloc(drv_video_bitmap_bytes( nc->xsize, nc->ysize ) );
+        screencopy = ph_malloc(drv_video_bitmap_bytes( nc->xsize, nc->ysize ) );
 }
 
 void vid_mouse_off_deflt()

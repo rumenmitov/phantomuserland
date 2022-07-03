@@ -52,7 +52,7 @@ ui_loop(int argc,char **argv, const char *name)
         width = 400;
         height = 300;
 
-        w1 = malloc(drv_video_window_bytes(width,height));
+        w1 = ph_malloc(drv_video_window_bytes(width,height));
         w1->xsize = width;
         w1->ysize = height;
 

@@ -1,6 +1,8 @@
 #ifndef PHANTOM_MALLOC
 #define PHANTOM_MALLOC
 
+#include <stdlib.h>
+
 void *ph_malloc(size_t size);
 void ph_free(void *);
 

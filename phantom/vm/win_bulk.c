@@ -36,7 +36,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     long fsize = ftell(f);
     //printf("fsize %d\n", fsize );
 
-    unsigned char *code = (unsigned char *)malloc(fsize);
+    unsigned char *code = (unsigned char *)ph_malloc(fsize);
     if( code == NULL )
     {
         fclose( f );
@@ -49,7 +49,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     if( fsize != ret )
     {
         printf("Can't read code: ret = %d\n", ret );
-        free( code );
+        ph_free( code );
         fclose( f );
         return 1;
     }

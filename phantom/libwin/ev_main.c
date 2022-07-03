@@ -45,7 +45,7 @@ static int                     ev_events_in_q = 0;
 //! Allocate one more event
 static void ev_allocate_event()
 {
-    struct ui_event *e = calloc( 1, sizeof(struct ui_event) );
+    struct ui_event *e = ph_calloc( 1, sizeof(struct ui_event) );
     assert(e);
     queue_enter(&ev_unused_events, e, struct ui_event *, echain);
 }
@@ -111,7 +111,7 @@ static void ev_remove_extra_unused()
     if(c > MAX_EVENT_POOL)
     {
         struct ui_event *e = ev_get_unused();
-        free(e);
+        ph_free(e);
     }
 }
 

@@ -872,8 +872,8 @@ static void  	do_ttf_destroy(void *arg)
     FT_Done_Face( cur->face );
     hal_mutex_unlock( &faces_mutex );
 
-    free((void *)cur->font_name);
-    free( arg );
+    ph_free((void *)cur->font_name);
+    ph_free( arg );
 }
 
 
@@ -931,7 +931,7 @@ font_handle_t w_get_tt_font_file( const char *file_name, int size )
 static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
 {
 
-    struct ttf_pool_el *newel = calloc( sizeof(struct ttf_pool_el), 1 );
+    struct ttf_pool_el *newel = ph_calloc( sizeof(struct ttf_pool_el), 1 );
     if( 0 == newel )
     {
         lprintf("\nout of mem loading font %s\n", req->font_name );
@@ -943,7 +943,7 @@ static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
     if( 0 == newel->font_name )
     {
         lprintf("\nout of mem strdup loading font %s\n", req->font_name );
-        free(newel);
+        ph_free(newel);
         return INVALID_POOL_HANDLE;
     }
 
@@ -952,8 +952,8 @@ static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
     if( newh == INVALID_POOL_HANDLE )
     {
         lprintf("\npool_create_el failed loading font %s\n", req->font_name );
-        free( (void *)newel->font_name );
-        free( newel );
+        ph_free( (void *)newel->font_name );
+        ph_free( newel );
     }
 
     return newh;

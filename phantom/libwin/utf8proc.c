@@ -40,7 +40,7 @@
 
 
 #include <utf8proc.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 
 #ifndef NULL
 #define NULL 0
@@ -549,16 +549,16 @@ ssize_t utf8proc_map(
   *dstptr = NULL;
   result = utf8proc_decompose(str, strlen, NULL, 0, options);
   if (result < 0) return result;
-  buffer = malloc(result * sizeof(int32_t) + 1);
+  buffer = ph_malloc(result * sizeof(int32_t) + 1);
   if (!buffer) return UTF8PROC_ERROR_NOMEM;
   result = utf8proc_decompose(str, strlen, buffer, result, options);
   if (result < 0) {
-    free(buffer);
+    ph_free(buffer);
     return result;
   }
   result = utf8proc_reencode(buffer, result, options);
   if (result < 0) {
-    free(buffer);
+    ph_free(buffer);
     return result;
   }
   {

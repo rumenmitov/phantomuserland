@@ -174,7 +174,7 @@ void videotest_pbm()
 
         printf("Size of %s is %d\n", bpm, size );
 
-        char *data = malloc(size);
+        char *data = ph_malloc(size);
 
         rc = k_read( 0, fd, data, size );
         k_close(fd);
@@ -187,7 +187,7 @@ void videotest_pbm()
         //for( i = 0; i < 1000; i++ )
             result = bmp_ppm_load( &bmp, data );
 
-        free(data);
+        ph_free(data);
 
         if(result)
             printf("can't parse %s: %d\n", bpm, result );

@@ -207,8 +207,8 @@ int main(int argc, char* argv[])
     // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 
 
-    mem = malloc(size+1024*10);
-    setDiffMem( mem, malloc(size+1024*10), size );
+    mem = ph_malloc(size+1024*10);
+    setDiffMem( mem, ph_malloc(size+1024*10), size );
 
     hal_init( mem, size );
     //pvm_alloc_threaded_init(); // no threads yet - no lock

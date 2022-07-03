@@ -498,7 +498,7 @@ void parse_and_dump( const char * j1 )
 		json_dump(tokens,count,j1);
 		printf("\n\n");
 		json_descent( tokens+1, count-1, tokens+0, 0, tokens[0].size, 0, j1 );
-		free(tokens);
+		ph_free(tokens);
 	}
 }
 
@@ -633,7 +633,7 @@ static const char *parse_string(char **item, const char *str)
 
 	while (*ptr!='\"' && *ptr && ++len) if (*ptr++ == '\\') ptr++;	/* Skip escaped quotes. */
 
-	out=(char*)malloc(len+1);	/* This is how long we need for the string, roughly. */
+	out=(char*)ph_malloc(len+1);	/* This is how long we need for the string, roughly. */
 	if (!out) return 0;
 
 

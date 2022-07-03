@@ -73,7 +73,7 @@
   {
     FT_UNUSED( memory );
 
-    return malloc( size );
+    return ph_malloc( size );
   }
 
 
@@ -129,7 +129,7 @@
   {
     FT_UNUSED( memory );
 
-    free( block );
+    ph_free( block );
   }
 
 
@@ -401,7 +401,7 @@
     FT_Memory  memory;
 
 
-    memory = (FT_Memory)malloc( sizeof ( *memory ) );
+    memory = (FT_Memory)ph_malloc( sizeof ( *memory ) );
     if ( memory )
     {
       memory->user    = 0;

@@ -34,8 +34,8 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize, void *new_buffer,
                 new_buffer = w->bitmap;
             else
             {
-                free(w->bitmap); // TODO assert not persistent ptr
-                new_buffer = calloc( 1, drv_video_window_bytes(xsize,ysize) );
+                ph_free(w->bitmap); // TODO assert not persistent ptr
+                new_buffer = ph_calloc( 1, drv_video_window_bytes(xsize,ysize) );
             }            
         }
 
@@ -50,7 +50,7 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize, void *new_buffer,
         int free_old = 0;
         if( 0 == new_buffer )
         {
-            new_buffer = calloc( 1, drv_video_window_bytes(xsize,ysize) );
+            new_buffer = ph_calloc( 1, drv_video_window_bytes(xsize,ysize) );
             free_old = 1;
         }
 
@@ -63,7 +63,7 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize, void *new_buffer,
             xsize, ysize
         );
 
-        if(free_old) free(w->bitmap); // TODO assert not persistent ptr
+        if(free_old) ph_free(w->bitmap); // TODO assert not persistent ptr
         w->bitmap = new_buffer;
         w->xsize = xsize;
         w->ysize = ysize;

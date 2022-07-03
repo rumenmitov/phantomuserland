@@ -121,7 +121,7 @@ static int load( int len, pvm_object_t   *out )
 {
     if(DEBUG) printf("Bulk: loading\n" );
 
-    void *buf = malloc(len);
+    void *buf = ph_malloc(len);
     if( buf == 0 )
         return -1;
 
@@ -132,7 +132,7 @@ static int load( int len, pvm_object_t   *out )
 
 
     int lret = pvm_load_class_from_memory( buf, len, out );
-    free( buf );
+    ph_free( buf );
 
     return lret;
 }

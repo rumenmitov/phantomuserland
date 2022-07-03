@@ -37,12 +37,11 @@
                 "${workspaceFolder}/../genode/repos/base/include/spec/x86_64",
                 "${workspaceFolder}/../genode/repos/base-nova/include",
                 "${workspaceFolder}/../genode/repos/os/include",
-                "${workspaceFolder}/include/genode_libc/libc",
-                "${workspaceFolder}/include/genode_libc/openlibm",
-                "${workspaceFolder}/include/genode_libc/spec/x86_64/libc",
                 "${workspaceFolder}/include/genode-amd64",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/../genode/repos/libports/include"
+                "${workspaceFolder}/../genode/repos/libports/include",
+                "${workspaceFolder}/../genode/contrib/libc-c7cd230b11ca71979f32950803bc78b45adfa0ce/include/libc",
+                "${workspaceFolder}/../genode/contrib/libc-c7cd230b11ca71979f32950803bc78b45adfa0ce/include/spec/x86_64/libc"
             ],
             "defines": [
                 "PHANTOM_GENODE=1"

@@ -73,10 +73,10 @@ static control_handle_t control_to_pool( window_handle_t w, control_t *cc )
         w->controls = create_controls_pool();
 
     // Just add to pool
-    control_handle_t ch = pool_create_el( w->controls, calloc( 1, sizeof(control_ref_t) ) );
+    control_handle_t ch = pool_create_el( w->controls, ph_calloc( 1, sizeof(control_ref_t) ) );
     if( ch < 0 )
     {
-        free(cc);
+        ph_free(cc);
         //LOG_ERROR0( 0, "out of buttons" );
         return INVALID_POOL_HANDLE;
     }
@@ -160,7 +160,7 @@ static void w_add_to_group( window_handle_t w, control_t *cc )
     if( env.g == 0 )
     {
         // No other 
-        env.g = calloc( 1, sizeof(control_group_t) );
+        env.g = ph_calloc( 1, sizeof(control_group_t) );
         assert(env.g);
     }
 
@@ -249,7 +249,7 @@ control_handle_t w_add_control_persistent(window_handle_t w, control_t *cc )
 
 control_handle_t w_add_control( window_handle_t w, control_t *c )
 {
-    control_t *cc = calloc( 1, sizeof(control_t) );
+    control_t *cc = ph_calloc( 1, sizeof(control_t) );
     if( 0 == cc )
     {
         //LOG_ERROR0( 0, "out of buttons" );

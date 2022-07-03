@@ -184,7 +184,7 @@ void win_scr_init_window(void)
 {
     // Allocate enough memory for the BITMAPINFOHEADER and 256 RGBQUAD palette entries
     LPBITMAPINFO lpbi;
-    lpbi = (LPBITMAPINFO) malloc(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
+    lpbi = (LPBITMAPINFO) ph_malloc(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
 
     lpbi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     lpbi->bmiHeader.biWidth = VSCREEN_WIDTH;
@@ -208,7 +208,7 @@ void win_scr_init_window(void)
 
 
     ReleaseDC(NULL,hScreenDC);
-    free(lpbi);
+    ph_free(lpbi);
 }
 
 

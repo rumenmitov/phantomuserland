@@ -7,7 +7,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 
 #include <kernel/mutex.h>
 #include <kernel/cond.h>
@@ -253,7 +253,7 @@ void wtty_dump( wtty_t * w )
 
 wtty_t * wtty_init(void)
 {
-    wtty_t *w = calloc( 1, sizeof(wtty_t) );
+    wtty_t *w = ph_calloc( 1, sizeof(wtty_t) );
     assert(w);
 
     //w->getpos = 0;
@@ -271,7 +271,7 @@ void wtty_destroy(wtty_t * w)
     hal_mutex_destroy( &w->mutex );
     hal_cond_destroy( &w->rcond );
     hal_cond_destroy( &w->wcond );
-    free(w);
+    ph_free(w);
 }
 
 

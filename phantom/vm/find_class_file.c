@@ -37,7 +37,7 @@ static int do_load_class_from_file(const char *fn, pvm_object_t *out)
     //pvm_object_t out;
     rc = pvm_load_class_from_memory( code, size, out );
 
-    free(code);
+    ph_free(code);
     return rc;
 }
 

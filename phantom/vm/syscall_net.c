@@ -150,7 +150,7 @@ static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_
     char shdr[hdr_len+1]; strlcpy( shdr, pvm_get_str_data(hdr), hdr_len+1 );
 
     const int bs = 100*1024;
-    char *buf = malloc(bs);
+    char *buf = ph_malloc(bs);
     if( 0 == buf )
     {
         SHOW_ERROR( 1, "out of mem in curl() %d bytes", bs );
@@ -183,7 +183,7 @@ static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_
     SHOW_FLOW( 1, "curl content '%s' ", content );
 
     pvm_object_t oret = pvm_create_string_object(content);
-    free(buf);
+    ph_free(buf);
 
     SYSCALL_RETURN(oret); // TODO need stringBuilder
 }

@@ -23,10 +23,10 @@ typedef int			ssize_t;
 #endif //_SIZE_T
 
 
-//void *malloc( int size );
-void *malloc(size_t size);
+//void *ph_malloc( int size );
+void *ph_malloc(size_t size);
 
-void free( void *mem );
+void ph_free( void *mem );
 
 FILE * fopen( const char *fn, const char *mode );
 int fread( void *ptr, int, int, FILE *f );

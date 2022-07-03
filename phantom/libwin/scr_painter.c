@@ -63,7 +63,7 @@ static bool paint_q_empty(void)
 
 static pqel_t * mkel( rect_t *r )
 {
-    pqel_t *new_el = calloc(1,sizeof(pqel_t));
+    pqel_t *new_el = ph_calloc(1,sizeof(pqel_t));
     if( 0 != new_el )
         new_el->r = *r;
     
@@ -107,7 +107,7 @@ again:
         // qe includes r - skip addition
         if( rect_includes( &pqel->r, r ) )
         {
-            free( new_el );
+            ph_free( new_el );
             goto finish;
         }
     }
@@ -279,7 +279,7 @@ static void repaint_q(void)
         // break;
 
         // rect_t r = pqel->r;
-        // free(pqel);
+        // ph_free(pqel);
 
 #if !USE_ZBUF_SHADOW
         // scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?

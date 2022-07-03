@@ -34,7 +34,7 @@ static char *x11_videomem;
 static XImage *image;
 static void * x11_prepare(Display *display, Window win, GC gc)
 {
-    x11_videomem = calloc( 4, xsize * ysize );
+    x11_videomem = ph_calloc( 4, xsize * ysize );
     if( x11_videomem == 0 ) return 0;
 
     image = XCreateImage (display,

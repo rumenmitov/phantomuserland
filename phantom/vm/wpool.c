@@ -78,7 +78,7 @@ pool_handle_t w_create(int xsize, int ysize)
 
 static void * do_w_create(void *arg)
 {
-    window_t *w = calloc( sizeof(window_t), 1 );
+    window_t *w = ph_calloc( sizeof(window_t), 1 );
     assert(w);
     // if(!w) return 0;
 
@@ -106,13 +106,13 @@ static void do_w_destroy(void *arg)
     assert(w);
 
     if( (w->pixel != 0) && !(w->flags & WFLAG_WIN_NOPIXELS) )
-        free(w->pixel);
+        ph_free(w->pixel);
 
     //if( w->w_title >= 0 )	pool_release_el( wp, w->w_title );
     //if( w->w_decor >= 0 )	pool_release_el( wp, w->w_decor );
     //if( w->w_owner >= 0 )	pool_release_el( wp, w->w_owner );
 
-    free(w);
+    ph_free(w);
 }
 
 void w_destroy(pool_handle_t h)
@@ -126,7 +126,7 @@ static void do_w_resize( window_t *w, int xsize, int ysize )
 {
     assert(!(w->flags & WFLAG_WIN_NOPIXELS));
 
-    rgba_t *npixel = calloc( xsize*ysize, sizeof(rgba_t) );
+    rgba_t *npixel = ph_calloc( xsize*ysize, sizeof(rgba_t) );
 
 
     if( w->pixel != 0 )
@@ -137,7 +137,7 @@ static void do_w_resize( window_t *w, int xsize, int ysize )
 		npixel, xsize, ysize, 0, 0,
 		w->pixel, w->xsize, w->ysize, 0, 0,
 		mw, mh );
-        free(w->pixel);
+        ph_free(w->pixel);
     }
 
 

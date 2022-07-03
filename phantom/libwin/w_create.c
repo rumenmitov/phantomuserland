@@ -34,7 +34,7 @@ drv_video_window_t *	focused_window = 0;
 void drv_video_window_free(drv_video_window_t *w)
 {
     drv_video_window_destroy(w);
-    free(w);
+    ph_free(w);
 }
 
 /**
@@ -96,7 +96,7 @@ common_window_init( drv_video_window_t *w,  void *pixels,
     if(pixels == 0)
     {
         // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
-        pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+        pixels = ph_calloc( 1, drv_video_window_bytes(xsize, ysize) );
         assert(pixels != 0); // userland gives us buffer, so we alloc just for kernel
     }
 
@@ -187,16 +187,16 @@ void w_restart_attach( drv_video_window_t *w )
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
 {
-    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
+    drv_video_window_t *w = ph_calloc(1,sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
 
         // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
-    void *pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+    void *pixels = ph_calloc( 1, drv_video_window_bytes(xsize, ysize) );
 
     if(pixels == 0)
     {
-        free(w);
+        ph_free(w);
         return 0;
     }
 
@@ -219,7 +219,7 @@ drv_video_window_create(
     //LOG_FLOW()
     lprintf( "drv_video_window_create %dx%d\n", xsize, ysize ); 
 
-    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
+    drv_video_window_t *w = ph_calloc(1,sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
 

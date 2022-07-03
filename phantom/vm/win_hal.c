@@ -507,7 +507,7 @@ errno_t hal_mutex_destroy(hal_mutex_t *m)
     struct phantom_mutex_impl *mi = m->impl;
 
     //if(mi->owner != 0)        panic("locked mutex killed");
-    free(mi);
+    ph_free(mi);
 
     m->impl = 0;
 
@@ -521,7 +521,7 @@ errno_t hal_mutex_destroy(hal_mutex_t *m)
 
 int hal_cond_init( hal_cond_t *c, const char *name )
 {
-    c->impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    c->impl = ph_calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
     //InitializeConditionVariable( &(c->impl.cv) );
     c->impl->name = name;
     return 0;
@@ -565,7 +565,7 @@ errno_t hal_cond_destroy(hal_cond_t *c)
 {
 
     //if(m->impl.owner != 0)        panic("locked mutex killed");
-    free(c->impl);
+    ph_free(c->impl);
     c->impl=0;
 
     return 0;

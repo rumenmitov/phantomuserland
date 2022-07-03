@@ -25,7 +25,7 @@
 #include <string.h>
 #include <phantom_libc.h>
 
-// Kills kernel - needs big stack (256 kb or more), calls malloc - must
+// Kills kernel - needs big stack (256 kb or more), calls ph_malloc - must
 // be called out of spinlock, trapno 0: Divide error, error 00000000 EIP 1f5ae0: _gray_render_line
 
 #define TTF_TTY 0

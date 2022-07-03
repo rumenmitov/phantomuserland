@@ -125,7 +125,7 @@ void ctl_img_copy_and_blend( drv_video_bitmap_t **dst, uint32_t *alloc_flag, drv
 
     if( (*alloc_flag) && (*dst) )
     {
-        free( *dst );
+        ph_free( *dst );
         *dst = 0;
         *alloc_flag = 0;
     }
@@ -203,7 +203,7 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 
     //const char *old = cc->text;
     //cc->text = strdup(text);
-    //if( old ) free((void *)old);
+    //if( old ) ph_free((void *)old);
 
     strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
     cc->text = cc->buffer;
