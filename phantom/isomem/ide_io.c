@@ -33,7 +33,7 @@
 #include <hal.h>
 
 #include <assert.h>
-#include <string.h>
+#include <ph_string.h>
 #include <stdio.h>
 
 #include <kernel/bus/pci.h>

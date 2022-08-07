@@ -9,7 +9,7 @@
 #include <stdlib.h>
 //#include <stdio.h>
 #include <assert.h>
-#include <string.h>
+#include <ph_string.h>
 #include "zbuffer.h"
 
 
@@ -131,7 +131,7 @@ static void ZB_copyBuffer(ZBuffer * zb,
     p1 = buf;
     n = zb->xsize * PSZB;
     for (y = 0; y < zb->ysize; y++) {
-	memcpy(p1, q, n);
+	ph_memcpy(p1, q, n);
 	p1 += linesize;
 	q = (PIXEL *) ((char *) q + zb->linesize);
     }

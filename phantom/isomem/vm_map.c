@@ -177,7 +177,7 @@ static void page_touch_history(vm_page *p)
     void **ebp;
     asm volatile ("movl %%ebp,%0" : "=r" (ebp));
 
-    memmove(p->touch_history + 1, p->touch_history, sizeof(p->touch_history) - sizeof(void*));
+    ph_memmove(p->touch_history + 1, p->touch_history, sizeof(p->touch_history) - sizeof(void*));
     p->touch_history[0] = ebp[1];
 }
 
@@ -186,7 +186,7 @@ static void page_touch_history_arg(vm_page *p, int arg)
     void **ebp;
     asm volatile ("movl %%ebp,%0" : "=r" (ebp));
 
-    memmove(p->touch_history + 2, p->touch_history, sizeof(p->touch_history) - 2 * sizeof(void*));
+    ph_memmove(p->touch_history + 2, p->touch_history, sizeof(p->touch_history) - 2 * sizeof(void*));
     p->touch_history[0] = ebp[1];
     p->touch_history[1] = (void*)arg;
 }
@@ -406,12 +406,12 @@ vm_map_init(unsigned long page_count)
     int mapsize = vm_map_vm_page_count*sizeof(vm_page);
 
     vm_map_map = (vm_page *)ph_malloc( mapsize );
-    memset( vm_map_map, 0, mapsize );
+    ph_memset( vm_map_map, 0, mapsize );
     /*
     unsigned int i;
     for( i = 0; i < page_count; i++ )
     {
-        memset( vm_map_map+i, 0, sizeof(vm_page) );
+        ph_memset( vm_map_map+i, 0, sizeof(vm_page) );
     }*/
 
     vm_map_map_end = vm_map_map + page_count;
@@ -527,7 +527,7 @@ void vm_map_finish(void)
 void
 vm_page_init( vm_page *me, void *my_vaddr)
 {
-    memset( me, 0, sizeof(vm_page) );
+    ph_memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
@@ -1804,8 +1804,8 @@ static void page_clear_engine_clear_page(physaddr_t p)
     hal_page_control( p, page_clear_vaddr, page_map, page_rw );
 
     // TODO use MMX clear code
-    //memset( page_clear_vaddr, '#', __MEM_PAGE );
-    memset( page_clear_vaddr, 0, __MEM_PAGE );
+    //ph_memset( page_clear_vaddr, '#', __MEM_PAGE );
+    ph_memset( page_clear_vaddr, 0, __MEM_PAGE );
 
     // TODO Broken!
     //fast_clear_page( page_clear_vaddr );
@@ -1850,7 +1850,7 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
 
     if (current < page_offset && page_offset - current < sizeof(hdr))
     {
-        memcpy(((void*)&hdr) + (page_offset - current), data,
+        ph_memcpy(((void*)&hdr) + (page_offset - current), data,
                 sizeof(hdr) - (page_offset - current));
         current += vm_verify_object(&hdr);
     }
@@ -1860,7 +1860,7 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
             current += vm_verify_object(data + (current - page_offset));
         else
         {
-            memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
+            ph_memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
             break;
         }
     }

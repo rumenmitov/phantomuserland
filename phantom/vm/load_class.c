@@ -149,7 +149,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
         //printf("%d bytes left\n", data + fsize - ptr );
 
-        if( strncmp( (const char *)ptr, "phfr:", 5 ) )
+        if( ph_strncmp( (const char *)ptr, "phfr:", 5 ) )
         {
             printf("No record marker\n" );
             return 1;

@@ -51,11 +51,11 @@ static void phantom_init_stat_counters(void)
     stat_per_sec_counters	= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
     to_zero_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
 
-    memset( stat_sec_counters, 0, C_SIZE );
-    memset( stat_per_sec_counters, 0, C_SIZE );
-    memset( to_zero_counters, 0, C_SIZE );
+    ph_memset( stat_sec_counters, 0, C_SIZE );
+    ph_memset( stat_per_sec_counters, 0, C_SIZE );
+    ph_memset( to_zero_counters, 0, C_SIZE );
 
-    memset(stat_total_counters, 0, sizeof(stat_total_counters));
+    ph_memset(stat_total_counters, 0, sizeof(stat_total_counters));
 }
 
 
@@ -91,7 +91,7 @@ void stat_update_second_stats(void)
     stat_total_seconds++;
     addall( stat_total_counters, last_sec );
 
-    memset( last_sec, 0, C_SIZE );
+    ph_memset( last_sec, 0, C_SIZE );
 
     to_zero_counters = last_sec;
 }
@@ -315,7 +315,7 @@ errno_t get_stats_record( int id, struct kernel_stats *out )
     if( stat_counter_name[id] == 0 )
         return EINVAL;
 
-    strlcpy( out->name, stat_counter_name[id], KERNEL_STATS_MAX_NAME );
+    ph_strlcpy( out->name, stat_counter_name[id], KERNEL_STATS_MAX_NAME );
 
     out->current_per_second	= stat_per_sec_counters[id];
     out->average_per_second	= stat_total_counters[id]/stat_total_seconds;

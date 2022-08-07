@@ -210,14 +210,14 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     cc->focused = 0;        //< Selected in window
     cc->changed = 1;
 
-    if( 0 == memcmp( &cc->bg_color, &((color_t){0, 0, 0, 0}), sizeof(color_t) ) )
+    if( 0 == ph_memcmp( &cc->bg_color, &((color_t){0, 0, 0, 0}), sizeof(color_t) ) )
         cc->bg_color = (color_t){ .r = 237, .g = 235, .b = 232, .a = 0xFF };
 
-    memset( cc->buffer, 0, sizeof(cc->buffer) );
+    ph_memset( cc->buffer, 0, sizeof(cc->buffer) );
 
     if(cc->text)
     {
-        strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
+        ph_strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
         cc->text = cc->buffer;
     }
 }
@@ -280,7 +280,7 @@ void w_add_controls( window_handle_t w, control_t *c )
 
 void w_clear_control( control_t *c )
 {
-    memset( c, 0, sizeof(control_t) );
+    ph_memset( c, 0, sizeof(control_t) );
 }
 
 
@@ -381,7 +381,7 @@ control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, i
     cb.text = text;
     cb.fg_color = text_color;
 
-    cb.str_len = strnlen( text, 1024 ); // TODO define and describe
+    cb.str_len = ph_strnlen( text, 1024 ); // TODO define and describe
     cb.vis_len = cb.str_len;
 
     cb.pas_bg_image = &text_field_x200_bmp;

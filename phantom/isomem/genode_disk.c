@@ -57,8 +57,8 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
     // ret->fence = vioFence;
     // ret->trim = vioTrim;
 
-    // strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );
-    strlcpy(ret->name, vd->name, PARTITION_NAME_LEN);
+    // ph_strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );
+    ph_strlcpy(ret->name, vd->name, PARTITION_NAME_LEN);
 
     return ret;
 }

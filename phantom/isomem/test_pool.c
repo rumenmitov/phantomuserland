@@ -132,7 +132,7 @@ int do_test_pool(const char *test_parm)
     (void) test_parm;
 
     hsp = 0;
-    memset( &hs, 0, sizeof(hs) );
+    ph_memset( &hs, 0, sizeof(hs) );
 
     pool = create_pool();
     pool->flag_nofail = 0; // return errors, don't panic

@@ -519,7 +519,7 @@ found:
 
     // TODO remove it here - memory must be cleaned some other, more effective way
     // ! clean on object deletion (can be done at idle time)
-    memset( data->da, 0, data_area_size );
+    ph_memset( data->da, 0, data_area_size );
 
     //stat
     if (size <= max_stat_size)

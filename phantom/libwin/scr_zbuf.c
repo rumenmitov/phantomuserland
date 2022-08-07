@@ -72,14 +72,14 @@ void scr_zbuf_init()
 
 void scr_zbuf_reset()
 {
-    memset( zbuf, 0, zbsize );
+    ph_memset( zbuf, 0, zbsize );
 }
 
 /* wrong! not byte but zbuf_t!
 void scr_zbuf_reset_z(zbuf_t z)
 {
     //LOG_FLOW( 1, "%d", z );
-    memset( zbuf, z, zbsize );
+    ph_memset( zbuf, z, zbsize );
 }
 */
 
@@ -164,7 +164,7 @@ void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
         assert( p >= (void*)zbuf );
         assert( p+len <= ((void*)zbuf)+zbsize );
 
-        memset( p, zpos, len );
+        ph_memset( p, zpos, len );
     }
 }
 #else
@@ -202,7 +202,7 @@ static void do_scr_zbuf_reset_square_z(zbuf_t *target, int x, int y, int xsize, 
         assert( p >= (void*)target );
         assert( p+len <= ((void*)target)+zbsize );
 
-        memset( p, zpos, len );
+        ph_memset( p, zpos, len );
     }
 }
 
@@ -226,7 +226,7 @@ static void scr_zbuf_reset_shadow(void)
 {
     // in shadow -1 means not active (== ZBUF_TOP) - not copied to zbuf no application
     //scr_zbuf_request_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
-    memset( zbuf_shadow, 0xFF, zbsize );
+    ph_memset( zbuf_shadow, 0xFF, zbsize );
 }
 
 void scr_zbuf_apply_shadow(void)

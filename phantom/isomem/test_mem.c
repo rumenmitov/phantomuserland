@@ -72,7 +72,7 @@ int do_test_malloc(const char *test_parm)
         if( p[i] == 0 )
             return ENOMEM;
 
-        memset( p[i], i, sz[i] );
+        ph_memset( p[i], i, sz[i] );
     }
 
     for( i = 0; i < max; i += 2 )
@@ -118,14 +118,14 @@ int do_test_physmem(const char *test_parm)
     
     printf("!!! : T%d\n", t_cnt++);
 
-    memset( va, 0, MSIZE );
+    ph_memset( va, 0, MSIZE );
     memcpy_p2v( buf, pa, MSIZE );
     if( memnotchar( buf, 0, MSIZE ) )
         test_fail_msg( EINVAL, "not 0");
 
     printf("!!! : T%d\n", t_cnt++);
 
-    memset( buf, 0xFF, MSIZE );
+    ph_memset( buf, 0xFF, MSIZE );
     memcpy_v2p( pa, buf, MSIZE );
     if( memnotchar( va, 0xFF, MSIZE ) ){
         void* err_addr = memnotchar( va, 0xFF, MSIZE );
@@ -133,7 +133,7 @@ int do_test_physmem(const char *test_parm)
         test_fail_msg( EINVAL, "not 1");
     }
 
-    memset( va, 0, MSIZE );
+    ph_memset( va, 0, MSIZE );
 
     printf("!!! : T%d\n", t_cnt++);
 
@@ -147,7 +147,7 @@ int do_test_physmem(const char *test_parm)
         test_fail_msg( EINVAL, "not A0");
 
 
-    memset( va, 0, MSIZE );
+    ph_memset( va, 0, MSIZE );
 
     printf("!!! : T%d\n", t_cnt++);
 
@@ -167,7 +167,7 @@ int do_test_physmem(const char *test_parm)
 
 
     // Cross page
-    memset( va, 0, MSIZE );
+    ph_memset( va, 0, MSIZE );
 #define SH (4096-4)
 
 
@@ -191,9 +191,9 @@ int do_test_physmem(const char *test_parm)
 
 
 #if 0 // not impl
-    memset( va, 0, MSIZE );
+    ph_memset( va, 0, MSIZE );
 
-    memset( va+20, 'C', 3 );
+    ph_memset( va+20, 'C', 3 );
     memcpy_p2v( buf, pa+20, 3 );
     if( memnotchar( buf, 'C', 3 ) )
         test_fail_msg( EINVAL, "not C");
@@ -316,7 +316,7 @@ static void __cfree(int tobe, int ln)
 
 //     physalloc_item_t 	ret;
 
-//     memset( &igot, 0, sizeof(igot) );
+//     ph_memset( &igot, 0, sizeof(igot) );
 
 //     SHOW_FLOW( 0, "physalloc test arena %d, initial free %d", PA_PAGES, PA_PAGES/2 );
 

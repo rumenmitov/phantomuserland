@@ -12,7 +12,7 @@
 **/
 
 
-#include <string.h>
+#include <ph_string.h>
 #include <assert.h>
 
 #include <video/screen.h>

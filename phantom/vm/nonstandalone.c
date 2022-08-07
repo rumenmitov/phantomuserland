@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
+#include <ph_string.h>
 #include <unistd.h>
 
 #include <setjmp.h>
@@ -135,7 +135,7 @@ static void winhal_setport( int sock, int port )
 {
 #ifndef NO_NETWORK
     struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
+    ph_memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -401,22 +401,22 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 
     printf( "\n\ncurl '%s'\n", url );
 
-    if( strlen(url) > CURL_MAXBUF )
+    if( ph_strlen(url) > CURL_MAXBUF )
         return EINVAL;
 
-    if( strncmp( url, "http://", 7 ) )
+    if( ph_strncmp( url, "http://", 7 ) )
         return EINVAL;
 
     url += 7;
 
-    char *pos = strchr( url, '/' );
+    char *pos = ph_strchr( url, '/' );
     if( pos == 0 )
         return EINVAL;
 
-    strlcpy( host, url, pos-url+1 );
-    strlcpy( path, pos+1, CURL_MAXBUF );
+    ph_strlcpy( host, url, pos-url+1 );
+    ph_strlcpy( path, pos+1, CURL_MAXBUF );
 
-    pos = strchr( host, ':' );
+    pos = ph_strchr( host, ':' );
     if( pos != 0 )
     {
         *pos = '\0';
@@ -475,8 +475,8 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 
     char buf[1024*10];
 
-    memset( buf, 0, sizeof(buf) );
-    strlcpy( buf, "GET /", sizeof(buf) );
+    ph_memset( buf, 0, sizeof(buf) );
+    ph_strlcpy( buf, "GET /", sizeof(buf) );
     strlcat( buf, path, sizeof(buf) );
     //rlcat( buf, "\r\n\r\n", sizeof(buf) );
     strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
@@ -489,12 +489,12 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
     strlcat( buf, "\r\n", sizeof(buf) );
 
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
-    int len = strlen(buf);
+    int len = ph_strlen(buf);
     int nwrite = write( sock, buf, len );
     //printf( "TCP - write = %d, requested %d (%s)\n", nwrite, len, buf );
     if( nwrite != len ) goto err;
 
-    memset( obuf, 0, obufsize );
+    ph_memset( obuf, 0, obufsize );
     //int bytes_recvd = 0;
     while(1)
     {
@@ -523,10 +523,10 @@ err:
     if( nread <= 0 )
         return EIO;
 
-    memset( obuf, 0, obufsize );
+    ph_memset( obuf, 0, obufsize );
     len = nread;
     if( len > obufsize-1 ) len = obufsize-1;
-    strncpy( obuf, buf, len );
+    ph_strncpy( obuf, buf, len );
 */
     return 0;
     #endif

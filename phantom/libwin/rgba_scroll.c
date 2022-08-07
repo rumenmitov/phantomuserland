@@ -12,7 +12,7 @@
 
 //#include "drv_video_screen.h"
 #include <assert.h>
-#include <string.h>
+#include <ph_string.h>
 #include <errno.h>
 #include <sys/libkern.h>
 #include <video/color.h>
@@ -52,12 +52,12 @@ void rgba_scroll_hor( rgba_t *pixels, int xs, int ys, int lstep, int s, rgba_t b
 
         if( s > 0 ) // right
         {
-            memmove( pixels+sabs, pixels, sabs*sizeof( rgba_t ) );
+            ph_memmove( pixels+sabs, pixels, sabs*sizeof( rgba_t ) );
             rgba_fill_line( pixels, sabs, bg );
         }
         else // left
         {
-            memmove( pixels, pixels+sabs, sabs*sizeof( rgba_t ) );
+            ph_memmove( pixels, pixels+sabs, sabs*sizeof( rgba_t ) );
             rgba_fill_line( pixels+xs-sabs, sabs, bg );
         }
 

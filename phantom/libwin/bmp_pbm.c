@@ -202,7 +202,7 @@ errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from )
     *to = ph_malloc(bytes);
     if( *to == NULL ) return ENOMEM;
 
-    memcpy( *to, from, bytes );
+    ph_memcpy( *to, from, bytes );
     
     return 0;
 }

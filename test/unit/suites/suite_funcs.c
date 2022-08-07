@@ -16,7 +16,7 @@
     if( uu_make_absname( o, b, a ) )                                     \
         CU_FAIL( "uu_absname failed" );                                  \
                                                                          \
-    if( expect && strcmp( o, expect ) )                                  \
+    if( expect && ph_strcmp( o, expect ) )                                  \
     {                                                                    \
         printf( "Expected '%s', got '%s'\n", expect, o );                \
         CU_FAIL( expect );                                               \
@@ -26,7 +26,7 @@
 
 TEST_FUNCT(filename) {
     //printf("test case 1\n");
-     /* ”¥©ª®¢ë© ª®¤ */
+     /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     //CU_ASSERT_EQUAL(0, 0);
 
 
@@ -74,7 +74,7 @@ TEST_FUNCT(filename) {
 TEST_FUNCT(rectangles)
 {
     //printf("test case 2\n");
-    /* ”¥©ª®¢ë© ª®¤ */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     //CU_ASSERT_EQUAL(1, 1);
 
     rect_t out1, out2, oldw, neww;
@@ -129,7 +129,7 @@ TEST_FUNCT(rectangles)
 }
 
 void runSuite(void) {
-    /* Š®¤ â¥áâ-áìîâ  */
+    /* ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ */
 
     //printf("test suite\n");
 

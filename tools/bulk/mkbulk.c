@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ph_string.h>
 //#include "../../include/vm/bulk.h"
 
 FILE *outf;
@@ -18,12 +18,12 @@ int fn2cn( char *out, const char *in, int outsz )
     p = rindex( in, ':' );
     if( p ) in = p+1;
 
-    strlcpy( out, in, outsz );
+    ph_strlcpy( out, in, outsz );
     out[outsz-1] = '\0';
 
     p = rindex( out, '.' );
 
-    if( (p != 0) && (0 == strcmp( p, ".pc" )) )
+    if( (p != 0) && (0 == ph_strcmp( p, ".pc" )) )
     {
         *p = '\0';
         return 0;
@@ -37,7 +37,7 @@ int fn2cn( char *out, const char *in, int outsz )
 void save_hdr( char *classnm, long size )
 {
     struct pvm_bulk_class_head h;
-    strncpy( h.name, classnm, PVM_BULK_CN_LENGTH );
+    ph_strncpy( h.name, classnm, PVM_BULK_CN_LENGTH );
     h.data_length = size;
 
     //return 1 ==

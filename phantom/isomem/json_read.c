@@ -11,7 +11,7 @@
 
 #include <kernel/json.h>
 //#include <jsmn.h>
-#include <string.h>
+#include <ph_string.h>
 #include <errno.h>
 #include <assert.h>
 #include <ph_malloc.h>
@@ -23,7 +23,7 @@ errno_t json_parse(const char *js, jsmntok_t **tokens, size_t *o_count )
 {
     assert(js);
 
-    int jslen = strlen(js);
+    int jslen = ph_strlen(js);
 
     return json_parse_len( js, jslen, tokens, o_count );
 }

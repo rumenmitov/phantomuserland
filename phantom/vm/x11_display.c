@@ -44,7 +44,7 @@ static void * x11_prepare(Display *display, Window win, GC gc)
                                   xsize, ysize,
                                   32, 0 );
 
-    //memset( x11_videomem, 4 * xsize * ysize, 0xFF );
+    //ph_memset( x11_videomem, 4 * xsize * ysize, 0xFF );
     int size = xsize * ysize;
     int *p = (int *)x11_videomem;
     while(size--)

@@ -8,7 +8,7 @@
 //  *
 // **/
 
-// #include <string.h>
+// #include <ph_string.h>
 // #include <stdio.h>
 // #include <phantom_assert.h>
 // #include <ph_malloc.h>
@@ -53,7 +53,7 @@
 
 //     // Mark everything used.
 //     // Caller later will free what is supposed to be free
-//     memset( arena->map, 0xFF, n_map_elems );
+//     ph_memset( arena->map, 0xFF, n_map_elems );
 
 //     arena->alloc_last_pos = 0;
 //     arena->n_used_pages = n_alloc_units;
@@ -249,7 +249,7 @@
 //         return ENOMEM;  // not found
 //     }
 
-//     memset( &(arena->map[arena->alloc_last_pos - N]), ~0, elem_no*BITS_PER_ELEM/8 );
+//     ph_memset( &(arena->map[arena->alloc_last_pos - N]), ~0, elem_no*BITS_PER_ELEM/8 );
 
 //     //partial elements:
 //     map_elem_t elem = arena->map[arena->alloc_last_pos-1];

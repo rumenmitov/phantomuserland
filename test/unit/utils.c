@@ -1,4 +1,4 @@
-#include <string.h>
+#include <ph_string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

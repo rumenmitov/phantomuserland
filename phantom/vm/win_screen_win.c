@@ -158,7 +158,7 @@ int win_scr_setup_window(void)
     // NOTE: The memset() here is added to deal with this code crashing on
     // WinNT (reported by Girish Deodhar, solution due to him as well)
     // The extra include statement is for memset() too...
-    memset(&WndClass, 0, sizeof(WndClass));
+    ph_memset(&WndClass, 0, sizeof(WndClass));
     WndClass.cbClsExtra = 0;
     WndClass.cbWndExtra = 0;
     WndClass.hbrBackground = NULL; //(HBRUSH)GetStockObject(WHITE_BRUSH);

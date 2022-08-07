@@ -42,7 +42,7 @@ int do_test_misc(const char *test_parm)
 
         snprintf( buf, sizeof(buf), fmt, "s", 1, 'a', 50000000l );
 
-        test_check_false( strcmp( out, buf ) );
+        test_check_false( ph_strcmp( out, buf ) );
         
     }
 

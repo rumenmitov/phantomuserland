@@ -22,7 +22,7 @@
 #include <kernel/libkern.h>
 
 #include <assert.h>
-#include <string.h>
+#include <ph_string.h>
 #include <phantom_libc.h>
 
 // Kills kernel - needs big stack (256 kb or more), calls ph_malloc - must
@@ -142,7 +142,7 @@ void w_font_draw_string(
 {
     //if(font->xsize < 0)        font_reverse_x((drv_video_font_t *)font);
 
-    int nc = strlen(s);
+    int nc = ph_strlen(s);
 
     while(nc--)
     {
@@ -242,7 +242,7 @@ void w_font_tty_string(
 {
     rgba_t color = _color;
     rgba_t back  = _back;
-    //int nc = strlen(s);
+    //int nc = ph_strlen(s);
     int bright = 0;
     //int startx = *x;
 

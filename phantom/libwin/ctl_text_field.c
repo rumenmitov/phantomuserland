@@ -171,7 +171,7 @@ void w_ctl_delete_buffer_char( control_t *cc, int pos )
     char *to = cc->buffer + pos;
     size_t len = cc->str_len - (pos + 1);
 
-    strncpy( to, from, len );
+    ph_strncpy( to, from, len );
 
     assert(cc->str_len > 0);
 
@@ -285,7 +285,7 @@ check_cursor_right:
                 const char *from = cc->buffer + cc->cursor_pos + 1;
                 char *to = cc->buffer + cc->cursor_pos;
                 size_t len = cc->str_len - (cc->cursor_pos + 1);
-                strncpy( to, from, len );
+                ph_strncpy( to, from, len );
                 assert(cc->str_len > 0);
                 cc->str_len--;
                 cc->buffer[cc->str_len] = 0;
@@ -318,7 +318,7 @@ check_cursor_right:
                 if( (cc->str_len > 0) && (cc->cursor_pos < cc->str_len) ) // Can't extend empty string
                 {
                     assert( len > 0 );
-                    memmove( to, from, len );
+                    ph_memmove( to, from, len );
                 }
 
                 *from = e.k.ch;

@@ -99,7 +99,7 @@ static void mkFlamePalette()
 {
     u_int8_t i;
 
-    memset( palette, 0, sizeof(palette) );
+    ph_memset( palette, 0, sizeof(palette) );
 
     for( i = 0; i < MaxColor; i++ )
         palette[i] = Hsi2Rgb(4.6-1.5*i/MaxColor,i/MaxColor,i/MaxColor);

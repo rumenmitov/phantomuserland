@@ -44,7 +44,7 @@ static int do_load_class_from_file(const char *fn, pvm_object_t *out)
 
 int load_class_from_file(const char *cn, pvm_object_t *out)
 {
-    char * have_suffix = (char *)strstr( cn, ".pc" );
+    char * have_suffix = (char *)ph_strstr( cn, ".pc" );
 
     if(*cn == '.') cn++;
 

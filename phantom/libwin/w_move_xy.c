@@ -123,7 +123,7 @@ void w_move( drv_video_window_t *w, int x, int y )
         rect_t diff1_r, diff2_r;
         rect_sub( &diff1_r, &diff2_r, &src_r, &dst_r );
 
-        memset( &e1, 0, sizeof(e1) );
+        ph_memset( &e1, 0, sizeof(e1) );
         e1.type = UI_EVENT_TYPE_GLOBAL;
         e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
         e1.w.rect = diff1_r;
@@ -136,7 +136,7 @@ void w_move( drv_video_window_t *w, int x, int y )
     }
     else
     {
-        memset( &e1, 0, sizeof(e1) );
+        ph_memset( &e1, 0, sizeof(e1) );
         e1.type = UI_EVENT_TYPE_GLOBAL;
         e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
         e1.w.rect = src_r;
@@ -144,7 +144,7 @@ void w_move( drv_video_window_t *w, int x, int y )
         ev_q_put_global( &e1 );
     }
 #else
-    memset( &e1, 0, sizeof(e1) );
+    ph_memset( &e1, 0, sizeof(e1) );
     e1.type = UI_EVENT_TYPE_GLOBAL;
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
 
@@ -356,7 +356,7 @@ w_move( drv_video_window_t *w, int x, int y )
             rect_t diff1_r, diff2_r;
             rect_sub( &diff1_r, &diff2_r, &src_r, &dst_r );
 
-            memset( &e1, 0, sizeof(e1) );
+            ph_memset( &e1, 0, sizeof(e1) );
             e1.type = UI_EVENT_TYPE_GLOBAL;
             e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
             e1.w.rect = diff1_r;
@@ -369,7 +369,7 @@ w_move( drv_video_window_t *w, int x, int y )
         }
         else
         {
-            memset( &e1, 0, sizeof(e1) );
+            ph_memset( &e1, 0, sizeof(e1) );
             e1.type = UI_EVENT_TYPE_GLOBAL;
             e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
             e1.w.rect = src_r;
@@ -377,7 +377,7 @@ w_move( drv_video_window_t *w, int x, int y )
             ev_q_put_global( &e1 );
         }
 #else
-        memset( &e1, 0, sizeof(e1) );
+        ph_memset( &e1, 0, sizeof(e1) );
         e1.type = UI_EVENT_TYPE_GLOBAL;
         e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
 
@@ -397,7 +397,7 @@ w_move( drv_video_window_t *w, int x, int y )
 #else
     /*{
      ui_event_t e_copy;
-     memset( &e_copy, 0, sizeof(e_copy) );
+     ph_memset( &e_copy, 0, sizeof(e_copy) );
      e_copy.type = UI_EVENT_TYPE_GLOBAL;
      e_copy.w.info = UI_EVENT_GLOBAL_COPY_RECT;
 
@@ -413,9 +413,9 @@ w_move( drv_video_window_t *w, int x, int y )
      }*/
 #endif
 
-    memset( &e1, 0, sizeof(e1) );
-    memset( &e2, 0, sizeof(e2) );
-    memset( &e3, 0, sizeof(e3) );
+    ph_memset( &e1, 0, sizeof(e1) );
+    ph_memset( &e2, 0, sizeof(e2) );
+    ph_memset( &e3, 0, sizeof(e3) );
 
     //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
     e1.type = UI_EVENT_TYPE_GLOBAL;

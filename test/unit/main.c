@@ -16,7 +16,7 @@ int modules_alphasort(const char **a, const char **b) {
 
 void (*runSuite)( void);
 
-/* ”ã­ªæ¨ï ¯®¨áª  ¤¨­ ¬¨ç¥áª¨å ¬®¤ã«¥©  */
+/* ï¿½ã­ªï¿½ï¿½ ï¿½ï¿½ï¿½áª  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½áª¨ï¿½ ï¿½ï¿½ï¿½ã«¥ï¿½  */
 size_t searchModulesInDir( char ***m_list, char *dir ) {
     DIR *modules_dir = NULL;
     struct dirent *ent = NULL;    
@@ -41,24 +41,24 @@ size_t searchModulesInDir( char ***m_list, char *dir ) {
     }
     
     while( ( ent = readdir( modules_dir ) ) ) {
-        if( strncmp( ent->d_name, ".", 1 ) == 0 || 
-            ( (strstr( ent->d_name, ".so" ) == NULL) && (strstr( ent->d_name, ".dll" ) == NULL) )
+        if( ph_strncmp( ent->d_name, ".", 1 ) == 0 || 
+            ( (ph_strstr( ent->d_name, ".so" ) == NULL) && (ph_strstr( ent->d_name, ".dll" ) == NULL) )
             ) {
             continue;
         }
     
-        size_t mem_len = ( strlen( ent->d_name ) + strlen( dir ) ) * sizeof( char )  + 2;
+        size_t mem_len = ( ph_strlen( ent->d_name ) + ph_strlen( dir ) ) * sizeof( char )  + 2;
         char *module_path = malloc( mem_len );
-        memset(module_path, 0,  mem_len);
+        ph_memset(module_path, 0,  mem_len);
     
         if( !module_path ) {
             fprintf( stderr, "%s\n", strerror(errno) );
             return -1;
         }
     
-        strncat( module_path, dir, strlen( dir ) * sizeof( char ) );
+        strncat( module_path, dir, ph_strlen( dir ) * sizeof( char ) );
         strncat( module_path, "/", 1 );
-        strncat( module_path, ent->d_name, strlen( ent->d_name ) * sizeof( char ) );
+        strncat( module_path, ent->d_name, ph_strlen( ent->d_name ) * sizeof( char ) );
     
         module_handle = dlopen ( module_path, RTLD_LAZY );
     
@@ -78,8 +78,8 @@ size_t searchModulesInDir( char ***m_list, char *dir ) {
             continue;
         }
     
-        mem_module = realloc( modules_list, allocated_mem + strlen(module_path));
-        allocated_mem += strlen(module_path);
+        mem_module = realloc( modules_list, allocated_mem + ph_strlen(module_path));
+        allocated_mem += ph_strlen(module_path);
     
         if( !mem_module ) {
             fprintf( stderr, "%s\n",  strerror(errno));

@@ -6,7 +6,7 @@
 
 //#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ph_string.h>
 #include "ui.h"
 
 //#include "drv_video_screen.h"

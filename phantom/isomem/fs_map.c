@@ -16,7 +16,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <phantom_disk.h>
 #include <kernel/page.h>
 

@@ -12,7 +12,7 @@
 
 //#include "drv_video_screen.h"
 #include <assert.h>
-#include <string.h>
+#include <ph_string.h>
 #include <errno.h>
 #include <sys/libkern.h>
 //#include <video/font.h>
@@ -33,7 +33,7 @@ void w_scroll_up( window_handle_t win, int npix, rgba_t color)
 
     struct rgba_t *dst = win->w_pixel + (win->xsize * npix);
     int len = win->xsize * (win->ysize - npix);
-    memmove( dst, win->w_pixel, len*sizeof(struct rgba_t) );
+    ph_memmove( dst, win->w_pixel, len*sizeof(struct rgba_t) );
     int clrlen = win->xsize * npix;
     dst = win->w_pixel;
     while( clrlen-- )

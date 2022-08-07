@@ -31,7 +31,7 @@ w_get_bounds( window_handle_t w, rect_t *out )
 void w_set_title( window_handle_t w, const char *title )
 {
     // TODO static buf or strdup/free
-    w->title = strdup(title);
+    w->title = ph_strdup(title);
     
     // Can update just title area of title win
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );

@@ -22,7 +22,7 @@
 #include <kernel/config.h>
 #include <kernel/physalloc.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <threads.h>
 
 #include <kernel/init.h>
@@ -461,7 +461,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
 
         hal_page_control( page, addr, page_map, page_rw );
 
-        memcpy( addr+shift, from, part );
+        ph_memcpy( addr+shift, from, part );
 
         hal_page_control( page, addr, page_unmap, page_noaccess );
 
@@ -480,7 +480,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
 
         hal_page_control( to, addr, page_map, page_rw );
 
-        memcpy( addr, from, stepSize );
+        ph_memcpy( addr, from, stepSize );
 
         hal_page_control( to, addr, page_unmap, page_noaccess );
 
@@ -512,7 +512,7 @@ memcpy_p2v( void *to, physaddr_t from, size_t size )
 
         hal_page_control( from, addr, page_map, page_rw );
 
-        memcpy( to, addr, stepSize );
+        ph_memcpy( to, addr, stepSize );
 
         hal_page_control( from, addr, page_unmap, page_noaccess );
 
@@ -538,7 +538,7 @@ hal_copy_page_v2p( physaddr_t to, void *from )
         panic("out of vaddresses");
     hal_page_control( to, addr, page_map, page_rw );
 
-    memcpy( addr, from, hal_mem_pagesize() );
+    ph_memcpy( addr, from, hal_mem_pagesize() );
 
     hal_page_control( to, addr, page_unmap, page_noaccess );
     hal_free_vaddress(addr, 1);

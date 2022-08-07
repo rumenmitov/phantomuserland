@@ -223,7 +223,7 @@ void glopVertex(GLContext * c, GLParam * p)
 	if (!newarray) {
 	    gl_fatal_error("unable to allocate GLVertex array.\n");
 	}
-	memcpy(newarray, c->vertex, n * sizeof(GLVertex));
+	ph_memcpy(newarray, c->vertex, n * sizeof(GLVertex));
 	gl_free(c->vertex);
 	c->vertex = newarray;
     }

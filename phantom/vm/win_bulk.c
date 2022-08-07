@@ -84,7 +84,7 @@ int bulk_read_f( int count, void *data )
 
     if( count > left ) count = left;
 
-    memcpy( data, bulk_read_pos, count );
+    ph_memcpy( data, bulk_read_pos, count );
 
     bulk_read_pos += count;
 

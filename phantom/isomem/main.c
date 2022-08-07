@@ -9,7 +9,7 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
 #include <kernel/boot.h>
@@ -241,7 +241,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     {
         extern const char* SVN_Version;
         extern struct utsname phantom_uname;
-        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+        ph_strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
     //pressEnter("will run DPC");
@@ -360,7 +360,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     // If this is test run, switch to test code
     // -----------------------------------------------------------------------
 #if !defined(ARCH_arm)
-    if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
+    if( argc >= 3 && (0 == ph_strcmp( argv[1], "-test" )) )
     {
         SHOW_FLOW0( 0, "Sleep before tests to settle down boot activities" );
         hal_sleep_msec( 2000 );

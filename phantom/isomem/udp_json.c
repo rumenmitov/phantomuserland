@@ -43,7 +43,7 @@
 const struct _json_value json_value_none;
 
 #include <stdio.h>
-#include <string.h>
+#include <ph_string.h>
 #include <ctype.h>
 #include <math.h>
 #include <phantom_libc.h>
@@ -270,7 +270,7 @@ json_value * json_parse_ex (json_settings * settings,
    error[0] = '\0';
    end = (json + length);
 
-   memcpy (&state.settings, settings, sizeof (json_settings));
+   ph_memcpy (&state.settings, settings, sizeof (json_settings));
 
    if (!state.settings.mem_alloc)
       state.settings.mem_alloc = default_alloc;
@@ -278,8 +278,8 @@ json_value * json_parse_ex (json_settings * settings,
    if (!state.settings.mem_free)
       state.settings.mem_free = default_free;
 
-   memset (&state.uint_max, 0xFF, sizeof (state.uint_max));
-   memset (&state.ulong_max, 0xFF, sizeof (state.ulong_max));
+   ph_memset (&state.uint_max, 0xFF, sizeof (state.uint_max));
+   ph_memset (&state.ulong_max, 0xFF, sizeof (state.ulong_max));
 
    state.uint_max -= 8; /* limit of how much can be added before next check */
    state.ulong_max -= 8;
@@ -950,7 +950,7 @@ e_unknown_value:
 
 e_alloc_failure:
 
-   strlcpy (error, "Memory allocation failure", sizeof(error) );
+   ph_strlcpy (error, "Memory allocation failure", sizeof(error) );
    goto e_failed;
 
 e_overflow:
@@ -963,9 +963,9 @@ e_failed:
    if (error_buf)
    {
       if (*error)
-         strlcpy (error_buf, error, error_buf_len);
+         ph_strlcpy (error_buf, error, error_buf_len);
       else
-         strlcpy (error_buf, "Unknown error", error_buf_len);
+         ph_strlcpy (error_buf, "Unknown error", error_buf_len);
    }
 
    if (state.first_pass)

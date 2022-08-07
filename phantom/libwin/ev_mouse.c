@@ -22,7 +22,7 @@
 
 void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons )
 {
-    memset( e, 0, sizeof(struct ui_event) );
+    ph_memset( e, 0, sizeof(struct ui_event) );
 
     e->type = UI_EVENT_TYPE_MOUSE;
     e->time = fast_time();

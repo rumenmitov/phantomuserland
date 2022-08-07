@@ -18,7 +18,7 @@
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
 #include <ph_malloc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <stdio.h>
 
 
@@ -241,7 +241,7 @@ static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t *init )
         if(init && i < init->narenas)
         {
             int sz = umin(arena_size,init->arenas[i].arena_size);
-            memcpy( ret[i].ptrs, init->arenas[i].ptrs, sizeof(void*) * sz );
+            ph_memcpy( ret[i].ptrs, init->arenas[i].ptrs, sizeof(void*) * sz );
         }
     }
 

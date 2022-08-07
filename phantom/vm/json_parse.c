@@ -245,7 +245,7 @@ pvm_object_t pvm_json_parse_ext( const char *json, size_t json_len )
 **/
 pvm_object_t pvm_json_parse( const char *json )
 {
-	return pvm_json_parse_ext( json, strlen(json) );
+	return pvm_json_parse_ext( json, ph_strlen(json) );
 }
 
 
@@ -308,8 +308,8 @@ void jh_init( json_handler_t *jhp )
 //! Not equal
 int json_strneq( const char *s1, size_t l1, const char *s2 )
 {
-	if( strlen(s2) != l1 ) return 1;
-	return strncmp( s1, s2, l1);
+	if( ph_strlen(s2) != l1 ) return 1;
+	return ph_strncmp( s1, s2, l1);
 }
 
 

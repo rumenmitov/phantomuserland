@@ -36,7 +36,7 @@ int do_test_video(const char *test_parm)
     int i;
     ui_event_t e1;
 
-    memset( &e1, 0, sizeof(e1) );
+    ph_memset( &e1, 0, sizeof(e1) );
 
     SHOW_FLOW0( 0, "start video test" );
 

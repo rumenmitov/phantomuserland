@@ -56,7 +56,7 @@ void
 phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname )
 {
 
-    memset( sb, 0, sizeof(*sb) );
+    ph_memset( sb, 0, sizeof(*sb) );
 
     sb->version = DISK_STRUCT_VERSION;
     sb->magic   = DISK_STRUCT_MAGIC_SUPERBLOCK;
@@ -72,7 +72,7 @@ phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const ch
     sb->free_list = 0;  // No free list yet.
     sb->fs_is_clean = 0xFF;
 
-    strlcpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
+    ph_strlcpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
 
     phantom_calc_sb_checksum( sb );
 }

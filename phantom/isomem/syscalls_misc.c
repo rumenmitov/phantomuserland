@@ -1,7 +1,7 @@
 // Functions required by several system calls (strings and binaries)
 // TODO : Built-in gcc
 
-#include <string.h>
+#include <ph_string.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <stdlib.h>
@@ -15,9 +15,9 @@ atoln(const char *str, size_t n)
     if( n > (sizeof(buf) - 1) )
         n = sizeof(buf) - 1;
 
-    strlcpy( buf, str, n );
+    ph_strlcpy( buf, str, n );
 
-    return(strtol(buf, (char **)0, 10));
+    return(ph_strtol(buf, (char **)0, 10));
 }
 
 int  atoin(const char *str, size_t n)
@@ -31,13 +31,13 @@ strnstrn(char const *s1, int l1, char const *s2, int l2)
 {
 	//int l1, l2;
 
-	//l2 = strlen(s2);
+	//l2 = ph_strlen(s2);
 	if (!l2)
 		return (char *)s1;
-	//l1 = strlen(s1);
+	//l1 = ph_strlen(s1);
 	while(l1 >= l2) {
 		l1--;
-		if (!memcmp(s1,s2,l2))
+		if (!ph_memcmp(s1,s2,l2))
 			return (char *)s1;
 		s1++;
 	}

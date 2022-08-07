@@ -65,7 +65,7 @@ void w_ttfont_draw_string(
     //FT_Set_Pixel_Sizes(ftFace, 50, 0);
  
     //const char *str = s;
-    const size_t strLen = strlen(str);
+    const size_t strLen = ph_strlen(str);
  
     struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;

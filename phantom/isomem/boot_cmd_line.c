@@ -17,7 +17,7 @@
 #include <phantom_types.h>
 #include <phantom_assert.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <multiboot.h>
 #include <kernel/vm.h>
 #include <kernel/boot.h>
@@ -128,7 +128,7 @@ phantom_parse_cmd_line( const char* cmdline )
     int start_opt = 1; // Assume 0 is kernel name
 
     if( token[0][0] == '-' ||
-        strchr( token[0], '=' ) != 0 )
+        ph_strchr( token[0], '=' ) != 0 )
         start_opt = 0; // No
 
     int end_boot_opts = -1;
@@ -137,7 +137,7 @@ phantom_parse_cmd_line( const char* cmdline )
     {
         SHOW_FLOW( 2, "'%s'", token[i]);
 
-        if( 0 == strcmp( token[i], "--" ) )
+        if( 0 == ph_strcmp( token[i], "--" ) )
         {
             end_boot_opts = i;
             SHOW_FLOW0( 2, " EBOOT");
@@ -237,7 +237,7 @@ char *syslog_dest_address_string = 0;
 
 
 #define ISARG(__aname,__flag) do { \
-    if( !strcmp( arg, __aname ) ) \
+    if( !ph_strcmp( arg, __aname ) ) \
     { \
         __flag = 1; \
     	return 1;\
@@ -287,7 +287,7 @@ phantom_process_boot_options(void)
             continue;
         }
 
-        int alen = strlen( arg );
+        int alen = ph_strlen( arg );
 
         SHOW_INFO( 0, "arg = %s", arg );
 
@@ -298,7 +298,7 @@ phantom_process_boot_options(void)
         if( *arg != '-' )
             goto error;
 
-        //if( strlen( arg ) != 2 )            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
+        //if( ph_strlen( arg ) != 2 )            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
 
         switch( arg[1] )
         {
@@ -321,7 +321,7 @@ phantom_process_boot_options(void)
         case 's':
             if(alen < 4 || arg[2] != '=') goto error;
             if( syslog_dest_address_string ) ph_free(syslog_dest_address_string);
-            syslog_dest_address_string = strdup( arg+3 );
+            syslog_dest_address_string = ph_strdup( arg+3 );
             break;
 
         default:

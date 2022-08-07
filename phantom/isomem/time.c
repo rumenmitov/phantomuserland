@@ -15,7 +15,7 @@
 // #include <kernel/ia32/rtc.h>
 
 // #include <time.h>
-// #include <string.h>
+// #include <ph_string.h>
 
 // #include <kernel/timedcall.h>
 // #include <kernel/atomic.h>
@@ -66,7 +66,7 @@
 //     sys_time_accurate = 0;
 //     real_time_delta = 0;
 //     tz_delta = 0;
-//     strcpy(tz_name, "UTC");
+//     ph_strcpy(tz_name, "UTC");
 //     real_time_delta = arch_get_rtc_delta();
 
 //     return 0;

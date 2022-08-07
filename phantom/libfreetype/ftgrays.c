@@ -101,12 +101,12 @@
 
 #ifdef _STANDALONE_
 
-#include <string.h>             /* for ft_memcpy() */
+#include <ph_string.h>             /* for ft_memcpy() */
 #include <setjmp.h>
 #include <limits.h>
 #define FT_UINT_MAX  UINT_MAX
 
-#define ft_memset   memset
+#define ft_memset   ph_memset
 
 #define ft_setjmp   setjmp
 #define ft_longjmp  longjmp

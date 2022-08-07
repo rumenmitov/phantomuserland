@@ -146,8 +146,8 @@ static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_
     if( url_len > 1024 ) SYSCALL_THROW_STRING( "URL too long" );
     if( hdr_len > 1024 ) SYSCALL_THROW_STRING( "HTTP headers too long" );
 
-    char surl[url_len+1]; strlcpy( surl, pvm_get_str_data(url), url_len+1 );
-    char shdr[hdr_len+1]; strlcpy( shdr, pvm_get_str_data(hdr), hdr_len+1 );
+    char surl[url_len+1]; ph_strlcpy( surl, pvm_get_str_data(url), url_len+1 );
+    char shdr[hdr_len+1]; ph_strlcpy( shdr, pvm_get_str_data(hdr), hdr_len+1 );
 
     const int bs = 100*1024;
     char *buf = ph_malloc(bs);

@@ -202,10 +202,10 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
     GET_CONTROL
 
     //const char *old = cc->text;
-    //cc->text = strdup(text);
+    //cc->text = ph_strdup(text);
     //if( old ) ph_free((void *)old);
 
-    strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
+    ph_strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
     cc->text = cc->buffer;
 
     cc->fg_color = text_color;
@@ -217,7 +217,7 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 void w_control_get_text( window_handle_t w, control_handle_t ch, char *text_buf, size_t buf_size )
 {
     GET_CONTROL    
-    strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
+    ph_strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
     w_paint_control( w, cc );
     RELEASE_CONTROL
 }

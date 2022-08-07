@@ -92,7 +92,7 @@ static int putws_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
     char buf[BS+2];
 
     if( len > BS ) len = BS;
-    strncpy( buf, data, len );
+    ph_strncpy( buf, data, len );
     //buf[len] = '\n';
     buf[len] = 0;
 
@@ -247,7 +247,7 @@ static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_a
     const char * data = (const char *)pvm_get_str_data(_text);
 
     if( len > PVM_MAX_TTY_TITLE-1 ) len = PVM_MAX_TTY_TITLE-1 ;
-    strlcpy( da->title, data, len+1 );
+    ph_strlcpy( da->title, data, len+1 );
     //buf[len] = 0;
 
     SYS_FREE_O(_text);
@@ -334,7 +334,7 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
     tty->fg = COLOR_BLACK;
     tty->bg = COLOR_WHITE;
 
-    strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
+    ph_strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
 
     pvm_object_t bin = pvm_create_binary_object( drv_video_window_bytes( PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE ) + sizeof(drv_video_window_t), 0 );
     tty->o_pixels = bin;

@@ -79,7 +79,7 @@ void test_fail_msg(errno_t rc, const char *msg)
     }                                                   \
     else                                                \
     {                                                   \
-        if( all || (0 == strcmp( test_name, #name )) )  \
+        if( all || (0 == ph_strcmp( test_name, #name )) )  \
         report( do_test_##name(test_parm), #name );     \
     }                                                   \
     })
@@ -95,7 +95,7 @@ void report( int rc, const char *test_name )
     }
 
     char rcs[128];
-    strerror_r(rc, rcs, sizeof(rcs));
+    ph_strerror_r(rc, rcs, sizeof(rcs));
 
     nFailed++;
     // CI: this message is being watched by CI scirpts (ci-runtest.sh)
@@ -121,7 +121,7 @@ void report( int rc, const char *test_name )
 
 void run_test( const char *test_name, const char *test_parm )
 {
-    int all = 0 == strcmp(test_name, "all" );
+    int all = 0 == ph_strcmp(test_name, "all" );
     //int i;
 
 #ifndef ARCH_ia32

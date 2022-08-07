@@ -49,7 +49,7 @@ static int      dpc2_triggered = 0;
 
 static void dpc_serve1( void *arg )
 {
-    if( strcmp( arg, DPC_ARG1 ) )
+    if( ph_strcmp( arg, DPC_ARG1 ) )
     {
         SHOW_ERROR0( 0, "DPC 1 arg is wrong" );
         test_fail( -1 );
@@ -61,7 +61,7 @@ static void dpc_serve1( void *arg )
 
 static void dpc_serve2( void *arg )
 {
-    if( strcmp( arg, DPC_ARG2 ) )
+    if( ph_strcmp( arg, DPC_ARG2 ) )
     {
         SHOW_ERROR0( 0, "DPC 2 arg is wrong" );
         test_fail( -1 );

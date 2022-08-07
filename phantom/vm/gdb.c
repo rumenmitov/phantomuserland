@@ -82,7 +82,7 @@
 
 
 
-#include <string.h>
+#include <ph_string.h>
 #include <assert.h>
 #include "vm/internal_da.h"
 #include "vm/exec.h"
@@ -256,7 +256,7 @@ static void getpacket(char *buffer)
                     /*
                      * remove sequence chars from buffer
                      */
-                    count = strlen(buffer);
+                    count = ph_strlen(buffer);
                     for (i=3; i <= count; i++)
                         buffer[i-3] = buffer[i];
                 }
@@ -444,7 +444,7 @@ void gdb_stub_get_non_pt_regs(gdb_pt_regs *regs)
             fpregs->fprs[3].d=
             fpregs->fprs[5].d=
             fpregs->fprs[7].d=0;
-        memset(&fpregs->fprs[8].d,0,sizeof(freg_t)*8);
+        ph_memset(&fpregs->fprs[8].d,0,sizeof(freg_t)*8);
         }
     */
 }
@@ -474,7 +474,7 @@ static void report_tid_extra_info(char *sbuf, int bufmax, int tid)
 
     char name[BUFMAX];
 
-    strlcpy( name, "NameWith,Comma", BUFMAX );
+    ph_strlcpy( name, "NameWith,Comma", BUFMAX );
     repl( name, ',', '?' );
 
     snprintf(
@@ -565,7 +565,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                  hex2mem (ptr, (char *)regs->fp_regs,sizeof(s390_fp_regs), FALSE);
                  gdb_stub_set_non_pt_regs(regs);
                  */
-                strcpy(output_buffer,"OK");
+                ph_strcpy(output_buffer,"OK");
             }
             break;
 
@@ -582,10 +582,10 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 printf("GDB read mem %d @ 0x%p\n", (int)length, (void *)addr );
                 if (mem2hex((char *)addr, output_buffer, length, 1))
                     break;
-                strcpy (output_buffer, "E03");
+                ph_strcpy (output_buffer, "E03");
             }
             else
-                strcpy(output_buffer,"E01");
+                ph_strcpy(output_buffer,"E01");
             break;
 
             /*
@@ -600,12 +600,12 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 && *ptr++ == ':')
             {
                 if (hex2mem(ptr, (char *)addr, length, 1))
-                    strcpy(output_buffer, "OK");
+                    ph_strcpy(output_buffer, "OK");
                 else
-                    strcpy(output_buffer, "E03");
+                    ph_strcpy(output_buffer, "E03");
             }
             else
-                strcpy(output_buffer, "E02");
+                ph_strcpy(output_buffer, "E02");
             break;
 
             /*
@@ -665,12 +665,12 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
             ptr = &input_buffer[1];
             {
                 static int startTid = 0;
-                if( 0 == strcmp( ptr, "fThreadInfo" ))
+                if( 0 == ph_strcmp( ptr, "fThreadInfo" ))
                 {
                     startTid = 0;
                     goto sendThreadList;
                 }
-                if( 0 == strcmp( ptr, "sThreadInfo" ))
+                if( 0 == ph_strcmp( ptr, "sThreadInfo" ))
                 {
                 sendThreadList:
                     ;
@@ -702,11 +702,11 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 {
                     char sbuf[BUFMAX];
                     report_tid_extra_info(sbuf, BUFMAX, tid);
-                    mem2hex(sbuf, output_buffer, strlen(sbuf), 0);
+                    mem2hex(sbuf, output_buffer, ph_strlen(sbuf), 0);
                     break;
                 }
 
-                //strcpy(output_buffer,"E00");
+                //ph_strcpy(output_buffer,"E00");
                 break;
 
             }
@@ -737,7 +737,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 {
                     if( (!hexToInt(&ptr, &addr)) || *ptr++ != ',' || *ptr++ == 0 )
                     {
-                        strcpy(output_buffer, "E03"); // TODO check 03
+                        ph_strcpy(output_buffer, "E03"); // TODO check 03
                         break;
                     }
 
@@ -745,7 +745,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     int method = (int)addr;
 
                     create_and_run_object(class_name, method );
-                    strcpy(output_buffer, "OK");
+                    ph_strcpy(output_buffer, "OK");
                     break;
                 }
 
@@ -755,21 +755,21 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     pvm_object_t cns = pvm_create_string_object(ptr);
                     if( pvm_is_null(cns) )
                     {
-                        strcpy(output_buffer, "E03"); // TODO check 03
+                        ph_strcpy(output_buffer, "E03"); // TODO check 03
                         break;
                     }
 
                     pvm_object_t c = pvm_exec_lookup_class_by_name(cns);
                     if( pvm_is_null(c) )
                     {
-                        strcpy(output_buffer, "E02"); // TODO check 02
+                        ph_strcpy(output_buffer, "E02"); // TODO check 02
                         break;
                     }
 
                     pvm_object_t o = pvm_create_object(c);
                     if( pvm_is_null(o) )
                     {
-                        strcpy(output_buffer, "E01"); // TODO check 01
+                        ph_strcpy(output_buffer, "E01"); // TODO check 01
                         break;
                     }
 
@@ -787,17 +787,17 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     {
                         printf("GDB snapshots %s\n", mode ? "on" : "off" );
                         // TODO implement
-                        strcpy(output_buffer,"E01");
+                        ph_strcpy(output_buffer,"E01");
                         //snprintf( output_buffer, sizeof(output_buffer), "OK" );
                     }
                     else
-                        strcpy(output_buffer,"E01");
+                        ph_strcpy(output_buffer,"E01");
 
                     break;
                 }
 
             default:
-                strcpy(output_buffer,"E00"); // TODO check
+                ph_strcpy(output_buffer,"E00"); // TODO check
 
             }
 

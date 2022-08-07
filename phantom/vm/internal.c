@@ -554,11 +554,11 @@ int     pvm_iclass_by_class( pvm_object_t cs )
 
 int     pvm_iclass_by_name( const char *name )
 {
-    int len = strlen(name);
+    int len = ph_strlen(name);
     int i;
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        if( 0 == strncmp( pvm_internal_classes[i].name, name, len ) )
+        if( 0 == ph_strncmp( pvm_internal_classes[i].name, name, len ) )
             return i;
     }
     panic("no iclass named %s", name);
@@ -566,7 +566,7 @@ int     pvm_iclass_by_name( const char *name )
 
 
 #if 0
-#define CHECK_NAME(data, len, name) ( (len == (sizeof(name)-1)) && (0 == strncmp(data, name, len)) )
+#define CHECK_NAME(data, len, name) ( (len == (sizeof(name)-1)) && (0 == ph_strncmp(data, name, len)) )
 
 static pvm_object_t 
 pvm_hardcoded_lookup_class( pvm_object_t class_name )
@@ -577,7 +577,7 @@ pvm_hardcoded_lookup_class( pvm_object_t class_name )
     int len = class_name.get_str_len();
     const char *data = (const char *)class_name.get_str_data();
 
-    if( 0 != strncmp( data, ".internal.", 10 ) )
+    if( 0 != ph_strncmp( data, ".internal.", 10 ) )
         return fall_back( class_name );
 
     data += 10; // skip ".internal"
@@ -588,7 +588,7 @@ pvm_hardcoded_lookup_class( pvm_object_t class_name )
     if( CHECK_NAME(data, len, "int"))	return pvm_object_storage::get_int_class();
     if( CHECK_NAME(data, len, "string"))	return pvm_object_storage::get_string_class();
 
-    if( 0 == strncmp( data, "container.", 10) )
+    if( 0 == ph_strncmp( data, "container.", 10) )
     {
         data += 10; // skip "container."
         len -= 10;
@@ -598,7 +598,7 @@ pvm_hardcoded_lookup_class( pvm_object_t class_name )
         return fall_back( class_name );
     }
 
-    if( 0 == strncmp( data, "io.", 3) )
+    if( 0 == ph_strncmp( data, "io.", 3) )
     {
         data += 3;
         len -= 3;

@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 #include <ph_malloc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <stdio.h>
 
 #include <disk.h>

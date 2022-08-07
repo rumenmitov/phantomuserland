@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <ph_malloc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <assert.h>
 
 #include <multiboot.h>
@@ -132,7 +132,7 @@ int bulk_read_f( int count, void *data )
     if( count > left )
         count = left;
 
-    memcpy( data, bulk_read_pos, count );
+    ph_memcpy( data, bulk_read_pos, count );
 
     bulk_read_pos += count;
 

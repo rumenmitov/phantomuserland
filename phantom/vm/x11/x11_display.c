@@ -116,7 +116,7 @@ static void * prepare(Display *display, Window win, GC gc, int xsize, int ysize)
                                   xsize, ysize,
                                   32, 0 );
 
-    //memset( newBuf, 4 * xsize * ysize, 0xFF );
+    //ph_memset( newBuf, 4 * xsize * ysize, 0xFF );
     int size = xsize * ysize;
     int *p = (int *)newBuf;
     while(size--)

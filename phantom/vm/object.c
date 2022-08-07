@@ -380,7 +380,7 @@ pvm_copy_object( pvm_object_t in_object )
             ref_inc_o( da_po_ptr((in_object)->da)[i] );
     }
 
-    memcpy( out->da, in_object->da, da_size );
+    ph_memcpy( out->da, in_object->da, da_size );
     // TODO: check for special cases - copy c'tor?
 
     return out;

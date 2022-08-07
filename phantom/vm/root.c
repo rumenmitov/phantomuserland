@@ -458,7 +458,7 @@ static void pvm_boot()
 
     char boot_class[128];
     if( !phantom_getenv("root.boot", boot_class, sizeof(boot_class) ) )
-        strcpy( boot_class, ".ru.dz.phantom.system.boot" );
+        ph_strcpy( boot_class, ".ru.dz.phantom.system.boot" );
 
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
     {
@@ -492,7 +492,7 @@ static int get_env_name_pos( const char *name )
         char *ed = pvm_get_str_data(o);
         //int el = pvm_get_str_len(o);
 
-        char *eqpos = strchr( ed, '=' );
+        char *eqpos = ph_strchr( ed, '=' );
         if( eqpos == 0 )
         {
             // Strange...
@@ -500,7 +500,7 @@ static int get_env_name_pos( const char *name )
         }
         int keylen = eqpos - ed;
 
-        if( 0 == strncmp( ed, name, keylen ) )
+        if( 0 == ph_strncmp( ed, name, keylen ) )
         {
             return i;
         }
@@ -514,11 +514,11 @@ void phantom_setenv( const char *name, const char *value )
 {
     char ename[MAX_ENV_KEY];
 
-    strncpy( ename, name, MAX_ENV_KEY-2 );
+    ph_strncpy( ename, name, MAX_ENV_KEY-2 );
     ename[MAX_ENV_KEY-2] = '\0';
-    strcat( ename, "=" );
+    ph_strcat( ename, "=" );
 
-    pvm_object_t s = pvm_create_string_object_binary_cat( ename, strlen(ename), value, strlen(value) );
+    pvm_object_t s = pvm_create_string_object_binary_cat( ename, ph_strlen(ename), value, ph_strlen(value) );
 
     int pos = get_env_name_pos( name );
 
@@ -542,7 +542,7 @@ int phantom_getenv( const char *name, char *value, int vsize )
 
     //printf("full '%.*s'\n", el, ed );
 
-    char *eqpos = strchr( ed, '=' );
+    char *eqpos = ph_strchr( ed, '=' );
     if( eqpos == 0 )
     {
         *value = '\0';
@@ -557,7 +557,7 @@ int phantom_getenv( const char *name, char *value, int vsize )
 
     if( vsize > el ) vsize = el;
 
-    strncpy( value, eqpos, vsize );
+    ph_strncpy( value, eqpos, vsize );
     value[vsize-1] = '\0';
 
     return 1;
@@ -593,7 +593,7 @@ static void load_kernel_boot_env(void)
         char buf[128+1];
         if( nlen > 128 ) nlen=128;
 
-        strncpy( buf, e, nlen );
+        ph_strncpy( buf, e, nlen );
         buf[nlen] = '\0';
 
         printf("Loading env '%s'='%s'\n", buf, eq );

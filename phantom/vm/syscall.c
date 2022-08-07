@@ -489,7 +489,7 @@ static int si_string_4_equals( pvm_object_t me, pvm_object_t *ret, struct data_a
         iret =
             me->_class == him->_class &&
             meda->length == himda->length &&
-            0 == strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
+            0 == ph_strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
             ;
     }
     SYS_FREE_O(him);
@@ -1157,7 +1157,7 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
     struct data_area_4_string *nameda = pvm_object_da( name, string );
 
     len = nameda->length > bufs ? bufs : nameda->length;
-    memcpy( buf, nameda->data, len );
+    ph_memcpy( buf, nameda->data, len );
     buf[len] = '\0';
 
     SYS_FREE_O(name);
@@ -1177,13 +1177,13 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
     if( pvm_load_class_from_module(buf, &new_class))
     {
         const char *msg = " - class load error";
-        if( strlen(buf) >= bufs - 2 - strlen(msg) )
+        if( ph_strlen(buf) >= bufs - 2 - ph_strlen(msg) )
         {
             SYSCALL_THROW_STRING( msg+3 );
         }
         else
         {
-            strcat( buf, msg );
+            ph_strcat( buf, msg );
             SYSCALL_THROW_STRING( buf );
         }
     }
@@ -1213,7 +1213,7 @@ static int si_bootstrap_9_load_code( pvm_object_t me, pvm_object_t *ret, struct 
     struct data_area_4_string *nameda = pvm_object_da( name, string );
 
     int len = nameda->length > bufs ? bufs : nameda->length;
-    memcpy( buf, nameda->data, len );
+    ph_memcpy( buf, nameda->data, len );
     buf[len] = '\0';
     SYS_FREE_O(name);
 
@@ -1627,7 +1627,7 @@ static int si_binary_10_setrange( pvm_object_t me, pvm_object_t *ret, struct dat
         SYSCALL_THROW_STRING( "binary copy src index/len out of bounds" );
 
     //da->data[index] = byte;
-    memcpy( (da->data)+topos, (src->data)+frompos, len );
+    ph_memcpy( (da->data)+topos, (src->data)+frompos, len );
 
     SYS_FREE_O(_src);
 
@@ -2062,7 +2062,7 @@ static int si_connection_8_connect( pvm_object_t o, pvm_object_t *ret, struct da
         SYSCALL_THROW_STRING( "string arg too long" );
     }
 
-    strncpy( da->name, pvm_get_str_data(_s), slen );
+    ph_strncpy( da->name, pvm_get_str_data(_s), slen );
     SYS_FREE_O(_s);
 
     printf(".internal.connection: Connect to '%s'\n", da->name );

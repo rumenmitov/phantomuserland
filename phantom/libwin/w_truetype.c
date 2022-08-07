@@ -260,7 +260,7 @@ void w_ttfont_draw_char(
 
     FT_Face ftFace = pe->face;;
 
-    const size_t strLen = strlen(str);
+    const size_t strLen = ph_strlen(str);
 
     struct ttf_symbol symbol;
 
@@ -314,7 +314,7 @@ void w_ttfont_draw_string(
                           const char *str, const rgba_t color,
                           int win_x, int win_y )
 {
-    size_t strLen = strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
+    size_t strLen = ph_strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
     w_ttfont_draw_string_ext( win, font,
                           str, strLen,
                           color,
@@ -883,7 +883,7 @@ static errno_t tt_lookup(pool_t *pool, void *el, font_handle_t handle, void *arg
     struct ttf_pool_el *req = arg;
     struct ttf_pool_el *cur = el;
 
-    if( (req->font_type == cur->font_type) && (req->font_size == cur->font_size) && (0 == strcmp( req->font_name, cur->font_name )) )
+    if( (req->font_type == cur->font_type) && (req->font_size == cur->font_size) && (0 == ph_strcmp( req->font_name, cur->font_name )) )
     {
         req->face = cur->face;
         req->fhandle = handle;
@@ -939,7 +939,7 @@ static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
     }
 
     *newel = *req;
-    newel->font_name = strdup(req->font_name);
+    newel->font_name = ph_strdup(req->font_name);
     if( 0 == newel->font_name )
     {
         lprintf("\nout of mem strdup loading font %s\n", req->font_name );
@@ -990,7 +990,7 @@ static int w_load_tt_from_mem( FT_Face *ftFace, void *mem_font, size_t mem_font_
 {
     FT_Open_Args args;
 
-    memset( &args, 0, sizeof(args) );
+    ph_memset( &args, 0, sizeof(args) );
 
     args.flags = FT_OPEN_MEMORY;
     args.memory_base = mem_font;
@@ -1026,7 +1026,7 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 
     struct ttf_pool_el req;
 
-    memset( &req, 0, sizeof(req) );
+    ph_memset( &req, 0, sizeof(req) );
 
     req.font_name = diag_font_name;
     req.font_size = font_size;

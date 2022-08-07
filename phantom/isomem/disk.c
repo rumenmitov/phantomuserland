@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <ph_malloc.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <kernel/vm.h>
 #include <kernel/page.h>
 #include <kernel/stats.h>
@@ -124,7 +124,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
 
     errno_t ret = EINVAL;
 
-    if(isWrite) memcpy( va, to, nBlocks * p->block_size );
+    if(isWrite) ph_memcpy( va, to, nBlocks * p->block_size );
 
     int ei = hal_save_cli();
     hal_spin_lock(&(rq.lock));
@@ -144,7 +144,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     SHOW_FLOW0( 3, "unblock" );
     if( ei ) hal_sti();
 
-    if(!isWrite) memcpy( to, va, nBlocks * p->block_size );
+    if(!isWrite) ph_memcpy( to, va, nBlocks * p->block_size );
     ret = rq.rc;
 
     //return partAsyncIo( p, &rq );
@@ -399,7 +399,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
         char pn[4] = "PC0";
         //pn[2] += pno++;
         pn[2] += pno;
-        strlcpy(newp->name, pn, PARTITION_NAME_LEN);
+        ph_strlcpy(newp->name, pn, PARTITION_NAME_LEN);
 
         register_partition( newp );
     }

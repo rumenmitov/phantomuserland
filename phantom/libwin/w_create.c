@@ -74,7 +74,7 @@ void iw_switch_buffers(drv_video_window_t *w)
 
     // If not full paint, copy current displayed buffer to paint buffer
     if(!WIN_HAS_FLAG(w,WFLAG_WIN_FULLPAINT))
-        memmove( w->w_pixel, w->r_pixel, sizeof(rgba_t) * w->xsize * w->ysize );
+        ph_memmove( w->w_pixel, w->r_pixel, sizeof(rgba_t) * w->xsize * w->ysize );
 #else
 
 #ifndef r_pixel

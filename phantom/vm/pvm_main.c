@@ -87,7 +87,7 @@ void test_json()
     //printf("content '%s'\n\n", content );
 #if 1
 /*
-    json_value *jv = json_parse( content, strlen(content) );
+    json_value *jv = json_parse( content, ph_strlen(content) );
     pvm_object_t top = pvm_convert_json_to_objects( jv );
     json_value_free( jv );
     printf("\n\n------------------------- OBJECT LAND -------------------\n\n" );
