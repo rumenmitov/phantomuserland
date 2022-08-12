@@ -66,7 +66,7 @@ static void remove_vm_thread_from_list(pvm_object_storage_t *os)
     }
 
     if(1 != nkill)
-        printf("Nkill = %d\n", nkill);
+        ph_printf("Nkill = %d\n", nkill);
 }
 
 
@@ -75,7 +75,7 @@ static void thread_death_handler( phantom_thread_t *t )
     //pvm_object_t current_thread = *((pvm_object_t *)arg);
     n_vm_threads--;
 
-    printf("thread_death_handler called\n");
+    ph_printf("thread_death_handler called\n");
 
     vm_lock_persistent_memory();
 
@@ -122,7 +122,7 @@ static void thread_run_func( void *arg )
 static void start_new_vm_thread(pvm_object_t new_thread)
 {
 
-    printf("DEBUG!!! STARTED VM THREAD\n");
+    ph_printf("DEBUG!!! STARTED VM THREAD\n");
 
     args_used++;
 

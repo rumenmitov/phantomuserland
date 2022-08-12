@@ -242,11 +242,11 @@ static void repaint_q(void)
     {
         pqel_t *temp_pqel;
 
-        printf("Printing scr painter queue:\n");
+        ph_printf("Printing scr painter queue:\n");
         int idx = 0;
         queue_iterate( &rect_list, temp_pqel, pqel_t *, chain )
         {
-            printf("Q[%d] me=%p, prev=%p, next=%p\n", idx++, temp_pqel, temp_pqel->chain.prev, temp_pqel->chain.next);
+            ph_printf("Q[%d] me=%p, prev=%p, next=%p\n", idx++, temp_pqel, temp_pqel->chain.prev, temp_pqel->chain.next);
         }
     }
 
@@ -273,7 +273,7 @@ static void repaint_q(void)
         //     (&rect_list)->next = ___next; 
         // }
 
-        printf("!!!: Processedd scr queue element!!!\n");
+        ph_printf("!!!: Processedd scr queue element!!!\n");
 
         // TODO : REMOVE!!!
         // break;

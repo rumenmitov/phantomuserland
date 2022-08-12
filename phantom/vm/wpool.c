@@ -519,9 +519,9 @@ void new_videotest()
 
     w_blt( wb );
 
-    printf("create win\n");
+    ph_printf("create win\n");
     pool_handle_t w1 = w_create( 200, 300 );
-    printf("fill win\n");
+    ph_printf("fill win\n");
     w_fill( w1, COLOR_LIGHTRED );
 
     pool_handle_t w2 = w_create( 200, 300 );

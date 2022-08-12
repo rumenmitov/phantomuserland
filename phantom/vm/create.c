@@ -420,7 +420,7 @@ void pvm_gc_iter_call_frame(gc_iterator_call_t func, pvm_object_t  os, void *arg
 
 static pvm_object_t create_interface_worker( int n_methods )
 {
-	//if(debug_init) printf("create interface\n");
+	//if(debug_init) ph_printf("create interface\n");
 
 	int das = n_methods*sizeof(pvm_object_t );
 
@@ -445,7 +445,7 @@ pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent
     {
         // root classes have N_SYS_METHODS slots in interface, don't cry about that
         if( n_methods > N_SYS_METHODS )
-            printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
+            ph_printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
         base_icount = n_methods;
     }
 
@@ -869,7 +869,7 @@ pvm_object_t pvm_weakref_get_object(pvm_object_t wr )
 
     // TODO should we check refcount before and return null if zero?
     if( 0 == da->object->_ah.refCount )
-        printf("zero object in pvm_weakref_get_object\n");
+        ph_printf("zero object in pvm_weakref_get_object\n");
 
     out = ref_inc_o( da->object );
 
@@ -981,7 +981,7 @@ void pvm_restart_window( pvm_object_t o )
     struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
     window_handle_t pixels = (window_handle_t)&bda->data;
 
-    printf("restart WIN\n");
+    ph_printf("restart WIN\n");
 
     w_restart_init( &(da->w), pixels );
 
@@ -1144,7 +1144,7 @@ void pvm_gc_finalizer_connection( pvm_object_t  os )
     //#warning disconnect!
     errno_t ret = phantom_disconnect_object( da );
     if( ret )
-        printf("automatic disconnect failed - %d\n", ret );
+        ph_printf("automatic disconnect failed - %d\n", ret );
 
 
 }
@@ -1152,13 +1152,13 @@ void pvm_gc_finalizer_connection( pvm_object_t  os )
 void pvm_restart_connection( pvm_object_t o )
 {
     struct data_area_4_connection *da = pvm_object_da( o, connection );
-printf("restarting connection");
+ph_printf("restarting connection");
     da->kernel = 0;
 
     int ret = pvm_connect_object(o,0);
 
     if( ret )
-        printf("reconnect failed %d\n", ret );
+        ph_printf("reconnect failed %d\n", ret );
 
 //#warning restart!
 }
@@ -1212,7 +1212,7 @@ void pvm_restart_tcp( pvm_object_t o )
     //da->connected = 0;
     if( da->connected )
     {
-        printf("restarting TCP - unimpl!");
+        ph_printf("restarting TCP - unimpl!");
     }
 
 }

@@ -193,9 +193,9 @@ void stat_dump_all( int av, char **ac )
 
     vm_lock_persistent_memory();
 #if COMPILE_PERSISTENT_STATS
-    printf(" Statistics            /sec t/sec total/run total/life\n");
+    ph_printf(" Statistics            /sec t/sec total/run total/life\n");
 #else
-    printf(" Statistics        \t\tper sec\t     total\ttotal/sec\n");
+    ph_printf(" Statistics        \t\tper sec\t     total\ttotal/sec\n");
 #endif
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
@@ -207,7 +207,7 @@ void stat_dump_all( int av, char **ac )
             continue;
 
 #if COMPILE_PERSISTENT_STATS
-        printf(" %-20s %5d %5ld %10ld %10ld\n",
+        ph_printf(" %-20s %5d %5ld %10ld %10ld\n",
                stat_counter_name[i],
                stat_per_sec_counters[i],
                stat_total_counters[i]/stat_total_seconds,
@@ -215,7 +215,7 @@ void stat_dump_all( int av, char **ac )
                (long)pdata[i].total_prev_and_this_runs
               );
 #else
-        printf(" %-20s\t%7d\t%10ld\t%10ld\n",
+        ph_printf(" %-20s\t%7d\t%10ld\t%10ld\n",
                stat_counter_name[i],
                stat_per_sec_counters[i],
                stat_total_counters[i]/stat_total_seconds,
@@ -233,9 +233,9 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
 {
     int rc;
 #if COMPILE_PERSISTENT_STATS
-    rc = snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      this run    life\x1b[37m");
+    rc = ph_snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      this run    life\x1b[37m");
 #else
-    rc = snprintf(buf, len, " Statistics       \tper sec\ttotal/sec\t     total");
+    rc = ph_snprintf(buf, len, " Statistics       \tper sec\ttotal/sec\t     total");
 #endif
     buf += rc;
     len -= rc;
@@ -271,7 +271,7 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
             scol = "\x1b[33m";
 
 #if COMPILE_PERSISTENT_STATS
-        rc = snprintf(buf, len, "\n %s%-17s%5d %5ld %10ld %10ld",
+        rc = ph_snprintf(buf, len, "\n %s%-17s%5d %5ld %10ld %10ld",
                       scol,
                       stat_counter_name[i],
                       stat_per_sec_counters[i],
@@ -281,7 +281,7 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
                       (long)ps->total_prev_and_this_runs
                      );
 #else
-        rc = snprintf(buf, len, "\n %s%-17s\t%7d\t%10ld\t%10ld",
+        rc = ph_snprintf(buf, len, "\n %s%-17s\t%7d\t%10ld\t%10ld",
                       scol,
                       stat_counter_name[i],
                       stat_per_sec_counters[i],
@@ -366,7 +366,7 @@ static void stat_update_persistent_storage( void *ign )
     {
         int rc = set_net_timer( &e, 10000, stat_update_persistent_storage, 0, 0 );
         if( rc )
-            printf( "can't set timer, persistent stats are dead" );
+            ph_printf( "can't set timer, persistent stats are dead" );
             //SHOW_ERROR0( 0, "can't set timer, persistent stats are dead" );
     }
 

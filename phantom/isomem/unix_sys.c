@@ -15,17 +15,17 @@ void panic(const char *fmt, ...)
     va_list vl;
 
     // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPanic: ");
+    ph_printf("\nPanic: ");
     va_start(vl, fmt);
-    vprintf(fmt, vl);
+    ph_vprintf(fmt, vl);
     va_end(vl);
 
     //save_mem(mem, size);
     getchar();
     // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPress Enter from memcheck...");
+    ph_printf("\nPress Enter from memcheck...");
     pvm_memcheck();
-    //printf("\nPress Enter...");	getchar();
+    //ph_printf("\nPress Enter...");	getchar();
     exit(1);
 }
 

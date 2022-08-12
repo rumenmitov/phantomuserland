@@ -11,7 +11,7 @@ void gl_fatal_error(char *format, ...) //__attribute__((noreturn))
   //vfprintf(stderr,format,ap);
   //fprintf(stderr,"\n");
 
-  vprintf(format,ap);
+  ph_vprintf(format,ap);
 
   exit(1);
 

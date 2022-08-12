@@ -138,14 +138,14 @@ phantom_multiboot_main()
 
 int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
-    printf("Waiting...\n");
+    ph_printf("Waiting...\n");
     // wait_for_continue();
 
     // Running adapters tests
 
 	// if (!test_thread_creation())
 	// {
-	// 	printf("Test creation test failed!\n");
+	// 	ph_printf("Test creation test failed!\n");
 	// 	return;
 	// }
 
@@ -155,7 +155,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     (void) envp;
 
-    snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
+    ph_snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
 
     // Runs all functions defined with macro INIT_ME
     run_init_functions( INIT_LEVEL_PREPARE ); // OK
@@ -249,7 +249,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options(); // OK. Let's keep it
 
 #if defined(ARCH_arm) && 0
@@ -385,8 +385,8 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     run_test( "all", "" );
 
 #ifdef PHANTOM_TESTS_ONLY 
-    printf("\n\n======================\n");
-    printf("Testing is done!\n");
+    ph_printf("\n\n======================\n");
+    ph_printf("Testing is done!\n");
     return 0;
 #endif
 
@@ -453,12 +453,12 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     //init_wins(u_int32_t ip_addr);
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
     {
         hal_sleep_msec(60000*13);
-        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        ph_printf("\nWILL CRASH ON PURPOSE\n\n" );
         hal_sleep_msec(20000);
         hal_cpu_reset_real();
     }
@@ -480,7 +480,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 void start_phantom()
 {
 
-    printf("DEBUG!!! STARTING PHANTOM\n");
+    ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");
     SHOW_FLOW0( 2, "Will init snap interlock... ");

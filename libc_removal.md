@@ -10,6 +10,8 @@ Secondly, we need to chose the implementation. It should be either built-in Geno
 
 Also, both solutions have certain risks. Implementation from Genode might behave differently from what Phantom OS components expect. Implementation from Phantom might have bugs and might be not vompatible with 64-bit architecture.
 
+Moreover, not all functions are used extensively. Some of them are used only in one or couple of places and can be replaced with other functions.
+
 Following sections contain functions that are used by system's binary accroding to `nm`.
 
 Each section contains table with following columns:
@@ -46,7 +48,7 @@ Some of string operations are implemented in Genode, but the majority is not. Mo
 | `strcmp`    | - | + | - | +  |  |
 | `strcpy`    | - | + | - | +  | `copy_cstring()` is an alternative in Genode |
 | `strdup`    | - | + | - | +  |  |
-| `strerror_r`| - | + | - | -  | Should be replaced |
+| `strerror_r`| - | + | - | -  | Should be replaced. Used only in tests |
 | `strlcpy`   | - | + | - | +  | `copy_cstring()` is an alternative in Genode |
 | `strlen`    | - | + | - | +  |  |
 | `strncmp`   | - | + | - | +  |  |
@@ -60,13 +62,13 @@ Some of string operations are implemented in Genode, but the majority is not. Mo
 
 | function    | completed | `ph_` | Genode | Phantom | comments |
 | ----------- | --------- | ----- | ------ | ------- | -------- |
-| `sscanf`    | - | - | - | - | - |
-| `printf`    | - | - | - | - | - |
-| `vprintf`   | - | - | - | - | - |
-| `snprintf`  | - | - | - | - | - |
-| `putc`      | - | - | - | - | - |
-| `putchar`   | - | - | - | - | - |
-| `puts`      | - | - | - | - | - |
+| `sscanf`    | - | + | - | - | Only in `bmp_pbm.c` in `parseHeader()` and `gdb.c` |
+| `printf`    | - | + | - | + | Used extensively across components. Need to figure out a single format for logging |
+| `vprintf`   | - | + | - | + | Used to define debug messages, e.t.c. Also used in hal_printf which is used for printing as well |
+| `snprintf`  | - | + | - | + | - |
+| `putc`      | - | - | - | - | Seems to be linked, but not used |
+| `putchar`   | - | + | ? | - | Only few occurences. `gl/list.c`, `isomem/json_write.c` and several files in `vm`. However used by `vprintf` implementation |
+| `puts`      | - | - | - | - | Not found. And it is good |
 
 ## Misc
 

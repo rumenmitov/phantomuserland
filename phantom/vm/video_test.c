@@ -54,7 +54,7 @@ void videotest_truetype(void)
 
     if( font1 == INVALID_POOL_HANDLE )
     {
-        printf("\n\nTTF 1 FAIL\n\n");
+        ph_printf("\n\nTTF 1 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font1,
@@ -68,7 +68,7 @@ void videotest_truetype(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font2,
@@ -108,7 +108,7 @@ void videotest_overlay(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
         return;
     }
 
@@ -162,7 +162,7 @@ void videotest_pbm()
 
     if( rc )
         {
-            printf("can't open %s\n", bpm );
+            ph_printf("can't open %s\n", bpm );
             exit(33);
         }
 
@@ -172,7 +172,7 @@ void videotest_pbm()
         k_seek( &size, fd, 0, SEEK_CUR );
         k_seek( 0, fd, 0, SEEK_SET );
 
-        printf("Size of %s is %d\n", bpm, size );
+        ph_printf("Size of %s is %d\n", bpm, size );
 
         char *data = ph_malloc(size);
 
@@ -190,7 +190,7 @@ void videotest_pbm()
         ph_free(data);
 
         if(result)
-            printf("can't parse %s: %d\n", bpm, result );
+            ph_printf("can't parse %s: %d\n", bpm, result );
         else
         {
             drv_video_window_t *w = drv_video_window_create( 900, 600, 10, 10, COLOR_BLACK, "BMP Test Window", WFLAG_WIN_DECORATED );

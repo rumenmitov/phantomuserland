@@ -277,7 +277,7 @@ void scr_zbuf_dump()
     int ysize = scr_get_ysize();
     int xsize = scr_get_xsize();
 
-    printf("zbuf dump %d*%d\n", xsize, ysize );
+    ph_printf("zbuf dump %d*%d\n", xsize, ysize );
     for(y = 0; y < ysize; y++)
     {
         int x;
@@ -286,9 +286,9 @@ void scr_zbuf_dump()
         for( x = 0; x < xsize; x++ )
         {
             int linpos = x + y*xsize;
-            printf("%02X", zbuf[linpos] );
+            ph_printf("%02X", zbuf[linpos] );
         }
-        printf("\n");
+        ph_printf("\n");
     }
 }
 

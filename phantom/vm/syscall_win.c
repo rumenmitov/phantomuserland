@@ -178,7 +178,7 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 
     SYS_FREE_O(_text);
 
-    //printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
+    //ph_printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
 
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;

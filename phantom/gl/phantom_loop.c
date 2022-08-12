@@ -45,7 +45,7 @@ ui_loop(int argc,char **argv, const char *name)
 
         /*
 	if (GrOpen() < 0) {
-		printf("cannot open graphics\n");
+		ph_printf("cannot open graphics\n");
 		exit(1);
 	}*/
 	
@@ -72,7 +72,7 @@ ui_loop(int argc,char **argv, const char *name)
 
             continue;
             int c = getchar();
-            printf("ph_loop ");
+            ph_printf("ph_loop ");
             switch(c)
             {
             case 0x1B:

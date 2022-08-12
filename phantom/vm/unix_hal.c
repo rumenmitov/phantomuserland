@@ -44,7 +44,7 @@ int phantom_is_a_real_kernel() { return 0; }
 
 void hal_init( vmem_ptr_t va, long vs )
 {
-    printf("Unix HAL init @%p\n", va);
+    ph_printf("Unix HAL init @%p\n", va);
 
     unix_hal_init();
 
@@ -124,7 +124,7 @@ errno_t         t_set_owner( tid_t tid, void *owner )
 void    hal_halt()
 {
     //fflush(stderr);
-    printf("\n\nhal halt called, exiting.\n");
+    ph_printf("\n\nhal halt called, exiting.\n");
     getchar();
     exit(1);
 }
@@ -241,7 +241,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
     / *if(phantom_virtual_machine_stop_request)
     {
-        if(DEBUG) printf("Thread will die now\n");
+        if(DEBUG) ph_printf("Thread will die now\n");
         pthread_exit(0);
     }* /
 
@@ -299,17 +299,17 @@ void panic(const char *fmt, ...)
     va_list vl;
 
     // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPanic: ");
+    ph_printf("\nPanic: ");
     va_start(vl, fmt);
-    vprintf(fmt, vl);
+    ph_vprintf(fmt, vl);
     va_end(vl);
 
     //save_mem(mem, size);
     getchar();
     // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-    printf("\nPress Enter from memcheck...");
+    ph_printf("\nPress Enter from memcheck...");
     pvm_memcheck();
-    //printf("\nPress Enter...");	getchar();
+    //ph_printf("\nPress Enter...");	getchar();
     exit(1);
 }
 
@@ -339,7 +339,7 @@ void checkDiffMem()
         {
             if( !prevdiff )
             {
-                printf(", d@ 0x%04x", mem - start );
+                ph_printf(", d@ 0x%04x", mem - start );
             }
             prevdiff = prevdiff ? 2 : 1;
             *copy = *mem;
@@ -348,7 +348,7 @@ void checkDiffMem()
         {
             if( prevdiff == 2 )
             {
-                printf( "-%04x", mem - start -1 );
+                ph_printf( "-%04x", mem - start -1 );
                 prevdiff = 0;
             }
         }
@@ -356,7 +356,7 @@ void checkDiffMem()
         copy++;
     }
 
-    printf(" Press Enter...");
+    ph_printf(" Press Enter...");
     getchar();
 #endif
 }
@@ -373,7 +373,7 @@ void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus 
 
 int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
 {
-    printf("\nGetEvent!?\n");
+    ph_printf("\nGetEvent!?\n");
     w->events_count--;
     assert(!wait);
     return 0;
@@ -398,7 +398,7 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
 /*
 errno_t wtty_putc_nowait( struct wtty *wt, int ch )
 {
-    putchar(ch);
+    ph_putchar(ch);
     return 0;
 }
 */
@@ -416,7 +416,7 @@ void hal_cpu_reset_real() { exit(33); }
 
 void run_test( void )
 {
-	printf("sorry, not in hosted env\n");
+	ph_printf("sorry, not in hosted env\n");
 }
 
 #endif
@@ -432,10 +432,10 @@ errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int c
 // debug_ext.h support
 // -----------------------------------------------------------------------
 
-void console_set_error_color() { printf("\x1b[31m"); }
-void console_set_normal_color() { printf("\x1b[37m"); }
-void console_set_message_color(void) { printf("\x1b[34m"); }
-void console_set_warning_color(void) { printf("\x1b[33m"); }
+void console_set_error_color() { ph_printf("\x1b[31m"); }
+void console_set_normal_color() { ph_printf("\x1b[37m"); }
+void console_set_message_color(void) { ph_printf("\x1b[34m"); }
+void console_set_warning_color(void) { ph_printf("\x1b[33m"); }
 
 int debug_max_level_error = ~0;
 int debug_max_level_info = ~0;
@@ -445,7 +445,7 @@ int debug_max_level_flow = ~0;
 
 void phantom_check_threads_pass_bytecode_instr_boundary( void )
 {
-    printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
+    ph_printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
 }
 
 
@@ -600,7 +600,7 @@ void console_set_fg_color( struct rgba_t c )
 
 void vm_map_page_mark_unused( addr_t page_start)
 {
-    //printf("asked to mark page unused\n");
+    //ph_printf("asked to mark page unused\n");
 }
 
 
@@ -641,7 +641,7 @@ void phantom_set_console_getchar( int (*_getchar_impl)(void) )
 void debug_console_putc(int c)
 {
     if( kout_f ) fputc( c, kout_f );
-    else putchar(c);
+    else ph_putchar(c);
 }
 
 
@@ -659,7 +659,7 @@ void lprintf(char const *fmt, ...)
     if( klog_f )
         vfprintf( klog_f, fmt, ap);
     else
-        vprintf(fmt, ap);
+        ph_vprintf(fmt, ap);
     va_end(ap);
 }
 

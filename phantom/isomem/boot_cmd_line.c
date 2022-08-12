@@ -95,7 +95,7 @@ phantom_parse_cmd_line( const char* cmdline )
 
             if( ntoken >= MAXTOK )
             {
-                printf("too many tokens on cmdline");
+                ph_printf("too many tokens on cmdline");
                 break;
             }
 

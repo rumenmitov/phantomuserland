@@ -240,7 +240,7 @@ void wtty_clear(wtty_t * w)
 void wtty_dump( wtty_t * w )
 {
     assert(w);
-    printf("wtty putpos %d, getpos %d\n", w->putpos, w->getpos );
+    ph_printf("wtty putpos %d, getpos %d\n", w->putpos, w->getpos );
 
 }
 

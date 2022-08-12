@@ -29,8 +29,8 @@ static int object_allocator_inited = 0;
 #define debug_allocation 0
 
 
-#define DEBUG_PRINT(a)   if (debug_allocation) printf(a)
-#define DEBUG_PRINT1(a,b)  if (debug_allocation) printf(a,b)
+#define DEBUG_PRINT(a)   if (debug_allocation) ph_printf(a)
+#define DEBUG_PRINT1(a,b)  if (debug_allocation) ph_printf(a,b)
 
 
 
@@ -453,7 +453,7 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(ngc-- <= 0)
             break;
 
-        printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
+        ph_printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
 
         /*
          * NB!  In fact, it is a huge risk to call GC here:  being called whithin constructor
@@ -573,7 +573,7 @@ int pvm_memcheck()
     unsigned int i;
     for( i = 0; i < ARENAS; i++)
     {
-        printf("\n Arena #%d [%s] \n", i, name_a[i]);
+        ph_printf("\n Arena #%d [%s] \n", i, name_a[i]);
         memcheck_one(i, start_a[i], end_a[i]);
     }
 
@@ -583,14 +583,14 @@ int pvm_memcheck()
 static void printmemsize( unsigned long sz, char *name )
 {
     if( sz > 1024*1024 )
-        printf("%ldM ", sz / (1024*1024));
+        ph_printf("%ldM ", sz / (1024*1024));
     sz %= 1024*1024;
 
     if( sz > 1024 )
-        printf("%ldK ", sz / (1024));
+        ph_printf("%ldK ", sz / (1024));
     sz %= 1024;
 
-    printf("%ld %s", sz, name );
+    ph_printf("%ld %s", sz, name );
 }
 
 static int memcheck_one(unsigned int i, void * start, void * end)
@@ -604,15 +604,15 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
     pvm_object_t curr = start;
 
-    printf("Memcheck: checking object memory allocation consistency (at %p, %ld bytes)\n", start, (long)(end - start) );
+    ph_printf("Memcheck: checking object memory allocation consistency (at %p, %ld bytes)\n", start, (long)(end - start) );
 
     while(((void *)curr) < end)
     {
         if(!pvm_alloc_is_object(curr))
         {
-            //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
+            //ph_printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
             //return 0;
-            printf("Memcheck: not an object at %p\n", curr);
+            ph_printf("Memcheck: not an object at %p\n", curr);
             break;
         }
 
@@ -622,7 +622,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
         {
             if(!pvm_object_is_allocated(curr))  //more tests
             {
-                printf("Memcheck: corrupted allocated object at %p\n", curr);
+                ph_printf("Memcheck: corrupted allocated object at %p\n", curr);
                 break;
             }
             if (curr->_ah.exact_size <= max_stat_size)
@@ -645,22 +645,22 @@ static int memcheck_one(unsigned int i, void * start, void * end)
         curr = (pvm_object_t)( ((void *)curr) + curr->_ah.exact_size );
     }
 
-    //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
-    //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest ", objects, used, free, largest );
-    printf("Memcheck: %ld objects, memory:  ", objects );
+    //ph_printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
+    //ph_printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest ", objects, used, free, largest );
+    ph_printf("Memcheck: %ld objects, memory:  ", objects );
     printmemsize( used, "used, " );
     printmemsize( free, "free, " );
     printmemsize( largest, "largest" );
-    printf("\n");
+    ph_printf("\n");
 
     if((void *)curr == end)
     {
-        printf("Memcheck: reached exact arena end at %p (%ld bytes used)\n", curr, (long)(((void *)curr) - start) );
+        ph_printf("Memcheck: reached exact arena end at %p (%ld bytes used)\n", curr, (long)(((void *)curr) - start) );
         if (debug_memory_leaks) memcheck_print_histogram(i);
         return 0;
     }
 
-    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%p (%ld bytes size)\n-----------------\n\n", curr, (long) (((void *)curr) - start) );
+    ph_printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%p (%ld bytes size)\n-----------------\n\n", curr, (long) (((void *)curr) - start) );
     return 1;
 }
 
@@ -670,14 +670,14 @@ static void memcheck_print_histogram(unsigned int arena)
     if (arena == 0) return; //nothing interesting
 
     if (created_large_o[arena] > 0)
-        printf(" large objects: now used %ld, was allocated %ld\n", used_large_o[arena], created_large_o[arena]);
+        ph_printf(" large objects: now used %ld, was allocated %ld\n", used_large_o[arena], created_large_o[arena]);
 
-    printf(" small objects: size, now used, was allocated\n");
+    ph_printf(" small objects: size, now used, was allocated\n");
     unsigned int size;
     for( size = 0; size <= max_stat_size; size++)
     {
         if(created_o[arena][size] > 0)
-            printf("   %6d %6ld %12ld \n", size, used_o[arena][size], created_o[arena][size]);
+            ph_printf("   %6d %6ld %12ld \n", size, used_o[arena][size], created_o[arena][size]);
     }
 }
 

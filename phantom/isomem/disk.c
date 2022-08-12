@@ -266,11 +266,11 @@ static void register_partition(phantom_disk_partition_t *p)
 {
     if( nPartitions >= MAX_DISK_PARTITIONS )
     {
-        printf("Too many partitions, skipping one (%.64s)\n", p->name );
+        ph_printf("Too many partitions, skipping one (%.64s)\n", p->name );
         return;
     }
 
-    printf("DEBUG: REGISTRING A PARTITION!!!\n");
+    ph_printf("DEBUG: REGISTRING A PARTITION!!!\n");
 
     partitions[nPartitions] = *p;
     //dump_partition(p);
@@ -391,7 +391,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
 
         if(newp->type == PHANTOM_PARTITION_TYPE_ID)
         {
-            printf("!! Phantom Partition found !!\n");
+            ph_printf("!! Phantom Partition found !!\n");
             p->flags |= PART_FLAG_IS_PHANTOM_TYPE;
 
         }
@@ -434,23 +434,23 @@ void dump_partition(phantom_disk_partition_t *p)
 {
     if( p == 0 )
     {
-        printf("attempt to dump null Disk Partition\n");
+        ph_printf("attempt to dump null Disk Partition\n");
         return;
     }
 
     char pname[128];
     if( partGetName( p, pname, sizeof(pname) ) )
     {
-        printf("Disk Partition ?? (%s)\n", p->label );
+        ph_printf("Disk Partition ?? (%s)\n", p->label );
         return;
     }
 
-    printf("Disk Partition %s (%s)\n", pname, p->label );
+    ph_printf("Disk Partition %s (%s)\n", pname, p->label );
 
-    printf(" - type %d%s\n", p->type, (p->type == PHANTOM_PARTITION_TYPE_ID) ? " (phantom)" : "" );
-    printf(" - flags %b\n", p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
-    printf(" - blksz %d, start %ld, size %ld\n", p->block_size, p->shift, p->size );
-    printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
+    ph_printf(" - type %d%s\n", p->type, (p->type == PHANTOM_PARTITION_TYPE_ID) ? " (phantom)" : "" );
+    ph_printf(" - flags %b\n", p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
+    ph_printf(" - blksz %d, start %ld, size %ld\n", p->block_size, p->shift, p->size );
+    ph_printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
 
 }
 
@@ -458,14 +458,14 @@ void print_partition(phantom_disk_partition_t *p)
 {
     if( p == 0 )
     {
-        printf("attempt to print null Disk Partition\n");
+        ph_printf("attempt to print null Disk Partition\n");
         return;
     }
 
     char pname[128];
     if( partGetName( p, pname, sizeof(pname) ) )
     {
-        printf("Disk Partition ?? (%s)\n", p->label );
+        ph_printf("Disk Partition ?? (%s)\n", p->label );
         return;
     }
 
@@ -475,7 +475,7 @@ void print_partition(phantom_disk_partition_t *p)
     if( sz > 1024*10 ) { un = "Mb"; sz /= 1024; }
     if( sz > 1024*10 ) { un = "Gb"; sz /= 1024; }
 
-    printf("Disk Partition %s (%s), %ld %s, flags %b\n", pname, p->label, sz, un, p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
+    ph_printf("Disk Partition %s (%s), %ld %s, flags %b\n", pname, p->label, sz, un, p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
 }
 
 

@@ -38,7 +38,7 @@ static int out_of_disk(disk_page_no_t disk_block_num)
         return 0; // blk num 0 is used as 'nothing'
 
     if(((unsigned long)disk_block_num) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
-        printf("FSCK: Warning: block number below disk start: %ld < %ld\n",
+        ph_printf("FSCK: Warning: block number below disk start: %ld < %ld\n",
                 (unsigned long)disk_block_num, (unsigned long)pager_superblock_ptr()->disk_start_page );
 
     // unsigned comparison will treat negatives as very big positives -> out of range
@@ -336,10 +336,10 @@ static int phantom_fsck_super()
 
 static int phantom_fsck_do_list(disk_page_no_t *pnp, char *desc, int magic, int *corr)
 {
-    printf("-- %s... ", desc);
+    ph_printf("-- %s... ", desc);
     if( *pnp == 0)
     {
-        printf("None\n");
+        ph_printf("None\n");
         return 0;
     }
 
@@ -348,11 +348,11 @@ static int phantom_fsck_do_list(disk_page_no_t *pnp, char *desc, int magic, int 
         *pnp = 0;
         *corr = 1;
         pager_update_superblock();
-        printf("!! damaged, deleting !!\n");
+        ph_printf("!! damaged, deleting !!\n");
         return 1;
     }
 
-    printf("Ok\n");
+    ph_printf("Ok\n");
     return 0;
 }
 
@@ -370,7 +370,7 @@ static int phantom_fsck_lists()
     // A2. check lists sanity - pages have sane 'used' numbers,
     // all intermediate pages are full
 
-    printf("-- Last snap... ");
+    ph_printf("-- Last snap... ");
     if( sb->last_snap && fsck_forlist( sb->last_snap, DISK_STRUCT_MAGIC_SNAP_LIST, NULL ) )
     {
         sb->last_snap = 0;
@@ -380,10 +380,10 @@ static int phantom_fsck_lists()
         pager_update_superblock();
     }
     else
-        printf("Ok\n");
+        ph_printf("Ok\n");
 
 
-    printf("-- Prev snap... ");
+    ph_printf("-- Prev snap... ");
     if( sb->prev_snap && fsck_forlist( sb->prev_snap, DISK_STRUCT_MAGIC_SNAP_LIST, NULL ) )
     {
         sb->prev_snap = 0;
@@ -393,10 +393,10 @@ static int phantom_fsck_lists()
         pager_update_superblock();
     }
     else
-        printf("Ok\n");
+        ph_printf("Ok\n");
 
 
-    printf("-- Boot list... ");
+    ph_printf("-- Boot list... ");
     if( sb->boot_list && fsck_forlist( sb->boot_list, DISK_STRUCT_MAGIC_BOOT_LOADER, NULL ) )
     {
         sb->boot_list = 0;
@@ -404,7 +404,7 @@ static int phantom_fsck_lists()
         pager_update_superblock();
     }
     else
-        printf("Ok\n");
+        ph_printf("Ok\n");
 
     /*
     if( sb->kernel_list && fsck_forlist( sb->kernel_list, DISK_STRUCT_MAGIC_BOOT_KERNEL, NULL ) )
@@ -414,7 +414,7 @@ static int phantom_fsck_lists()
         pager_update_superblock();
     }
     else
-        printf("Ok\n");
+        ph_printf("Ok\n");
         */
     phantom_fsck_do_list(&(sb->kernel_list), "Kernel", DISK_STRUCT_MAGIC_BOOT_KERNEL, &corruption );
 
@@ -431,7 +431,7 @@ static int phantom_fsck_lists()
             continue;
 
         char str[50];
-        snprintf( str, 49, "Boot module %d", i );
+        ph_snprintf( str, 49, "Boot module %d", i );
 
         phantom_fsck_do_list(&(sb->boot_module[i]), str, DISK_STRUCT_MAGIC_BOOT_MODULE, &corruption );
     }
@@ -562,12 +562,12 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
 
     if(flags != MAP_FREE )
     {
-        printf("phantom_free_snap warning: nonfree block passed by iterator: %d\n", (int)toFree );
+        ph_printf("phantom_free_snap warning: nonfree block passed by iterator: %d\n", (int)toFree );
         return;
     }
 
     //SHOW_FLOW( 0, "Free old snap blk: %ld", (long)toFree );
-    //printf( " %ld", (long)toFree );
+    //ph_printf( " %ld", (long)toFree );
     pager_free_page( toFree );
 }
 

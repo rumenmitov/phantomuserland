@@ -3,6 +3,6 @@
 
 int do_test_vm_map(const char *test_parm)
 {
-    printf("Dummy vm map test\n");
+    ph_printf("Dummy vm map test\n");
     return 0;
 }

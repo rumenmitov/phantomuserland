@@ -50,7 +50,7 @@ void __phantom_run_constructors (void)
 #if 1
     count = _init_array_end - _init_array_start;
 /*
-    printf("%d c'tors (%p - %p) @ (%p - %p)\n", 
+    ph_printf("%d c'tors (%p - %p) @ (%p - %p)\n", 
 		count,
 		_init_array_start, _init_array_end,
 		&_init_array_start, &_init_array_end
@@ -58,7 +58,7 @@ void __phantom_run_constructors (void)
 */
     for (i = 0; i < count; i++)
     {
-        //printf("c'tor %p\n", _init_array_start[i]);
+        //ph_printf("c'tor %p\n", _init_array_start[i]);
         _init_array_start[i] ();
     }
 #endif

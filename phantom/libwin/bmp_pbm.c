@@ -118,17 +118,17 @@ static errno_t parseHeader( unsigned char **pfrom, int *width, int *height, int 
 
     skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", width ) )
+    if( 1 != ph_sscanf(from, "%d", width ) )
         return EINVAL;
 
     skip_num( &from ); skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", height ) )
+    if( 1 != ph_sscanf(from, "%d", height ) )
         return EINVAL;
 
     skip_num( &from ); skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", maxcolorval ) )
+    if( 1 != ph_sscanf(from, "%d", maxcolorval ) )
         return EINVAL;
 
     skip_num( &from );

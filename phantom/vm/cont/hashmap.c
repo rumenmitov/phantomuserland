@@ -80,14 +80,14 @@ void hashmap_dump(Hashmap *h)
     for (i=0; i<table_size[h->table_size_index]; i++) {
         Entry *e = h->table[i];
 
-        printf("\nslot %3d: ", i);
+        ph_printf("\nslot %3d: ", i);
         while (e)
         {
-            printf("\"%s\"=>\"%s\" ", (char*) KEY(e), (char*) e->value);
+            ph_printf("\"%s\"=>\"%s\" ", (char*) KEY(e), (char*) e->value);
             e=e->next_in_bucket;
         }
     }
-    printf("\n");
+    ph_printf("\n");
 }
 
 void* hashmap_get(Hashmap *h, void *key, void *key_end)

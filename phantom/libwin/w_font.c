@@ -346,7 +346,7 @@ static void font_reverse_x(drv_video_font_t *font)
 {
     if(font->xsize > 0) return;
     font->xsize = -font->xsize;
-    //printf("reverse font x\n");
+    //ph_printf("reverse font x\n");
 
     int bpcx = 1 + ((font->xsize-1) / 8);
     int bcount = bpcx * font->ysize;

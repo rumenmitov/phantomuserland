@@ -50,7 +50,7 @@ void test_fail(errno_t rc)
 
 void test_fail_msg(errno_t rc, const char *msg)
 {
-    printf( "Test fail: %s\n", msg );
+    ph_printf( "Test fail: %s\n", msg );
     longjmp( jb, rc );
 }
 
@@ -90,7 +90,7 @@ void report( int rc, const char *test_name )
     if( !rc )
     {
 	// CI: this message is being watched by CI scirpts (ci-runtest.sh)
-        printf("KERNEL TEST PASSED: %s\n", test_name );
+        ph_printf("KERNEL TEST PASSED: %s\n", test_name );
         return;
     }
 
@@ -99,11 +99,11 @@ void report( int rc, const char *test_name )
 
     nFailed++;
     // CI: this message is being watched by CI scirpts (ci-runtest.sh)
-    printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, rcs );
+    ph_printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, rcs );
 
     if( fhandler_f )
     {
-        printf("Post mortem:\n");
+        ph_printf("Post mortem:\n");
         fhandler_f( fhandler_arg );
     }
 }
@@ -125,11 +125,11 @@ void run_test( const char *test_name, const char *test_parm )
     //int i;
 
 #ifndef ARCH_ia32
-    printf("sleeping 2 sec\n");
+    ph_printf("sleeping 2 sec\n");
     hal_sleep_msec(2000);
 #endif
 
-    printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
+    ph_printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
     TEST(hdir);
 
@@ -226,14 +226,14 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(vm_map);
 
-    printf("\n-----\n" );
+    ph_printf("\n-----\n" );
     if(nFailed)
-        printf("some tests FAILED\n" );
+        ph_printf("some tests FAILED\n" );
     else
-        printf("all tests PASSED\n" );
+        ph_printf("all tests PASSED\n" );
 
     // CI: this message is being watched by CI scripts (ci-runtest.sh)
-    printf( "-----\nPhantom test suite FINISHED\n-----\n" );
+    ph_printf( "-----\nPhantom test suite FINISHED\n-----\n" );
 
 }
 

@@ -18,7 +18,7 @@
 
 void videotest(void)
 {
-    //printf("\n\nTEST\n\n");
+    //ph_printf("\n\nTEST\n\n");
     //SHOW_FLOW0( 1, "videotest()" );
     //drv_video_window_t *w1 = drv_video_window_create( WXS, WYS, 350, 350, COLOR_BLACK, "Test 2", WFLAG_WIN_DECORATED );
 
@@ -48,7 +48,7 @@ void videotest(void)
 
     if( font1 == INVALID_POOL_HANDLE )
     {
-        printf("\n\nTTF 1 FAIL\n\n");
+        ph_printf("\n\nTTF 1 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font1,
@@ -62,7 +62,7 @@ void videotest(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font2,
@@ -236,7 +236,7 @@ void videotest()
         FILE *f = fopen(bpm, "r" );
         if(f == NULL )
         {
-            printf("can't open %s\n", bpm );
+            ph_printf("can't open %s\n", bpm );
             exit(33);
         }
 
@@ -244,7 +244,7 @@ void videotest()
         long size = ftell( f );
         fseek( f, 0, SEEK_SET );
 
-        printf("Size of %s is %ld\n", bpm, size );
+        ph_printf("Size of %s is %ld\n", bpm, size );
 
         char *data = ph_malloc(size);
 
@@ -257,7 +257,7 @@ void videotest()
         ph_free(data);
 
         if(result)
-            printf("can't parse %s: %d\n", bpm, result );
+            ph_printf("can't parse %s: %d\n", bpm, result );
         else
         {
             drv_video_bitblt(bmp->pixel, 0, 0, bmp->xsize, bmp->ysize, 0xFF );

@@ -231,12 +231,12 @@ amap_dump( amap_t *map )
     queue_iterate(&(map->queue), ie, amap_entry_t *, chain)
     {
         /*
-        printf(
+        ph_printf(
                "[0x%08X - 0x%08X[ : 0x%4X\n",
                (int)ie->start, (int)ie->start+ie->n_elem, ie->flags
               );
         */
-        printf(
+        ph_printf(
                "[0x%09qX - 0x%09qX[ : 0x%4X\n",
                ie->start, ie->start+ie->n_elem, ie->flags
               );

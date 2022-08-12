@@ -141,7 +141,7 @@ int cancel_net_timer(net_timer_event *e)
 //         hal_sleep_msec(NET_TIMER_INTERVAL);
 
 //         now = system_time();
-// //printf("(^)");
+// //ph_printf("(^)");
 //     retry:
 //         mutex_lock(&net_q.lock);
 

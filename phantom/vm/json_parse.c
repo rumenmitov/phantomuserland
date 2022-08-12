@@ -56,13 +56,13 @@ errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
     if (o == NULL) return 0;
 
     int i;
-    for( i = 0; i < tab; i++ ) printf("\t");
+    for( i = 0; i < tab; i++ ) ph_printf("\t");
 
-    if( key != 0 ) { pvm_object_print( key ); printf(": "); }
+    if( key != 0 ) { pvm_object_print( key ); ph_printf(": "); }
 
     if(o->_class == pvm_get_array_class())
     {
-        printf("[\n");
+        ph_printf("[\n");
         int asize = get_array_size(o);
 
             for( i = 0; i < asize; i++ )
@@ -71,7 +71,7 @@ errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
                 pvm_print_json_ext( key, el, tab+1 );
             }
             
-        printf("]\n");
+        ph_printf("]\n");
     }
     else if(o->_class == pvm_get_directory_class())
     {
@@ -82,7 +82,7 @@ errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
 
             int asize = get_array_size(keys);
             
-            printf("\n");
+            ph_printf("\n");
 
             int i;
             for( i = 0; i < asize; i++ )
@@ -98,7 +98,7 @@ errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
     else 
     {
         pvm_object_print(o);
-        printf("\n");
+        ph_printf("\n");
     }
 
     return rc;
@@ -148,23 +148,23 @@ pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, 
     if (jv == NULL) return 0;
 
     int i;
-    for( i = 0; i < tab; i++ ) if(PRINT_PARSED||PRINT_ADDED) printf("\t");
+    for( i = 0; i < tab; i++ ) if(PRINT_PARSED||PRINT_ADDED) ph_printf("\t");
 
-    if(PRINT_PARSED && name) printf("'%s': ", name );
+    if(PRINT_PARSED && name) ph_printf("'%s': ", name );
 
     switch(jv->type)
     {
-    case json_integer:  if(PRINT_PARSED) printf("%lld\n", jv->u.integer );     return pvm_create_long_object(jv->u.integer); 
-    case json_double:   if(PRINT_PARSED) printf("%g\n", jv->u.dbl );           return pvm_create_double_object(jv->u.dbl); 
-    case json_string:   if(PRINT_PARSED) printf("'%s'\n", jv->u.string.ptr );  return pvm_create_string_object_binary( jv->u.string.ptr, jv->u.string.length );
-    case json_boolean:  if(PRINT_PARSED) printf("%d\n", jv->u.boolean );       return pvm_create_int_object( jv->u.boolean );
+    case json_integer:  if(PRINT_PARSED) ph_printf("%lld\n", jv->u.integer );     return pvm_create_long_object(jv->u.integer); 
+    case json_double:   if(PRINT_PARSED) ph_printf("%g\n", jv->u.dbl );           return pvm_create_double_object(jv->u.dbl); 
+    case json_string:   if(PRINT_PARSED) ph_printf("'%s'\n", jv->u.string.ptr );  return pvm_create_string_object_binary( jv->u.string.ptr, jv->u.string.length );
+    case json_boolean:  if(PRINT_PARSED) ph_printf("%d\n", jv->u.boolean );       return pvm_create_int_object( jv->u.boolean );
 
     case json_object:        
         //print_jv( jv->u.object.values->name, jv->u.object.values->value, tab+1 );
         {
             pvm_object_t dir = pvm_create_directory_object();
             struct data_area_4_directory *d = pvm_object_da( dir, directory );
-            if(PRINT_PARSED||PRINT_ADDED) printf("\n" );
+            if(PRINT_PARSED||PRINT_ADDED) ph_printf("\n" );
             int length, x;        
             length = jv->u.object.length;
             for (x = 0; x < length; x++) 
@@ -174,24 +174,24 @@ pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, 
                 {    
                     if(PRINT_ADDED)
                     {
-                    printf("hdir_add '%*s' = ", jv->u.object.values[x].name_length, jv->u.object.values[x].name );
+                    ph_printf("hdir_add '%*s' = ", jv->u.object.values[x].name_length, jv->u.object.values[x].name );
                     pvm_object_print(ent);
-                    printf("\n" );
+                    ph_printf("\n" );
                     }
 
                     errno_t rc = hdir_add( d, jv->u.object.values[x].name, jv->u.object.values[x].name_length, ent );
-                    if( rc ) printf("failed hdir_add %d\n", rc );
+                    if( rc ) ph_printf("failed hdir_add %d\n", rc );
                 }
             }
 
-            if(PRINT_PARSED||PRINT_ADDED) printf("\n");
+            if(PRINT_PARSED||PRINT_ADDED) ph_printf("\n");
             return dir;
         }
 
     case json_array:
         {
             pvm_object_t arr = pvm_create_array_object();
-            if(PRINT_PARSED||PRINT_ADDED) printf("[ \n" );
+            if(PRINT_PARSED||PRINT_ADDED) ph_printf("[ \n" );
         for( i = 0; i < jv->u.array.length; i++ ) 
         {
             pvm_object_t ret = pvm_convert_json_to_objects_ext( 0, jv->u.array.values[i], tab+1 );
@@ -200,8 +200,8 @@ pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, 
         }
         if(PRINT_PARSED||PRINT_ADDED) 
         {
-            for( i = 0; i < tab; i++ ) printf("\t");
-            printf("]\n" );
+            for( i = 0; i < tab; i++ ) ph_printf("\t");
+            ph_printf("]\n" );
         }
         return arr;
         }
@@ -318,13 +318,13 @@ json_handler_t jh;
 #define CHECK_TYPE( __t ) \
 	if( t->type != (__t) ) { \
 		jhp->error = EINVAL; \
-		printf("level %d type is %d , not %d", level, t->type, (__t) ); \
+		ph_printf("level %d type is %d , not %d", level, t->type, (__t) ); \
 	}
 
 #define CHECK_VALUE( __v ) \
 	if( json_strneq( s, l, (__v)) ) { \
 		jhp->error = EINVAL; \
-		printf("level %d value is '%.*s' , not '%s'", level, l, s, (__v) ); \
+		ph_printf("level %d value is '%.*s' , not '%s'", level, l, s, (__v) ); \
 	}
 
 #define LEVEL_IS( __l, __s ) ( !json_strneq( jhp->string[__l], jhp->len[__l], (__s) ) )
@@ -335,7 +335,7 @@ void json_process_token(jsmntok_t * t, const char *full_string, int level )
 
 	if(level >= MAX_JSON_DEPTH)
 	{
-		printf("JSON too deep");
+		ph_printf("JSON too deep");
 		return;
 	}
 
@@ -381,15 +381,15 @@ void json_process_token(jsmntok_t * t, const char *full_string, int level )
 		case 3:
 			if( LEVEL_IS( 2, "class" ) )
 			{
-				printf("class %.*s\n", l, s );
+				ph_printf("class %.*s\n", l, s );
 			}
 			else if( LEVEL_IS( 2, "value" ) )
 			{
-				printf("value %.*s\n", l, s );
+				ph_printf("value %.*s\n", l, s );
 			}
 			else
 			{
-				printf("not class or value\n");
+				ph_printf("not class or value\n");
 				jhp->error = EINVAL;
 			}
 
@@ -412,7 +412,7 @@ void json_dump_token(jsmntok_t * t, const char *full_string)
 			case JSMN_PRIMITIVE: type = "primitive"; break;				
 			}
 
-			printf( 
+			ph_printf( 
 				"%s: '%.*s' parent %d pos %d end %d size %d\n", 
 					type,
 					tt.end-tt.start, 
@@ -452,12 +452,12 @@ size_t json_descent(
 	while( size-- > 0 )
 	{
 		int i = level;
-		while(i--) printf("\t");
+		while(i--) ph_printf("\t");
 		json_dump_token(tokens,full_string);
 		
 		if( tokens->parent != parent )
 		{
-			printf("given parent %d, tokens->parent %d\n", parent, tokens->parent );
+			ph_printf("given parent %d, tokens->parent %d\n", parent, tokens->parent );
 		}
 
 		json_process_token(tokens,full_string, level);
@@ -491,12 +491,12 @@ void parse_and_dump( const char * j1 )
 
 	rc = json_parse( j1, &tokens, &count );
 	if( rc )
-		printf("rc = %d for '%s'\n", rc, j1 );
+		ph_printf("rc = %d for '%s'\n", rc, j1 );
 	else
 	{
-		printf("parsed '%s', %d tokens\n\n", j1, count );
+		ph_printf("parsed '%s', %d tokens\n\n", j1, count );
 		json_dump(tokens,count,j1);
-		printf("\n\n");
+		ph_printf("\n\n");
 		json_descent( tokens+1, count-1, tokens+0, 0, tokens[0].size, 0, j1 );
 		ph_free(tokens);
 	}
@@ -505,7 +505,7 @@ void parse_and_dump( const char * j1 )
 void pvm_json_test()
 {
 	//sleep(1);
-	printf("\n");
+	ph_printf("\n");
 
 	//const char j1[] = "{ \"a\" : \"hello\", \"b\" : 122, \"c\" : [ \"c1\", \"c2\" ] }";
 	//parse_and_dump(j1);
@@ -652,14 +652,14 @@ static const char *parse_string(char **item, const char *str)
 			case 'r': *ptr2++='\r';	break;
 			case 't': *ptr2++='\t';	break;
 			case 'u':	 /* transcode utf16 to utf8. */
-				sscanf(ptr+1,"%4x",&uc);ptr+=4;	/* get the unicode char. */
+				ph_sscanf(ptr+1,"%4x",&uc);ptr+=4;	/* get the unicode char. */
 
 				if ((uc>=0xDC00 && uc<=0xDFFF) || uc==0)	break;	// check for invalid.
 
 				if (uc>=0xD800 && uc<=0xDBFF)	// UTF16 surrogate pairs.
 				{
 					if (ptr[1]!='\\' || ptr[2]!='u')	break;	// missing second-half of surrogate.
-					sscanf(ptr+3,"%4x",&uc2);ptr+=6;
+					ph_sscanf(ptr+3,"%4x",&uc2);ptr+=6;
 					if (uc2<0xDC00 || uc2>0xDFFF)		break;	// invalid second-half of surrogate.
 					uc=0x10000 | ((uc&0x3FF)<<10) | (uc2&0x3FF);
 				}

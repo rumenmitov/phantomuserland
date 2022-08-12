@@ -582,7 +582,7 @@ rewrap:
 
     }
     //goto rewrap;
-    printf("? no free in arena with nused <= arena_size");
+    ph_printf("? no free in arena with nused <= arena_size");
     goto next_arena;
 
     return -1;

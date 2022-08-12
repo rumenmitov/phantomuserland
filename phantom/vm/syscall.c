@@ -97,7 +97,7 @@ static int debug_print = 0;
 int invalid_syscall( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    printf("invalid syscal for object: "); dumpo( (addr_t)(o) );
+    ph_printf("invalid syscal for object: "); dumpo( (addr_t)(o) );
     SYSCALL_THROW_STRING( "invalid syscall called" );
 }
 
@@ -238,7 +238,7 @@ static int si_int_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_ar
 {
     DEBUG_INFO;
     char buf[32];
-    snprintf( buf, sizeof(buf), "%d", pvm_get_int(me) );
+    ph_snprintf( buf, sizeof(buf), "%d", pvm_get_int(me) );
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -246,7 +246,7 @@ static int si_int_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     char buf[32];
-    snprintf( buf, 31, "<int>%d</int>", pvm_get_int(me) );
+    ph_snprintf( buf, 31, "<int>%d</int>", pvm_get_int(me) );
         SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -302,7 +302,7 @@ static int si_long_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_a
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "%lld", pvm_get_long(me) ); // TODO right size?
+    ph_snprintf( buf, sizeof(buf), "%lld", pvm_get_long(me) ); // TODO right size?
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -310,7 +310,7 @@ static int si_long_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "<long>%lld</long>", pvm_get_long(me) );
+    ph_snprintf( buf, sizeof(buf), "<long>%lld</long>", pvm_get_long(me) );
         SYSCALL_RETURN(pvm_create_string_object( buf ));
     //SYSCALL_THROW_STRING( "int toXML called" );
 }
@@ -360,7 +360,7 @@ static int si_float_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "%f", pvm_get_float(me) ); // TODO right size?
+    ph_snprintf( buf, sizeof(buf), "%f", pvm_get_float(me) ); // TODO right size?
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -368,7 +368,7 @@ static int si_float_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_are
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "<float>%f</float>", pvm_get_float(me) );
+    ph_snprintf( buf, sizeof(buf), "<float>%f</float>", pvm_get_float(me) );
         SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -418,7 +418,7 @@ static int si_double_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "%f", pvm_get_double(me) ); // TODO right size?
+    ph_snprintf( buf, sizeof(buf), "%f", pvm_get_double(me) ); // TODO right size?
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -426,7 +426,7 @@ static int si_double_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_ar
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "<double>%f</double>", pvm_get_double(me) );
+    ph_snprintf( buf, sizeof(buf), "<double>%f</double>", pvm_get_double(me) );
         SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -1088,7 +1088,7 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
 #if !CACHED_CLASSES
     return ENOENT;
 #else
-    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
+    if(DEBUG_CACHED_CLASSES) ph_printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
 
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
 
@@ -1096,7 +1096,7 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
 
     if( DEBUG_CACHED_CLASSES && (rc == 0) )
     {
-        //printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
+        //ph_printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
         pvm_object_dump( *new_class );
     }
     return rc;
@@ -1123,7 +1123,7 @@ errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_
 #if !CACHED_CLASSES
     return 0;
 #else
-    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
+    if(DEBUG_CACHED_CLASSES) ph_printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
     errno_t rc = hdir_add( da, name, name_len, new_class );
     return rc;
@@ -1169,7 +1169,7 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
 
     if( 0 == pvm_class_cache_lookup(buf, len, &new_class) )
     {
-        printf("got from cache class '%.*s' @%p\n", len, buf, new_class );
+        ph_printf("got from cache class '%.*s' @%p\n", len, buf, new_class );
         ref_inc_o(new_class);
         SYSCALL_RETURN(new_class);
     }
@@ -2065,7 +2065,7 @@ static int si_connection_8_connect( pvm_object_t o, pvm_object_t *ret, struct da
     ph_strncpy( da->name, pvm_get_str_data(_s), slen );
     SYS_FREE_O(_s);
 
-    printf(".internal.connection: Connect to '%s'\n", da->name );
+    ph_printf(".internal.connection: Connect to '%s'\n", da->name );
 
     int iret = pvm_connect_object(o,tc);
 

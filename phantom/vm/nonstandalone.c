@@ -85,7 +85,7 @@ int hal_printf(const char *fmt, ...)
     va_start(ap, fmt);
 
     if( 0 == klog_f )
-        retval = vprintf(fmt, ap);
+        retval = ph_vprintf(fmt, ap);
     else
         retval = vfprintf( klog_f, fmt, ap);
 
@@ -100,7 +100,7 @@ int hal_printf(const char *fmt, ...)
 void debug_console_putc(int c)
 {
     if( kout_f ) fputc( c, kout_f );
-    else putchar(c);
+    else ph_putchar(c);
 }
 
 
@@ -118,7 +118,7 @@ void lprintf(char const *fmt, ...)
     if( klog_f )
         vfprintf( klog_f, fmt, ap);
     else
-        vprintf(fmt, ap);
+        ph_vprintf(fmt, ap);
     va_end(ap);
 }
 
@@ -150,7 +150,7 @@ static int cfd = -1;
 
 int putDebugChar(char c)    /* write a single character      */
 {
-    //putchar(c);
+    //ph_putchar(c);
     int rc = write( cfd, &c, 1 );
     return rc;
 }
@@ -160,7 +160,7 @@ extern char getDebugChar(void)     /* read and return a single char */
     char c;
     int rc = read( cfd, &c, 1 );
 
-    //if( rc > 0 ) putchar(c);
+    //if( rc > 0 ) ph_putchar(c);
 
     if( rc < 0 ) 
         perror("gdb sock read");
@@ -179,23 +179,23 @@ void gdb_stub_handle_cmds(void *da, int signal);
 void winhal_debug_srv_thread(int *arg)
 {
     (void) arg;
-    //printf("Debug server running\n");
+    //ph_printf("Debug server running\n");
 #ifndef NO_NETWORK
 
     int ls = socket( PF_INET, SOCK_STREAM, 0);
     //int ls = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if( ls < 0 )
     {
-        printf("! Debug server socket error\n");
+        ph_printf("! Debug server socket error\n");
         return;
     }
 
     winhal_setport( ls, 1256 );
 
-    printf("Debug server listen\n");
+    ph_printf("Debug server listen\n");
     if(listen(ls,1))
     {
-        printf("! Debug server listen error\n");
+        ph_printf("! Debug server listen error\n");
         return;
     }
 
@@ -204,7 +204,7 @@ void winhal_debug_srv_thread(int *arg)
         struct sockaddr_in client_addr;
         unsigned int clinetLen = sizeof(client_addr);
 
-        //printf("Debug server accept\n");
+        //ph_printf("Debug server accept\n");
         cfd = accept( ls, (struct sockaddr *) &client_addr, &clinetLen );
         if (cfd == -1)
         {
@@ -212,14 +212,14 @@ void winhal_debug_srv_thread(int *arg)
 			close(ls);
             return;
         }
-        printf("Debug server accepted from %s\n", inet_ntoa(client_addr.sin_addr) );
+        ph_printf("Debug server accepted from %s\n", inet_ntoa(client_addr.sin_addr) );
 
         //while(1)
         {
-            //printf("Debug server read cmds\n");
+            //ph_printf("Debug server read cmds\n");
             if(!setjmp(finish_gdb_socket))
                 gdb_stub_handle_cmds(0, 0);
-            printf("Debug server close connection\n");
+            ph_printf("Debug server close connection\n");
         }
 
         close(cfd);
@@ -399,7 +399,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 
     int sock;
 
-    printf( "\n\ncurl '%s'\n", url );
+    ph_printf( "\n\ncurl '%s'\n", url );
 
     if( ph_strlen(url) > CURL_MAXBUF )
         return EINVAL;
@@ -425,7 +425,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
             addr.sin_port = port;
     }
 
-    printf( "curl host '%s' path '%s'\n", host, path );
+    ph_printf( "curl host '%s' path '%s'\n", host, path );
 
     in_addr_t out;
 
@@ -434,7 +434,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
     if( he == 0 )
     {
         rc == ENOENT; //?
-        printf( "can't resolve '%s', %d\n", host, rc );
+        ph_printf( "can't resolve '%s', %d\n", host, rc );
         return rc;
     }
 
@@ -446,7 +446,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
     sock = socket(AF_INET , SOCK_STREAM , 0);
     if( sock < 0 )
     {
-        printf( "can't open TCP socket\n" );
+        ph_printf( "can't open TCP socket\n" );
         return ENOMEM;
     }
 
@@ -465,13 +465,13 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 */
     //SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip1, ip2, ip3, port);
 
-    printf( "TCP - will connect\n" );
+    ph_printf( "TCP - will connect\n" );
     if( connect( sock, (void *)&addr, sizeof(addr)) )
     {
-        printf( "can't connect to %s\n", host );
+        ph_printf( "can't connect to %s\n", host );
         goto err;
     }
-    printf( "TCP - connected\n");
+    ph_printf( "TCP - connected\n");
 
     char buf[1024*10];
 
@@ -488,10 +488,10 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 
     strlcat( buf, "\r\n", sizeof(buf) );
 
-    //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
+    //ph_snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = ph_strlen(buf);
     int nwrite = write( sock, buf, len );
-    //printf( "TCP - write = %d, requested %d (%s)\n", nwrite, len, buf );
+    //ph_printf( "TCP - write = %d, requested %d (%s)\n", nwrite, len, buf );
     if( nwrite != len ) goto err;
 
     ph_memset( obuf, 0, obufsize );
@@ -501,12 +501,12 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
         nread = read( sock, buf, sizeof(buf)-1 ); // , &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50
         buf[sizeof(buf)-1] = 0;
         
-        //printf("TCP - read = %d\n", nread );
+        //ph_printf("TCP - read = %d\n", nread );
 
         if( nread == 0 ) break;
         if( nread < 0 )
         {
-            //printf("TCP - err = %d\n", nread );
+            //ph_printf("TCP - err = %d\n", nread );
             close(sock);
             return nread;
         }
@@ -516,7 +516,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
         //bytes_recvd += nread;
     }
 
-    //printf("TCP - recvd = %d (%s)\n", bytes_recvd, obuf );
+    //ph_printf("TCP - recvd = %d (%s)\n", bytes_recvd, obuf );
 err:
     close(sock);
 /*

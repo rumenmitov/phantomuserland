@@ -1202,7 +1202,7 @@ pager_refill_free_reserve()
                 list->head._reserved != 0
                 )
                 {
-                printf("Free list head values are insane, need fsck\n");
+                ph_printf("Free list head values are insane, need fsck\n");
                 list->head.used = 0;
                 list->head.next = 0;
                 list->head.magic = 0;

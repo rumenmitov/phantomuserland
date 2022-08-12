@@ -190,7 +190,7 @@ phantom_disk_partition_t *select_phantom_partition(void)
     }
 
     // TODO auto-select by last snap date
-    printf("Select Phantom disk to boot:\n");
+    ph_printf("Select Phantom disk to boot:\n");
     int i;
     for( i = 0; i < n_phantom_fs_partitions; i++ )
     {
@@ -200,13 +200,13 @@ phantom_disk_partition_t *select_phantom_partition(void)
             char pname[128];
             partGetName( p, pname, sizeof(pname) );
 
-            printf("%2d: %s\n", i, pname );
+            ph_printf("%2d: %s\n", i, pname );
         }
     }
 
     do {
 
-        printf("Press digit (0-%d): \n", n_phantom_fs_partitions-1 );
+        ph_printf("Press digit (0-%d): \n", n_phantom_fs_partitions-1 );
         char c = (char)getchar();
 
         if( c < '0' || c > '9' )

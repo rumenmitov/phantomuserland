@@ -42,7 +42,7 @@ void hal_init( vmem_ptr_t va, long vs )
     hal.object_vspace = va;
     hal.object_vsize = vs;
 
-    printf("HAL init: %s %s, VM @ 0x%x\n", arch_name, board_name, hal.object_vspace );
+    ph_printf("HAL init: %s %s, VM @ 0x%x\n", arch_name, board_name, hal.object_vspace );
     pvm_alloc_init( va, vs );
 
     // hal_init_vm_map();
@@ -59,7 +59,7 @@ vmem_ptr_t hal_object_space_address() {
 void hal_halt()
 {
     //fflush(stderr);
-    printf("\n\nhal halt called, exiting.\n");
+    ph_printf("\n\nhal halt called, exiting.\n");
     (void)getchar();
     exit(1);
 }
@@ -70,7 +70,7 @@ void hal_printf( char *format, ... )
 {
     va_list argList;
     va_start(argList, format);
-    vprintf( format, argList );
+    ph_vprintf( format, argList );
     va_end(argList);
     //fflush(stdout);
 }
@@ -110,7 +110,7 @@ hal_init_object_vmem(void *start_of_virtual_address_space)
 int
 hal_addr_is_in_object_vmem( void *test )
 {
-    printf("!!! : %p <= %p < %p\n", ((addr_t)hal.object_vspace), test, ((addr_t)hal.object_vspace)+hal.object_vsize);
+    ph_printf("!!! : %p <= %p < %p\n", ((addr_t)hal.object_vspace), test, ((addr_t)hal.object_vspace)+hal.object_vsize);
     return ((addr_t)test) >= ((addr_t)hal.object_vspace) && ((addr_t)test) < ((addr_t)hal.object_vspace)+hal.object_vsize;
 }
 
@@ -173,7 +173,7 @@ hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapp
 
 void hal_assert_failed(char *file, int line)
 {
-    printf("Assert failed at %s:%d", file, line );
+    ph_printf("Assert failed at %s:%d", file, line );
     _exit(33);
 }
 

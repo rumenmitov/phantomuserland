@@ -32,7 +32,7 @@ void unix_hal_init( void )
 
     //int rc =
     //CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
-    //if( rc) printf("Win32 can't run debugger thread\n");
+    //if( rc) ph_printf("Win32 can't run debugger thread\n");
 
     /* // TODO : Uncomment
     unix_hal_start_thread( (void *)&winhal_debug_srv_thread, 0 );

@@ -167,7 +167,7 @@ void win_x11_message_loop(void)
             break;
 
         case EnterNotify:
-            printf("Enter\n");
+            ph_printf("Enter\n");
             break;
         }
 #endif

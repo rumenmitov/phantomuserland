@@ -466,7 +466,7 @@ vm_map_init(unsigned long page_count)
         {
             if( !pagelist_read_seq(&loader, &vm_map_map[np].prev_page) )
             {
-                printf("\n!!! Incomplete pagelist !!!\n");
+                ph_printf("\n!!! Incomplete pagelist !!!\n");
                 //panic("Incomplete pagelist\n");
                 break;
             }
@@ -1206,7 +1206,7 @@ page_fault( vm_page *p, int  is_writing )
     {
         p->max_latency = (int)(end - start);
         if (p->max_latency > 100000)
-            printf("page va %p, max latency: %d, %s\n",
+            ph_printf("page va %p, max latency: %d, %s\n",
                     p->virt_addr, p->max_latency, is_writing ? "w" : "r");
     }
 #endif
@@ -1939,7 +1939,7 @@ static void vm_verify_snap(disk_page_no_t head)
         }
         if (!pagelist_read_seq(&loader, &block))
         {
-            printf("Incomplete pagelist\n");
+            ph_printf("Incomplete pagelist\n");
             //panic("Incomplete pagelist\n");
             break;
         }
@@ -2059,7 +2059,7 @@ void unwire_page_for_addr( void *addr, size_t count )
 void vm_map_page_mark_unused( addr_t page_start )
 {
 #if VM_UNMAP_UNUSED_OBJECTS
-    //printf("asked to mark page %p unused\n", page_start);
+    //ph_printf("asked to mark page %p unused\n", page_start);
     vm_page *vmp = addr_to_vm_page( page_start, 0 );
 
     hal_mutex_lock(&vmp->lock);

@@ -69,7 +69,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         {
             DWORD err = GetLastError();
             //FormatMessage();
-            printf("Win error %d", (int)err);
+            ph_printf("Win error %d", (int)err);
 
             LPVOID lpMsgBuf;
             FormatMessage(
@@ -83,7 +83,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                           (LPTSTR) &lpMsgBuf,
                           0, NULL );
 
-            printf("WinErr: %s\n", (const char *)lpMsgBuf );
+            ph_printf("WinErr: %s\n", (const char *)lpMsgBuf );
 
         }
         GdiFlush();
@@ -110,7 +110,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            printf("%d,%d\n", xPos, yPos );
+            ph_printf("%d,%d\n", xPos, yPos );
             TrackMouseEvent(&eventTrack);
         }
         break;
@@ -122,7 +122,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
     case WM_CHAR:
         {
-            printf("-%x-", (int)lParam );
+            ph_printf("-%x-", (int)lParam );
         }
         break;
 
@@ -131,7 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            //	printf("%d,%d\n", xPos, yPos );
+            //	ph_printf("%d,%d\n", xPos, yPos );
 
 #if 1
             win_scr_mk_mouse_event( wParam, xPos, yPos );

@@ -60,15 +60,15 @@ static void _create_free( int i )
 
     while(i-- > 0)
     {
-        //printf("%d ", i);
+        //ph_printf("%d ", i);
         pool_handle_t  h = pool_create_el( pool, "aaa" );
         test_check_ge(h, 0);
         test_check_false(pool_release_el( pool, h ));
         //pool_destroy_el( pool, h );
-        //if( (i%10) == 0 ) printf(".");
-        //if( (i%100) == 0 ) printf("\n");
+        //if( (i%10) == 0 ) ph_printf(".");
+        //if( (i%100) == 0 ) ph_printf("\n");
     }
-    //printf("\n");
+    //ph_printf("\n");
     //_show_free();
 }
 

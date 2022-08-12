@@ -110,7 +110,7 @@ static map_elem_t    	mapbuf[MAP_SIZE_ELEM(PHYSALLOC_MAXPAGES)];
 //     STAT_INC_CNT_N(STAT_CNT_VA_ALLOC, num);
 
 //     *result = (void *)(ret * PAGE_SIZE);
-//     //printf("hal_alloc_vaddress req %d pages, ret 0x%X (internal %d)\n", num, *result, ret );
+//     //ph_printf("hal_alloc_vaddress req %d pages, ret 0x%X (internal %d)\n", num, *result, ret );
 //     return rc;
 // }
 
@@ -237,7 +237,7 @@ static void 		replentishThread(void *arg);
 
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-// //printf("PhysMem alloc %08X-%08X\n",           *result, (physaddr_t)((ret+npages) * PAGE_SIZE) );
+// //ph_printf("PhysMem alloc %08X-%08X\n",           *result, (physaddr_t)((ret+npages) * PAGE_SIZE) );
 //     return rc;
 // }
 
@@ -304,7 +304,7 @@ static void 		replentishThread(void *arg);
 //     STAT_INC_CNT_N(STAT_CNT_PMEM_ALLOC, 1);
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-// //printf("PhysMem alloc %08X\n", *result );
+// //ph_printf("PhysMem alloc %08X\n", *result );
 //     return rc;
 // }
 
@@ -410,7 +410,7 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 //     STAT_INC_CNT_N(STAT_CNT_LOMEM_ALLOC, npages);
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-//     //printf("hal_alloc_phys_pages_low req %d pages, ret 0x%X (internal %d)\n", npages, *result, ret );
+//     //ph_printf("hal_alloc_phys_pages_low req %d pages, ret 0x%X (internal %d)\n", npages, *result, ret );
 //     return rc;
 // }
 
@@ -666,7 +666,7 @@ static void dump_mem_stat( physalloc_t *map, const char *name, long div, const c
     int total = PG2MB(map->allocable_size, div);
     int free = PG2MB( (map->allocable_size - map->n_used_pages), div );
     int used = PG2MB(map->n_used_pages, div);
-    printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
+    ph_printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
 }
 
 // size_t pahantom_total_phys_mem_kb() { return PG2KB(pm_map.allocable_size); }

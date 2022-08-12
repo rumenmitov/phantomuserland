@@ -33,7 +33,7 @@
 
 static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    //printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
+    //ph_printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
 
     if( (e->m.clicked & UI_MOUSE_BTN_RIGHT) && (w->context_menu != 0) )
     {
@@ -119,7 +119,7 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
     //drv_video_window_t *mainw = w->w_owner ? drv_video_window_t *w : w;
-    //printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
+    //ph_printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
     switch(e->w.info)
     {
     case UI_EVENT_WIN_GOT_FOCUS:
@@ -151,7 +151,7 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         break;
 
     case UI_EVENT_WIN_BUTTON_ON: 
-        //printf("client win button %x\n", e->extra );
+        //ph_printf("client win button %x\n", e->extra );
     break;
 
     case UI_EVENT_WIN_TO_TOP:    w_to_top( w ); break;
@@ -169,7 +169,7 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-	//printf("defaultWindowEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
+	//ph_printf("defaultWindowEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
 
     switch(e->type)
     {

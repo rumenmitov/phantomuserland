@@ -37,7 +37,7 @@
 
 // void hal_init( vmem_ptr_t va, long vs )
 // {
-//     printf("Unix HAL init @%p\n", va);
+//     ph_printf("Unix HAL init @%p\n", va);
 
 //     unix_hal_init();
 
@@ -65,7 +65,7 @@
 // void    hal_halt()
 // {
 //     //fflush(stderr);
-//     printf("\n\nhal halt called, exiting.\n");
+//     ph_printf("\n\nhal halt called, exiting.\n");
 //     getchar();
 //     exit(1);
 // }
@@ -110,7 +110,7 @@
 //         {
 //             if( !prevdiff )
 //             {
-//                 printf(", d@ 0x%04x", mem - start );
+//                 ph_printf(", d@ 0x%04x", mem - start );
 //             }
 //             prevdiff = prevdiff ? 2 : 1;
 //             *copy = *mem;
@@ -119,7 +119,7 @@
 //         {
 //             if( prevdiff == 2 )
 //             {
-//                 printf( "-%04x", mem - start -1 );
+//                 ph_printf( "-%04x", mem - start -1 );
 //                 prevdiff = 0;
 //             }
 //         }
@@ -127,7 +127,7 @@
 //         copy++;
 //     }
 
-//     printf(" Press Enter...");
+//     ph_printf(" Press Enter...");
 //     getchar();
 // #endif
 // }
@@ -142,7 +142,7 @@ void event_q_put_win(int x, int y, int info, struct drv_video_window *focus)
 
 int drv_video_window_get_event(drv_video_window_t *w, struct ui_event *e, int wait)
 {
-    printf("\nGetEvent!?\n");
+    ph_printf("\nGetEvent!?\n");
     w->events_count--;
     assert(!wait);
     return 0;
@@ -168,10 +168,10 @@ void hal_cpu_reset_real() { exit(33); }
 // debug_ext.h support
 // -----------------------------------------------------------------------
 
-void console_set_error_color() { printf("\x1b[31m"); }
-void console_set_normal_color() { printf("\x1b[37m"); }
-void console_set_message_color(void) { printf("\x1b[34m"); }
-void console_set_warning_color(void) { printf("\x1b[33m"); }
+void console_set_error_color() { ph_printf("\x1b[31m"); }
+void console_set_normal_color() { ph_printf("\x1b[37m"); }
+void console_set_message_color(void) { ph_printf("\x1b[34m"); }
+void console_set_warning_color(void) { ph_printf("\x1b[33m"); }
 
 int debug_max_level_error = 255;
 int debug_max_level_info = 255;
@@ -179,7 +179,7 @@ int debug_max_level_flow = 255;
 
 void phantom_check_threads_pass_bytecode_instr_boundary(void)
 {
-    printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
+    ph_printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
 }
 
 void console_set_fg_color(struct rgba_t c)
@@ -188,7 +188,7 @@ void console_set_fg_color(struct rgba_t c)
 
 // void vm_map_page_mark_unused( addr_t page_start)
 // {
-//     //printf("asked to mark page unused\n");
+//     //ph_printf("asked to mark page unused\n");
 // }
 
 #warning stub
@@ -212,7 +212,7 @@ void phantom_set_console_getchar(int (*_getchar_impl)(void))
 void debug_console_putc(int c)
 {
     if( kout_f ) fputc( c, kout_f );
-    else putchar(c);
+    else ph_putchar(c);
 }
 
 #include <kernel/debug.h>
@@ -227,7 +227,7 @@ void lprintf(char const *fmt, ...)
     if( klog_f )
         vfprintf( klog_f, fmt, ap);
     else
-        vprintf(fmt, ap);
+        ph_vprintf(fmt, ap);
     va_end(ap);
 }
 

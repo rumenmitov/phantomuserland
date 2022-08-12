@@ -93,7 +93,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            //	printf("%d,%d\n", xPos, yPos );
+            //	ph_printf("%d,%d\n", xPos, yPos );
 
             drv_video_x11.mouse_x = xPos;
             drv_video_x11.mouse_y = yPos;
@@ -151,7 +151,7 @@ void    pvm_x11_window_thread()
 
 
     win_x11_message_loop();
-    //printf("Message loop end\n");
+    //ph_printf("Message loop end\n");
 
 }
 
@@ -160,7 +160,7 @@ int pvm_x11_init()
 {
     drv_video_x11.screen = 0; // Not ready yet
 
-    printf("Starting X11 graphics 'driver'\n" );
+    ph_printf("Starting X11 graphics 'driver'\n" );
 
 
     static unsigned long tid;

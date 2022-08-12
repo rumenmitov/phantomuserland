@@ -211,7 +211,7 @@ static void w_tt_paint_char(window_handle_t win, const struct ttf_symbol *symb, 
 
             if (0 == c)
             {
-                //putchar('-');
+                //ph_putchar('-');
                 continue;
             }
 
@@ -413,7 +413,7 @@ void w_ttfont_draw_string_ext(
         symbols[i].posX -= left;
     }
 
-    //printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
+    //ph_printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
 
     //const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
@@ -971,7 +971,7 @@ static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name )
    // tmp run in FS? user mode?
 
     char buf[1024];
-    snprintf( buf, sizeof(buf)-1, "P:/phantomuserland/plib/resources/ttfonts/opensans/%s", file_name );
+    ph_snprintf( buf, sizeof(buf)-1, "P:/phantomuserland/plib/resources/ttfonts/opensans/%s", file_name );
 
     hal_mutex_lock( &faces_mutex );
     int rc = FT_New_Face(ftLibrary, buf, 0, ftFace);
@@ -1015,12 +1015,12 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 {
     FT_Face ftFace;
 
-    //printf( "w_get_tt_font_mem '%s' %d\n", diag_font_name, font_size );
+    //ph_printf( "w_get_tt_font_mem '%s' %d\n", diag_font_name, font_size );
 
     int rc = w_load_tt_from_mem( &ftFace, mem_font, mem_font_size, diag_font_name );
     if( rc )
     {
-        printf( "w_get_tt_font_mem FAILED '%s' %d\n", diag_font_name, font_size );
+        ph_printf( "w_get_tt_font_mem FAILED '%s' %d\n", diag_font_name, font_size );
         return INVALID_POOL_HANDLE;
     }
 
@@ -1099,10 +1099,10 @@ static void dump_face( FT_Face ftFace )
     //    FT_FaceRec *fr = (FT_FaceRec *)ftFace;
     FT_Face fr = ftFace;
 
-    printf( "Face:\n" );
+    ph_printf( "Face:\n" );
 
-    printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
-    printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
+    ph_printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
+    ph_printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
 }*/
 
 

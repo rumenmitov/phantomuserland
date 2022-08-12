@@ -44,17 +44,17 @@ void drawbmp(Display *display, Window win, GC gc)
         /* check for failure or success. */
         switch (rc) {
         case BitmapOpenFailed:
-            printf( "XReadBitmapFile - could not open file 'icon.bmp'.\n");
+            ph_printf( "XReadBitmapFile - could not open file 'icon.bmp'.\n");
             exit(1);
             break;
         case BitmapFileInvalid:
-            printf(
+            ph_printf(
                     "XReadBitmapFile - file '%s' doesn't contain a valid bitmap.\n",
                     "icon.bmp");
             exit(1);
             break;
         case BitmapNoMemory:
-            printf( "XReadBitmapFile - not enough memory.\n");
+            ph_printf( "XReadBitmapFile - not enough memory.\n");
             exit(1);
             break;
         }

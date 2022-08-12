@@ -29,7 +29,7 @@ int fn2cn( char *out, const char *in, int outsz )
         return 0;
     }
 
-    printf("input file (%s) has no '.pc' extension, skip, ", in);
+    ph_printf("input file (%s) has no '.pc' extension, skip, ", in);
     return 1;
 }
 
@@ -59,14 +59,14 @@ void copyf( FILE *outfp, FILE *infp, int lencheck )
         len = fread( buf, 1, bs, infp );
         if( len < 0 )
         {
-            printf("Read error\n");
+            ph_printf("Read error\n");
             exit(2);
         }
 
         int res = fwrite( buf, 1, len, outfp );
         if( len != res )
         {
-            printf("Write error\n");
+            ph_printf("Write error\n");
             exit(2);
         }
 
@@ -75,7 +75,7 @@ void copyf( FILE *outfp, FILE *infp, int lencheck )
 
     if( lencheck != 0 )
         {
-            printf("Length error\n");
+            ph_printf("Length error\n");
             exit(2);
         }
 }
@@ -84,7 +84,7 @@ int main( int ac, char **av )
 {
     if( (ac < 3) || (av[0][0] == '-') )
     {
-        printf(
+        ph_printf(
                "mkbulk: combine Phantom class files to a special\n"
                "bulk file to bundle with kernel (classes boot module)\n"
                "\n"
@@ -99,19 +99,19 @@ int main( int ac, char **av )
     ac--;
     av++;
 
-    //printf("                       ----  Writing bulk\n");
-    //printf("                       ----  Writing bulk to %s: ", outfn);
-    //printf("                       ----  Writing bulk to %p: ", outfn);
+    //ph_printf("                       ----  Writing bulk\n");
+    //ph_printf("                       ----  Writing bulk to %s: ", outfn);
+    //ph_printf("                       ----  Writing bulk to %p: ", outfn);
 
     //outf = fopen( outfn, "wb" );
     outf = fopen( outfn, "w" );
     if( outf == NULL )
     {
-        printf("Can't open %s for write\n", outfn);
+        ph_printf("Can't open %s for write\n", outfn);
         exit(1);
     }
 
-    //printf("Writing bulk to %s: ", outfn);
+    //ph_printf("Writing bulk to %s: ", outfn);
 
 
     while( ac-- )
@@ -127,15 +127,15 @@ int main( int ac, char **av )
         FILE *inf = fopen( infn, "rb" );
         if( outf == NULL )
         {
-            printf("can't open %s, skip%c ", infn, ac == 0 ? ' ' : ',');
+            ph_printf("can't open %s, skip%c ", infn, ac == 0 ? ' ' : ',');
             continue;
         }
 
-        //printf("%s%c ", infn, ac == 0 ? ' ' : ',' );
+        //ph_printf("%s%c ", infn, ac == 0 ? ' ' : ',' );
 
         if( fseek( inf, 0, SEEK_END ) )
         {
-            printf("can't seek %s, skip%c ", infn, ac == 0 ? ' ' : ',');
+            ph_printf("can't seek %s, skip%c ", infn, ac == 0 ? ' ' : ',');
             fclose(inf);
             continue;
         }
@@ -148,7 +148,7 @@ int main( int ac, char **av )
 
         if(ferror(inf) || ferror(outf))
         {
-            printf("I/O error\n");
+            ph_printf("I/O error\n");
             exit(2);
         }
 
@@ -156,7 +156,7 @@ int main( int ac, char **av )
     }
 
     fclose(outf);
-    //printf("done\n");
+    //ph_printf("done\n");
     return 0;
 }
 

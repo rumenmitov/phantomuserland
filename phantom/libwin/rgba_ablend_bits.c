@@ -81,7 +81,7 @@ void bitmap2bitmap_generic(
     if( moveWidth <= 0 || moveHeight <= 0 )
         return;
 
-    //printf("blit %d x %d", moveWidth, moveHeight );
+    //ph_printf("blit %d x %d", moveWidth, moveHeight );
     //int srcShift = srcX * sizeof(struct rgba_t);
     //int dstShift = destX* sizeof(struct rgba_t);
     //int srcLineStep = srcWidth * sizeof(struct rgba_t);

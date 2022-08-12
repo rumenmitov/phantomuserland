@@ -56,7 +56,7 @@ void w_ttfont_draw_string(
     rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
     if( rc )
     {
-        printf("\ncan't load font\n");
+        ph_printf("\ncan't load font\n");
         return;
     }
  

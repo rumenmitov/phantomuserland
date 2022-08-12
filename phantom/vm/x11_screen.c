@@ -94,7 +94,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            //	printf("%d,%d\n", xPos, yPos );
+            //	ph_printf("%d,%d\n", xPos, yPos );
 
             drv_video_x11.mouse_x = xPos;
             drv_video_x11.mouse_y = yPos;
@@ -169,7 +169,7 @@ void    pvm_x11_window_thread()
 
 
     win_x11_message_loop();
-    //printf("Message loop end\n");
+    //ph_printf("Message loop end\n");
 
 }
 
@@ -180,7 +180,7 @@ int pvm_video_init()
 
     drv_video_x11.screen = 0; // Not ready yet
 
-    printf("Starting X11 graphics 'driver'\n" );
+    ph_printf("Starting X11 graphics 'driver'\n" );
 
 
     static unsigned long tid;
@@ -210,7 +210,7 @@ int pvm_video_init()
 
 void win_x11_key_event( int x, int y, unsigned int state, unsigned int keycode, int isRelease )
 {
-    printf("-ky- %x %x\r", state, keycode );
+    ph_printf("-ky- %x %x\r", state, keycode );
 }
 
 void win_x11_mouse_event( int x, int y, unsigned int state )
@@ -230,7 +230,7 @@ void win_x11_mouse_event( int x, int y, unsigned int state )
     e.abs_y = VSCREEN_HEIGHT - y - 1;
 
     ev_q_put_any( &e );
-    printf("-ms- %x\r", state );
+    ph_printf("-ms- %x\r", state );
 #endif
 }
 

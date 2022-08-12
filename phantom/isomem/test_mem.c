@@ -109,39 +109,39 @@ int do_test_physmem(const char *test_parm)
 
     int t_cnt = 0;
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     hal_pv_alloc( &pa, &va, MSIZE );
 
     test_check_true( va != 0 );
     // test_check_true( pa != 0 );
     
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     ph_memset( va, 0, MSIZE );
     memcpy_p2v( buf, pa, MSIZE );
     if( memnotchar( buf, 0, MSIZE ) )
         test_fail_msg( EINVAL, "not 0");
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     ph_memset( buf, 0xFF, MSIZE );
     memcpy_v2p( pa, buf, MSIZE );
     if( memnotchar( va, 0xFF, MSIZE ) ){
         void* err_addr = memnotchar( va, 0xFF, MSIZE );
-        printf("!!!: %p (%p) = %d \n", err_addr, buf,  (int)(*(char*)err_addr)); 
+        ph_printf("!!!: %p (%p) = %d \n", err_addr, buf,  (int)(*(char*)err_addr)); 
         test_fail_msg( EINVAL, "not 1");
     }
 
     ph_memset( va, 0, MSIZE );
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     memcpy_v2p( pa, "AAA", 3 );
     if( memnotchar( va, 'A', 3 ) )
         test_fail_msg( EINVAL, "not A");
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     if( memnotchar( va+3, 0, MSIZE-3 ) )
         test_fail_msg( EINVAL, "not A0");
@@ -149,18 +149,18 @@ int do_test_physmem(const char *test_parm)
 
     ph_memset( va, 0, MSIZE );
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     memcpy_v2p( pa+10, "BBB", 3 );
     if( memnotchar( va+10, 'B', 3 ) )
         test_fail_msg( EINVAL, "not B");
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     if( memnotchar( va, 0, 10 ) )
         test_fail_msg( EINVAL, "not B0-");
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     if( memnotchar( va+13, 0, MSIZE-13 ) )
         test_fail_msg( EINVAL, "not B0+");
@@ -171,19 +171,19 @@ int do_test_physmem(const char *test_parm)
 #define SH (4096-4)
 
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     memcpy_v2p( pa+SH, "EEEEEEEE", 8 );
     if( memnotchar( va+SH, 'E', 8 ) )
         test_fail_msg( EINVAL, "not E");
 
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     if( memnotchar( va, 0, SH ) )
         test_fail_msg( EINVAL, "not E0-");
 
-    printf("!!! : T%d\n", t_cnt++);
+    ph_printf("!!! : T%d\n", t_cnt++);
 
     if( memnotchar( va+SH+8, 0, MSIZE-SH-8 ) )
         test_fail_msg( EINVAL, "not E0+");

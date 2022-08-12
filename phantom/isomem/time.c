@@ -89,7 +89,7 @@
 // {
 //     saved_tick_rate = tick_rate;
 //     // We correct time by updating real_time_delta slowly
-// //putchar('#');
+// //ph_putchar('#');
 //     // Time correction logic
 //     if( diff > 0 )
 //     {
@@ -134,7 +134,7 @@
 //             stat_update_second_stats();
 //         }
 //     }
-// //putchar('^');
+// //ph_putchar('^');
 // }
 
 // int (*arch_get_tick_rate)(void);
@@ -255,7 +255,7 @@
 // {
 
 //     bigtime_t val = hal_local_time();
-//     //printf("time bigtime = %lld systime = %lld rt delta = %lld tzdelta = %lld\n", val, sys_time, real_time_delta, tz_delta );
+//     //ph_printf("time bigtime = %lld systime = %lld rt delta = %lld tzdelta = %lld\n", val, sys_time, real_time_delta, tz_delta );
 
 //     // ToDO last constant must be tuned
 //     time_t t = (time_t)(val/BUGTFACT) - BIGTDIFF;

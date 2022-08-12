@@ -119,7 +119,7 @@ errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thre
 
     c->blocking_syscall_worker = cn_timer_blocking_syscall_worker;
 
-    printf("Init timer");
+    ph_printf("Init timer");
     return 0;
 }
 

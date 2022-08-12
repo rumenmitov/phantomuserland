@@ -7,6 +7,6 @@ void lprintf(char const *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    vprintf(stdout, ap);
+    ph_vprintf(stdout, ap);
     va_end(ap);
 }

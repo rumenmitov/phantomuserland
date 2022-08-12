@@ -52,12 +52,12 @@ void pvm_exec_panic0( const char *reason )
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
     //syslog()
-    printf("pvm_exec_panic: %s\n", reason );
+    ph_printf("pvm_exec_panic: %s\n", reason );
     pvm_backtrace_current_thread();
 
     pvm_memcheck();
 #if CONF_USE_E4C
-    printf("pvm_exec_panic: throwing\n", reason );
+    ph_printf("pvm_exec_panic: throwing\n", reason );
     E4C_THROW( PvmException, reason );
 #else // CONF_USE_E4C
     hal_exit_kernel_thread();
@@ -69,12 +69,12 @@ void pvm_exec_panic( const char *reason, struct data_area_4_thread *tda )
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
     //syslog()
-    printf("pvm_exec_panic: %s\n", reason );
+    ph_printf("pvm_exec_panic: %s\n", reason );
     pvm_backtrace(tda);
 
     pvm_memcheck();
 #if CONF_USE_E4C
-    printf("pvm_exec_panic: throwing\n", reason );
+    ph_printf("pvm_exec_panic: throwing\n", reason );
     E4C_THROW( PvmException, reason );
 #else // CONF_USE_E4C
     hal_exit_kernel_thread();
@@ -88,20 +88,20 @@ void pvm_backtrace_current_thread(void)
     int tid = get_current_tid();
     if( tid < 0 )
     {
-        printf("pvm_backtrace - get_current_tid failed!\n");
+        ph_printf("pvm_backtrace - get_current_tid failed!\n");
         goto nope;
     }
 
     void *owner;
     if( 0 != (e=t_get_owner( tid, &owner )) )
     {
-        printf("pvm_backtrace - t_get_owner failed!\n");
+        ph_printf("pvm_backtrace - t_get_owner failed!\n");
         goto nope;
     }
 
     if( 0 == owner )
     {
-        printf("pvm_backtrace - owner == 0!\n");
+        ph_printf("pvm_backtrace - owner == 0!\n");
         goto nope;
     }
 
@@ -111,13 +111,13 @@ void pvm_backtrace_current_thread(void)
 
     if( _ow->_class != pvm_get_thread_class() )
     {
-        printf("pvm_backtrace - not thread in owner!\n");
+        ph_printf("pvm_backtrace - not thread in owner!\n");
         return;
     }
 
     if(tda->tid != tid)
     {
-        printf("pvm_backtrace VM thread TID doesn't match!\n");
+        ph_printf("pvm_backtrace VM thread TID doesn't match!\n");
         return;
     }
 
@@ -125,7 +125,7 @@ void pvm_backtrace_current_thread(void)
     return;
 
     nope:
-        printf("Unable to print backtrace, e=%d\n", e);
+        ph_printf("Unable to print backtrace, e=%d\n", e);
 }
 
 
@@ -135,14 +135,14 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
     if(code->IP > code->IP_max)
     {
-        printf("pvm_backtrace IP > IP_Max!\n");
+        ph_printf("pvm_backtrace IP > IP_Max!\n");
         return;
     }
 
-    printf("backtrace thread IP %d, this: ", code->IP);
-    //printf(", this:\n");
+    ph_printf("backtrace thread IP %d, this: ", code->IP);
+    //ph_printf(", this:\n");
     pvm_object_dump(tda->_this_object);
-    printf("\n\n");
+    ph_printf("\n\n");
 
     pvm_object_t sframe = tda->call_frame;
 
@@ -152,29 +152,29 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
         struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
 
-        //printf("pvm_backtrace frame:\n");        pvm_object_dump(sframe);        printf("\n");
+        //ph_printf("pvm_backtrace frame:\n");        pvm_object_dump(sframe);        ph_printf("\n");
 
-        printf("frame this:\n");
+        ph_printf("frame this:\n");
         pvm_object_t thiso = fda->this_object;
         pvm_object_dump(thiso);
-        printf("\n");
+        ph_printf("\n");
 
         pvm_object_t tclass = thiso->_class;
         int ord = fda->ordinal;
 
-        printf("frame IP: %d Method ordinal %d\n", fda->IP, ord );
+        ph_printf("frame IP: %d Method ordinal %d\n", fda->IP, ord );
         
         pvm_object_t mname = pvm_get_method_name( tclass, ord );
         pvm_object_print(mname);
 
         int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
         //if( lineno >= 0 )
-        printf(":%d\n", lineno);
+        ph_printf(":%d\n", lineno);
 
-        printf("\n\n");
+        ph_printf("\n\n");
         sframe = fda->prev;
     }
-    printf("--- backtrace END\n" );
+    ph_printf("--- backtrace END\n" );
 }
 
 
@@ -185,41 +185,41 @@ void pvm_trace_here(struct data_area_4_thread *tda)
 
     if(code->IP > code->IP_max)
     {
-        printf("pvm_trace_here IP > IP_Max!\n");
+        ph_printf("pvm_trace_here IP > IP_Max!\n");
         return;
     }
 
 
-    //printf("pvm_trace_here thread this:\n");
-    printf("%% ");
+    //ph_printf("pvm_trace_here thread this:\n");
+    ph_printf("%% ");
 #if 1
     pvm_object_t cn = pvm_get_class_name( tda->_this_object );
     pvm_object_print( cn );
 #else
     pvm_object_dump(tda->_this_object);
-    //printf("\n\n");
+    //ph_printf("\n\n");
 #endif
-    //printf("pvm_trace_here thread IP %d\n", code->IP);
+    //ph_printf("pvm_trace_here thread IP %d\n", code->IP);
 
     pvm_object_t sframe = tda->call_frame;
 
     if( pvm_is_null(sframe) )
     {
-        printf("pvm_trace_here call frame == 0\n");
+        ph_printf("pvm_trace_here call frame == 0\n");
         return;
     }
 
     //if( !pvm_object_class_is(sframe, pvm_get_stack_frame_class()) ) ??!
 
     struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
-    //printf("pvm_backtrace frame:\n");    pvm_object_dump(sframe);    printf("\n");
+    //ph_printf("pvm_backtrace frame:\n");    pvm_object_dump(sframe);    ph_printf("\n");
 
     int ord = fda->ordinal;
 /*
     pvm_object_t thiso = fda->this_object;
-    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
+    //ph_printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    ph_printf("\n");
     pvm_object_t tclass = thiso->_class;
-    printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
+    ph_printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
 
     int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
     if( lineno >= 0 )
@@ -227,13 +227,13 @@ void pvm_trace_here(struct data_area_4_thread *tda)
         pvm_object_t mname = pvm_get_method_name( tclass, ord );
 
         pvm_object_print(mname);
-        printf(":%d\n", lineno);
+        ph_printf(":%d\n", lineno);
     }
 */
-    printf("\tordinal %d", ord );
-    printf("\tIP %d ", code->IP);
+    ph_printf("\tordinal %d", ord );
+    ph_printf("\tIP %d ", code->IP);
 
-    printf("\n");
+    ph_printf("\n");
 
 }
 
@@ -244,7 +244,7 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 {
     if(!pvm_object_class_exactly_is( tclass, pvm_get_class_class() ))
     {
-        printf("pvm_ip_to_linenum: not a class\n");
+        ph_printf("pvm_ip_to_linenum: not a class\n");
         return -1;
     }
 

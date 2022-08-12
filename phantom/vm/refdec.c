@@ -54,15 +54,15 @@ static tid_t deferred_refdec_thread_id;
 
 static void deferred_refdec_init(void)
 {
-    // printf("DEBUG: Started refdec init!\n");
+    // ph_printf("DEBUG: Started refdec init!\n");
     hal_mutex_init( &deferred_refdec_mutex, "refdec");
 
     hal_cond_init(  &start_refdec_cond, "refdec st" );
     hal_cond_init(  &end_refdec_cond, "refdec end" );
-    // printf("DEBUG: Inited sync!\n");
+    // ph_printf("DEBUG: Inited sync!\n");
 
     deferred_refdec_thread_id = hal_start_thread( deferred_refdec_thread, 0, 0 );
-    printf("TID: %d\n", deferred_refdec_thread_id);
+    ph_printf("TID: %d\n", deferred_refdec_thread_id);
     // assert(deferred_refdec_thread_id > 0 );
 
     inited = 1;
@@ -147,18 +147,18 @@ void deferred_refdec(pvm_object_storage_t *os)
 
 static void deferred_refdec_thread(void *a)
 {
-    // printf("DEBUG: Started refdec thread!\n");
+    // ph_printf("DEBUG: Started refdec thread!\n");
     t_current_set_name("RefDec");
     t_current_set_priority( THREAD_PRIO_HIGH );
 
     while(!stop_refdec_thread)
     {
-        // printf("DEBUG: Entering mutex!\n");
+        // ph_printf("DEBUG: Entering mutex!\n");
         hal_mutex_lock(  &deferred_refdec_mutex );
         // TODO timed wait
-        // printf("DEBUG: Entering cond!\n");
+        // ph_printf("DEBUG: Entering cond!\n");
         hal_cond_wait( &start_refdec_cond, &deferred_refdec_mutex );
-        // printf("DEBUG: Exited cond!\n");
+        // ph_printf("DEBUG: Exited cond!\n");
 
         STAT_INC_CNT(DEFERRED_REFDEC_RUNS);
 
@@ -186,9 +186,9 @@ static void deferred_refdec_thread(void *a)
             do_ref_dec_p((pvm_object_storage_t *)os);
         }
 
-        // printf("DEBUG: Cond broadcast!\n");
+        // ph_printf("DEBUG: Cond broadcast!\n");
         hal_cond_broadcast(   &end_refdec_cond );
-        // printf("DEBUG: Mutex unlock!\n");
+        // ph_printf("DEBUG: Mutex unlock!\n");
         hal_mutex_unlock( &deferred_refdec_mutex );
     }
 }

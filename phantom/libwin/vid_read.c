@@ -28,7 +28,7 @@
 
 void vid_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse)
 {
-    //printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
+    //ph_printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
     assert(video_drv->screen != 0);
 
     int xafter = xpos+xsize;
@@ -48,7 +48,7 @@ void vid_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysi
     {
         // This one is easy candy
 
-        //printf("yshift = %d\n", yshift );
+        //ph_printf("yshift = %d\n", yshift );
         to += xsize*yshift; // Just skip some lines;
 
         // this is correct, but ysize is unused..?
@@ -62,7 +62,7 @@ void vid_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysi
     assert(xshift >= 0);
 
 
-    //printf("xshift = %d\n", xshift );
+    //ph_printf("xshift = %d\n", xshift );
 
     // xlen is how many pixels to move for each line
     int xlen = xsize;
@@ -87,7 +87,7 @@ void vid_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysi
     int wline = 0;
 
 
-    //printf("xlen = %d, sline = %d yafter=%d \n", xlen, sline, yafter );
+    //ph_printf("xlen = %d, sline = %d yafter=%d \n", xlen, sline, yafter );
 
     if(reverse)
     {

@@ -22,7 +22,7 @@ void win_hal_init( void )
 
     //int rc =
     //CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
-    //if( rc) printf("Win32 can't run debugger thread\n");
+    //if( rc) ph_printf("Win32 can't run debugger thread\n");
 }
 
 void win_hal_disable_preemption(void)

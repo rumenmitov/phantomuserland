@@ -66,7 +66,7 @@ unsigned int calc_hash(const char *datum, const char *datum_end)
         */
     }
 
-    /* printf("Hash value of %s//%s is %d\n", datum, datum_end, hash_value); */
+    /* ph_printf("Hash value of %s//%s is %d\n", datum, datum_end, hash_value); */
     return hash_value;
 }
 
