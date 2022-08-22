@@ -54,7 +54,7 @@ static int isupper(int c) { return (c >= 'A' && c <= 'Z'); }
  * alphabets and digits are each contiguous.
  */
 long
-strtol(const char *nptr, char **endptr, int base)
+ph_strtol(const char *nptr, char **endptr, int base)
 {
 	register const char *s = nptr;
 	register unsigned long acc;

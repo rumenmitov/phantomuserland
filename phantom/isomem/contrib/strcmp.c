@@ -51,7 +51,7 @@
 #include <phantom_libc.h>
 
 int
-strcmp(const char *s1, const char *s2)
+ph_strcmp(const char *s1, const char *s2)
 {
 register int a, b;
 

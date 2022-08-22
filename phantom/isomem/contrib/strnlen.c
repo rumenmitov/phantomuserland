@@ -6,7 +6,7 @@
 #include <phantom_types.h>
 
 size_t
-strnlen(char const *s, size_t count)
+ph_strnlen(char const *s, size_t count)
 {
 	const char *sc;
 

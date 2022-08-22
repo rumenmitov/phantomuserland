@@ -326,7 +326,7 @@ static void  snprintf_func(int ch, void *arg);
      }
      */
 
-int printf(const char *fmt, ...)
+int ph_printf(const char *fmt, ...)
 {
     va_list ap;
     struct putchar_arg pca;
@@ -367,7 +367,7 @@ int printf(const char *fmt, ...)
 }
 
 int
-vprintf(const char *fmt, va_list ap)
+ph_vprintf(const char *fmt, va_list ap)
 {
     struct putchar_arg pca;
     int retval;
@@ -478,7 +478,7 @@ aputchar(int c, void *arg)
  * Scaled down version of sprintf(3).
  */
 int
-sprintf(char *buf, const char *cfmt, ...)
+ph_sprintf(char *buf, const char *cfmt, ...)
 {
     int retval;
     va_list ap;
@@ -494,7 +494,7 @@ sprintf(char *buf, const char *cfmt, ...)
  * Scaled down version of vsprintf(3).
  */
 int
-vsprintf(char *buf, const char *cfmt, va_list ap)
+ph_vsprintf(char *buf, const char *cfmt, va_list ap)
 {
     int retval;
 
@@ -507,7 +507,7 @@ vsprintf(char *buf, const char *cfmt, va_list ap)
  * Scaled down version of snprintf(3).
  */
 int
-snprintf(char *str, size_t size, const char *format, ...)
+ph_snprintf(char *str, size_t size, const char *format, ...)
 {
     int retval;
     va_list ap;
@@ -522,7 +522,7 @@ snprintf(char *str, size_t size, const char *format, ...)
  * Scaled down version of vsnprintf(3).
  */
 int
-vsnprintf(char *str, size_t size, const char *format, va_list ap)
+ph_vsnprintf(char *str, size_t size, const char *format, va_list ap)
 {
     struct snprintf_arg info;
     int retval;
@@ -539,7 +539,7 @@ vsnprintf(char *str, size_t size, const char *format, va_list ap)
  * Kernel version which takes radix argument vsnprintf(3).
  */
 int
-vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap)
+ph_vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap)
 {
     struct snprintf_arg info;
     int retval;

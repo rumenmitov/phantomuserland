@@ -38,7 +38,7 @@
 #include <phantom_libc.h>
 
 int
-strncmp(const char *s1, const char *s2, size_t n)
+ph_strncmp(const char *s1, const char *s2, size_t n)
 {
 
 	if (n == 0)

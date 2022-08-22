@@ -1,8 +1,8 @@
 // We have asm version for this arch
 #ifndef ARCH_ia32
 
-/*-
- * Copyright (c) 1990, 1993
+/*
+ * Copyright (c) 1988, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,35 +29,36 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
-//#include <sys/cdefs.h>
-//__FBSDID("$FreeBSD: src/lib/libc/string/index.c,v 1.8.6.1 2008/11/25 02:59:29 kensmith Exp $");
-
-//#include <stddef.h>
 #include <phantom_libc.h>
 
 
-#ifdef STRCHR
+//#include <sys/cdefs.h>
+//__FBSDID("$FreeBSD: src/lib/libc/string/rindex.c,v 1.8.6.1 2008/11/25 02:59:29 kensmith Exp $");
+
+//#include <stddef.h>
+
+#ifdef STRRCHR
 //#include <string.h>
 
 char *
-ph_strchr
+strrchr
 #else
 //#include <strings.h>
 
 char *
-index
+ph_rindex
 #endif
 (const char *p, int ch)
 {
+	char *save;
 	char c;
 
 	c = ch;
-	for (;; ++p) {
+	for (save = 0;; ++p) {
 		if (*p == c)
-			return ((char *)p);
+			save = (char *)p;
 		if (*p == '\0')
-			return 0;
+			return (save);
 	}
 	/* NOTREACHED */
 }

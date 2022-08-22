@@ -45,7 +45,7 @@
 #include <phantom_libc.h>
 
 char *
-strcat(char *s, const char *add)
+ph_strcat(char *s, const char *add)
 {
 register char *ret = s;
 

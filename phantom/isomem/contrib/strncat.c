@@ -6,7 +6,7 @@
 #include <phantom_types.h>
 
 char *
-strncat(char *dest, char const *src, size_t count)
+ph_strncat(char *dest, char const *src, size_t count)
 {
 	char *tmp = dest;
 

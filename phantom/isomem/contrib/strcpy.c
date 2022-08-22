@@ -48,7 +48,7 @@
 
 #include <phantom_libc.h>
 
-char *strcpy(char *to, const char *from)
+char *ph_strcpy(char *to, const char *from)
 {
     register char *ret = to;
 

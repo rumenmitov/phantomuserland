@@ -7,7 +7,7 @@
 #include <phantom_types.h>
 
 char *
-strdup(const char *str)
+ph_strdup(const char *str)
 {
 	size_t len;
 	char *copy;
@@ -21,7 +21,7 @@ strdup(const char *str)
 }
 
 
-char *strndup(const char *str, size_t n)
+char *ph_strndup(const char *str, size_t n)
 {
 	size_t len;
 	char *copy;
