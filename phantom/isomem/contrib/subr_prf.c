@@ -83,11 +83,21 @@
 
 #if 1
 
+// XXX : undefed in the end of the file to avoid collisions
+
 #define LOCK() hal_disable_preemption()
 #define UNLOCK() hal_enable_preemption()
 
 #else
 
+
+#endif
+
+
+#ifdef PHANTOM_GENODE
+
+#include <stdarg.h>
+#include "freebsd_types.h"
 
 #endif
 
@@ -1040,3 +1050,6 @@ kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
   #endif // DDB
   */
 
+
+#undef LOCK()
+#undef UNLOCK()
