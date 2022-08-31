@@ -2,7 +2,7 @@
 ** Copyright 2004, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
 */
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <string.h>
 #include <phantom_types.h>
 
@@ -13,7 +13,7 @@ ph_strdup(const char *str)
 	char *copy;
 	
 	len = strlen(str) + 1;
-	copy = malloc(len);
+	copy = ph_malloc(len);
 	if (copy == 0)
 		return 0;
 	memcpy(copy, str, len);

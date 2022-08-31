@@ -43,8 +43,14 @@
 //#include <sys/limits.h>
 
 #include <phantom_libc.h>
-#include <limits.h>
+// #include <limits.h>
 
+#ifdef PHANTOM_GENODE
+
+#include "freebsd_types.h"
+#include <ph_string.h>
+
+#endif
 
 /*
  * Note that stdarg.h and the ANSI style va_start macro is used for both
@@ -84,13 +90,13 @@
 #define	CT_CHAR		0	/* %c conversion */
 #define	CT_CCL		1	/* %[...] conversion */
 #define	CT_STRING	2	/* %s conversion */
-#define	CT_INT		3	/* integer, i.e., strtoq or strtouq */
+#define	CT_INT		3	/* integer, i.e., ph_strtoq or ph_strtouq */
 typedef u_quad_t (*ccfntype)(const char *, char **, int);
 
 static const u_char *__sccl(char *, const u_char *);
 
 int
-vsscanf(const char *inp, char const *fmt0, va_list ap)
+ph_vsscanf(const char *inp, char const *fmt0, va_list ap)
 {
 	int inr;
 	const u_char *fmt = (const u_char *)fmt0;
@@ -103,8 +109,8 @@ vsscanf(const char *inp, char const *fmt0, va_list ap)
 	int nassigned;		/* number of fields assigned */
 	int nconversions;	/* number of conversions */
 	int nread;		/* number of characters consumed from fp */
-	int base;		/* base argument to strtoq/strtouq */
-	ccfntype ccfn;		/* conversion function (strtoq/strtouq) */
+	int base;		/* base argument to ph_strtoq/ph_strtouq */
+	ccfntype ccfn;		/* conversion function (ph_strtoq/ph_strtouq) */
 	char ccltab[256];	/* character class table for %[...] */
 	char buf[BUF];		/* buffer for numeric conversions */
 
@@ -118,7 +124,7 @@ vsscanf(const char *inp, char const *fmt0, va_list ap)
 	nconversions = 0;
 	nread = 0;
 	base = 0;		/* just to keep gcc happy */
-	ccfn = (ccfntype)strtoq;/* just to keep gcc happy */
+	ccfn = (ccfntype)ph_strtoq;/* just to keep gcc happy */
 	for (;;) {
 		c = *fmt++;
 		if (c == 0)
@@ -172,32 +178,32 @@ literal:
 		 */
 		case 'd':
 			c = CT_INT;
-			ccfn = (ccfntype)strtoq;
+			ccfn = (ccfntype)ph_strtoq;
 			base = 10;
 			break;
 
 		case 'i':
 			c = CT_INT;
-			ccfn = (ccfntype)strtoq;
+			ccfn = (ccfntype)ph_strtoq;
 			base = 0;
 			break;
 
 		case 'o':
 			c = CT_INT;
-			ccfn = strtouq;
+			ccfn = ph_strtouq;
 			base = 8;
 			break;
 
 		case 'u':
 			c = CT_INT;
-			ccfn = strtouq;
+			ccfn = ph_strtouq;
 			base = 10;
 			break;
 
 		case 'x':
 			flags |= PFXOK;	/* enable 0x prefixing */
 			c = CT_INT;
-			ccfn = strtouq;
+			ccfn = ph_strtouq;
 			base = 16;
 			break;
 
@@ -219,7 +225,7 @@ literal:
 		case 'p':	/* pointer format is like hex */
 			flags |= POINTER | PFXOK;
 			c = CT_INT;
-			ccfn = strtouq;
+			ccfn = ph_strtouq;
 			base = 16;
 			break;
 
@@ -374,7 +380,7 @@ literal:
 			continue;
 
 		case CT_INT:
-			/* scan an integer as if by strtoq/strtouq */
+			/* scan an integer as if by ph_strtoq/ph_strtouq */
 #ifdef hardway
 			if (width == 0 || width > sizeof(buf) - 1)
 				width = sizeof(buf) - 1;
@@ -617,13 +623,13 @@ doswitch:
 }
 
 int
-sscanf(const char *ibuf, const char *fmt, ...)
+ph_sscanf(const char *ibuf, const char *fmt, ...)
 {
 	va_list ap;
 	int ret;
 	
 	va_start(ap, fmt);
-	ret = vsscanf(ibuf, fmt, ap);
+	ret = ph_vsscanf(ibuf, fmt, ap);
 	va_end(ap);
 	return(ret);
 }

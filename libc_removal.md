@@ -29,9 +29,9 @@ Allocation of memory using `malloc` should be used only for non-persistent memor
 
 | function    | completed | `ph_` | Genode | Phantom | comments |
 | ----------- | --------- | ----- | ------ | ------- | -------- |
-| `malloc`    | - | + | + | -  |  |
-| `realloc`   | - | + | + | -  |  |
-| `calloc`    | - | + | + | -  |  |
+| `malloc`    | + | + | + | -  |  |
+| `calloc`    | + | + | + | -  |  |
+| `realloc`   | - | + | + | -  | Not really used inside the kernel  |
 
 ## Strings
 
@@ -39,35 +39,35 @@ Some of string operations are implemented in Genode, but the majority is not. Mo
 
 | function    | completed | `ph_` | Genode | Phantom | comments |
 | ----------- | --------- | ----- | ------ | ------- | -------- |
-| `memcmp`    | - | + | + | -  |  |
-| `memcpy`    | - | + | + | -  |  |
-| `memmove`   | - | + | + | -  |  |
-| `memset`    | - | + | + | -  |  |
-| `strcat`    | - | + | - | +  |  |
-| `strchr`    | - | + | - | +  |  |
-| `strcmp`    | - | + | - | +  |  |
-| `strcpy`    | - | + | - | +  | `copy_cstring()` is an alternative in Genode |
-| `strdup`    | - | + | - | +  |  |
+| `memcmp`    | + | + | + | -  |  |
+| `memcpy`    | + | + | + | -  |  |
+| `memmove`   | + | + | + | -  |  |
+| `memset`    | + | + | + | -  |  |
+| `strcat`    | + | + | - | +  |  |
+| `strchr`    | + | + | - | +  |  |
+| `strcmp`    | + | + | - | +  |  |
+| `strcpy`    | + | + | - | +  | `copy_cstring()` is an alternative in Genode |
+| `strdup`    | + | + | - | +  |  |
 | `strerror_r`| - | + | - | -  | Should be replaced. Used only in tests |
-| `strlcpy`   | - | + | - | +  | `copy_cstring()` is an alternative in Genode |
-| `strlen`    | - | + | - | +  |  |
-| `strncmp`   | - | + | - | +  |  |
-| `strncpy`   | - | + | - | +  |  |
-| `strnlen`   | - | + | - | +  |  |
-| `strrchr`   | - | + | - | +  |  |
-| `strstr`    | - | + | - | +  |  |
-| `strtol`    | - | + | - | +  |  |
+| `strlcpy`   | + | + | - | +  | `copy_cstring()` is an alternative in Genode |
+| `strlen`    | + | + | - | +  |  |
+| `strncmp`   | + | + | - | +  |  |
+| `strncpy`   | + | + | - | +  |  |
+| `strnlen`   | + | + | - | +  |  |
+| `strrchr`   | + | + | - | +  |  |
+| `strstr`    | + | + | - | +  |  |
+| `strtol`    | + | + | - | +  |  |
 
 # Input and output
 
 | function    | completed | `ph_` | Genode | Phantom | comments |
 | ----------- | --------- | ----- | ------ | ------- | -------- |
-| `sscanf`    | - | + | - | - | Only in `bmp_pbm.c` in `parseHeader()` and `gdb.c` |
-| `printf`    | - | + | - | + | Used extensively across components. Need to figure out a single format for logging |
-| `vprintf`   | - | + | - | + | Used to define debug messages, e.t.c. Also used in hal_printf which is used for printing as well |
-| `snprintf`  | - | + | - | + | - |
+| `sscanf`    | + | + | - | + | Only in `bmp_pbm.c` in `parseHeader()` and `gdb.c` |
+| `printf`    | + | + | - | + | Used extensively across components. Need to figure out a single format for logging |
+| `vprintf`   | + | + | - | + | Used to define debug messages, e.t.c. Also used in hal_printf which is used for printing as well |
+| `snprintf`  | + | + | - | + | - |
 | `putc`      | - | - | - | - | Seems to be linked, but not used |
-| `putchar`   | - | + | ? | - | Only few occurences. `gl/list.c`, `isomem/json_write.c` and several files in `vm`. However used by `vprintf` implementation |
+| `putchar`   | + | + | + | - | Used to inside printf to output messages. Besides this one, only few occurences. `gl/list.c`, `isomem/json_write.c` and several files in `vm` |
 | `puts`      | - | - | - | - | Not found. And it is good |
 
 ## Misc
@@ -80,7 +80,6 @@ Some of string operations are implemented in Genode, but the majority is not. Mo
 | `setjmp`    | - | - | - | - | - |
 | `time`      | - | - | - | - | - |
 | `nanosleep` | - | - | - | - | - |
-| `main`      | - | - | - | - | - |
 
 ## Not considered
 

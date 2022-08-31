@@ -44,9 +44,11 @@
 
 #include <phantom_libc.h>
 
+#include <sys/types.h>
+
 // size_t is correct, but kernel dies!
 //char *	strncpy(char *to, const char *from, size_t count);
-ph_char *strncpy(char *to, const char *from, ssize_t count)
+char *ph_strncpy(char *to, const char *from, ssize_t count)
 {
     register char *ret = to;
 

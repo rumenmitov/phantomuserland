@@ -16,5 +16,5 @@ extern "C" void ph_free(void * addr){
 }
 
 extern "C" void *ph_calloc(size_t n_elem, size_t elem_size){
-    calloc(n_elem, elem_size);
+    return calloc(n_elem, elem_size);
 }

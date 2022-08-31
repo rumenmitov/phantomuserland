@@ -35,6 +35,10 @@ typedef u_int64_t physaddr_t;
 // linear mem address
 typedef u_int64_t linaddr_t;
 
+// Required for some libc functions inside Phantom
+// It is unsigned long in Genode
+typedef long ssize_t;
+
 // #ifndef _STDINT_H
 // //typedef	u_int64_t             uintptr_t;
 // typedef int64_t ptrdiff_t;

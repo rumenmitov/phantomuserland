@@ -100,6 +100,17 @@ extern const char	hex2ascii_data[];
 #else
 
 #include <stddef.h>
+#include <ph_io.h>
+
+// One of those required by printf
+/* BCD conversions. */
+extern const unsigned char	bcd2bin_data[];
+extern const unsigned char	bin2bcd_data[];
+extern const char	hex2ascii_data[];
+
+#define	bcd2bin(bcd)	(bcd2bin_data[bcd])
+#define	bin2bcd(bin)	(bin2bcd_data[bin])
+#define	hex2ascii(hex)	(hex2ascii_data[hex])
 
 #endif
 

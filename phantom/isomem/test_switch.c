@@ -95,7 +95,8 @@ void report( int rc, const char *test_name )
     }
 
     char rcs[128];
-    ph_strerror_r(rc, rcs, sizeof(rcs));
+    // XXX : Need to reimplement somewhere
+    // ph_strerror_r(rc, rcs, sizeof(rcs));
 
     nFailed++;
     // CI: this message is being watched by CI scirpts (ci-runtest.sh)
