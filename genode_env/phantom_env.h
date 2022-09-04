@@ -6,6 +6,7 @@
 #include "disk_backend.h"
 #include "phantom_vmem.h"
 #include "phantom_timer.h"
+#include "phantom_threads.h"
 
 namespace Phantom
 {
@@ -18,6 +19,7 @@ namespace Phantom
 
         Phantom::Disk_backend _disk{_env, _heap};
         Phantom::Vmem_adapter _vmem_adapter{_env};
+        Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
 
         // XXX : Timers are required for timed calls. However, they are almost not used
         //       That is why it is temporary disabled. Moreover, it requires some improvements

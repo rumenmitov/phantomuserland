@@ -6,6 +6,8 @@
 #include <base/thread.h>
 #include <base/log.h>
 
+// TODO : kernel threads, names and mappings
+
 namespace Phantom
 {
     class PhantomThreadsRepo;
@@ -24,7 +26,8 @@ extern "C"
     struct phantom_thread
     {
         int tid = 0;
-        void *owner = 0;
+        char* name = nullptr;
+        void *owner = nullptr;
         int prio = 0;
     };
 }
@@ -42,6 +45,14 @@ struct Phantom::PhantomGenericThread : public Genode::Thread
     void setDeathHandler(void (*death_handler)(phantom_thread *tp))
     {
         _death_handler = death_handler;
+    }
+
+    void setInfo(phantom_thread new_info){
+        _info = new_info;
+    }
+
+    phantom_thread getInfo(){
+        return _info;
     }
 
     const phantom_thread getPhantomStruct()
@@ -102,6 +113,9 @@ struct Phantom::PhantomThreadWithArgs : PhantomGenericThread
     int operator=(const PhantomThreadWithArgs &another) = delete;
 };
 
+/*
+* Repo containing Phantom threads. Reponsible for creation, storage, assigning Phantom's tids
+*/
 class Phantom::PhantomThreadsRepo
 {
     Genode::Env &_env;
@@ -109,10 +123,7 @@ class Phantom::PhantomThreadsRepo
     PhantomGenericThread *_threads[512] = {0};
     unsigned int _thread_count = 0;
 
-public:
-    PhantomThreadsRepo(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap)
-    {
-    }
+private:
 
     int addThread(PhantomGenericThread *thread)
     {
@@ -124,8 +135,22 @@ public:
 
         _threads[_thread_count] = thread;
 
-        // XXX : Very scetchy tid, need something better
+        // phantom_thread info
+
+        // TODO : check that it works properly
+        thread->setInfo({
+            .tid = (int)_thread_count,
+            .owner = nullptr,
+            .prio = 0
+        });
+
+        // XXX : Very sketchy tid, need something better
         return _thread_count++;
+    }
+
+public:
+    PhantomThreadsRepo(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap)
+    {
     }
 
     int createThread(void (*thread_entry)(void))

@@ -10,6 +10,7 @@
 
 #include "phantom_env.h"
 #include "phantom_threads.h"
+#include <ph_malloc.h>
 
 #include <base/child.h>
 
@@ -24,11 +25,11 @@ extern "C"
 #include <threads.h>
 
     /*
-*
-* Thread creation/destruction
-* returns TID
-*
-*/
+     *
+     * Thread creation/destruction
+     * returns TID
+     *
+     */
 
     int hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg)
     {
@@ -61,12 +62,6 @@ extern "C"
         return 0;
     }
 
-    errno_t t_kill_thread(tid_t tid)
-    {
-        main_obj->_threads_repo.killThread(tid);
-        return 0;
-    }
-
     errno_t t_current_set_death_handler(void (*handler)(phantom_thread_t *tp))
     {
 
@@ -77,18 +72,11 @@ extern "C"
     }
 
     /*
-*
-* Thread info
-*
-*/
+     *
+     * Thread info
+     *
+     */
 
-    phantom_thread_t *get_current_thread()
-    {
-        // XXX: Probably, better to avoid this allocation. It will inevitably lead to dangling pointers
-        PhantomGenericThread *ph_thread = (PhantomGenericThread *)Thread::myself();
-        phantom_thread_t *alloced_thread_struct = new (main_obj->_heap) phantom_thread_t(ph_thread->getPhantomStruct());
-        return alloced_thread_struct;
-    }
 
     tid_t get_current_tid(void)
     {
@@ -120,16 +108,15 @@ extern "C"
     }
 
     /*
-*
-* Thread configuration
-*
-*/
+     *
+     * Thread configuration
+     *
+     */
+
 
     void hal_set_current_thread_name(const char *name)
     {
-        // XXX : Not used, actually
-        //       Moreover, Genode doesn't allow to set name
-        (void)name;
+        t_current_set_name(name);
     }
 
     errno_t hal_set_current_thread_priority(int p)
@@ -139,11 +126,11 @@ extern "C"
 
     errno_t t_current_set_name(const char *name)
     {
-        // XXX : Not used, actually
-        //       Moreover, Genode doesn't allow to set name
-        (void)name;
+        // TODO : Implement
+        Genode::log("Set name of thread tid=", (int)get_current_tid(), " to name=", name);
         return 0;
     }
+
     errno_t t_current_set_priority(int p)
     {
         ((PhantomGenericThread *)Thread::myself())->_info.prio = p;
@@ -157,10 +144,10 @@ extern "C"
     }
 
     /*
-*
-* Multithreading
-*
-*/
+     *
+     * Multithreading
+     *
+     */
 
     void t_smp_enable(int yn)
     {
@@ -184,22 +171,25 @@ extern "C"
     }
 
     /**
- *
- * Adds flag to sleep flags of thread, removes thread from
- * runnable set, unlocks the lock given, switches off to some other thread.
- */
+     *
+     * Adds flag to sleep flags of thread, removes thread from
+     * runnable set, unlocks the lock given, switches off to some other thread.
+     */
     void thread_block(int sleep_flag, hal_spinlock_t *lock_to_be_unlocked)
     {
         (void)sleep_flag;
-        (void)lock_to_be_unlocked;
+
+        // XXX : May be not that efficient. Used mainly while waiting disk IO
+        hal_spin_lock(lock_to_be_unlocked);
+
         // _stub_print();
     }
 
     /*
-*
-* Snapshot machinery
-*
-*/
+     *
+     * Snapshot machinery
+     *
+     */
 
     void t_migrate_to_boot_CPU(void)
     {
@@ -213,7 +203,38 @@ extern "C"
         return 0;
     }
 
+    /*
+     *
+     * Used only in tests (deprecated)
+     * 
+     */
+
+    // XXX : Don't use this function! Use hal_start_thread() instead
+    phantom_thread_t *phantom_create_thread(void (*func)(void *), void *arg, int flags)
+    {
+
+        Genode::warning("Called phantom_create_thread(), using hal_start_thread() instead!");
+        hal_start_thread(func, arg, flags);
+
+        return nullptr;
+    }
+
+    errno_t t_kill_thread(tid_t tid)
+    {
+        Genode::warning("Called t_kill_thread(). Thread tid=", tid, " is killed");
+        main_obj->_threads_repo.killThread(tid);
+        return 0;
+    }
+
     // TODO : Remove if not needed
+
+    // phantom_thread_t *get_current_thread()
+    // {
+    //     // XXX: Probably, better to avoid this allocation. It will inevitably lead to dangling pointers
+    //     PhantomGenericThread *ph_thread = (PhantomGenericThread *)Thread::myself();
+    //     phantom_thread_t *alloced_thread_struct = new (main_obj->_heap) phantom_thread_t(ph_thread->getPhantomStruct());
+    //     return alloced_thread_struct;
+    // }
 
     // void phantom_thread_wait_4_snap()
     // {
