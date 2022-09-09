@@ -31,13 +31,13 @@ public:
 
     void acquire()
     {
-        updateMutexState(true);
+        _mutex.acquire();
 
         // XXX : Not a good place to preempt
         // Assuming that nothing bad will happen if we say that
-        // it is locked while we are locking it
+        // it is locked after we locked it
 
-        _mutex.acquire();
+        updateMutexState(true);
     }
 
     void release()
