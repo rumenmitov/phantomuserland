@@ -1,8 +1,6 @@
 #include <cpu/atomic.h>
 #include <cpu/memory_barrier.h>
 
-#include <pthread.h>
-
 #include "phantom_sync.h"
 #include "phantom_env.h"
 
@@ -55,7 +53,7 @@ extern "C"
     int hal_mutex_is_locked(hal_mutex_t *m)
     {
         int res = m->impl->lock->isLocked() ? 1 : 0;
-        // log("Getting mutex state: ", m->impl->name, "={", res, "}");
+        log("Getting mutex state: ", m->impl->name, "={", res, "}");
         return res;
     }
 
@@ -77,55 +75,36 @@ extern "C"
 
     int hal_sem_acquire(hal_sem_t *s)
     {
-        int count = -111111;
-        sem_getvalue(&s->impl->sem  , &count);
-        // log("Acquiring sema '", s->impl->name, "' (", count , ")");
-        // s->impl->sem->down();
-        int err = sem_wait(&s->impl->sem);
-        if (err)
-        {
-            Genode::error("sem_wait failed with ", err);
-        }
+        log("Acquiring sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->down();
         return 0;
     }
 
     void hal_sem_release(hal_sem_t *s)
     {
-        int count = -111111;
-        sem_getvalue(&s->impl->sem  , &count);
-        // log("Releasing sema '", s->impl->name, "' (", count, ")");
-        // s->impl->sem->up();
-        int err = sem_post(&s->impl->sem);
-        if (err)
-        {
-            Genode::error("sem_wait failed with ", err);
-        }
+        log("Releasing sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->up();
     }
 
     int hal_sem_init(hal_sem_t *s, const char *name)
     {
         // main_obj->_heap.alloc(sizeof(Genode::Semaphore), (void **)&s->impl->sem);
         s->impl = (phantom_sem_impl *)malloc(sizeof(struct phantom_sem_impl));
-        // s->impl->sem = (Genode::Semaphore *)malloc(sizeof(Genode::Semaphore));
-        // construct_at<Genode::Semaphore>(s->impl->sem, 0);
+        s->impl->sem = (Genode::Semaphore *)malloc(sizeof(Genode::Semaphore));
+        construct_at<Genode::Semaphore>(s->impl->sem, 0);
 
         s->impl->name = name;
-
-        sem_init(&s->impl->sem, 0, 0);
 
         return 0;
     }
 
     void hal_sem_destroy(hal_sem_t *s)
     {
-        // s->impl->sem->~Semaphore();
+        s->impl->sem->~Semaphore();
         // main_obj->_heap.free(s->impl->sem, sizeof(Genode::Semaphore));
-        // free(s->impl->sem);
-
-        sem_destroy(&s->impl->sem);
-
+        free(s->impl->sem);
         free(s->impl);
-        // s->impl->sem = 0;
+        s->impl->sem = 0;
     }
 
     /*
