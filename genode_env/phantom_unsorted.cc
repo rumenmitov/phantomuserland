@@ -1,4 +1,5 @@
 #include <base/log.h>
+#include "phantom_env.h"
 
 extern "C"
 {
@@ -8,17 +9,9 @@ extern "C"
 
     void hal_sleep_msec(int miliseconds)
     {
-
-        int res = -1;
-        struct timespec ts;
-
-        ts.tv_sec = miliseconds / 1000;
-        ts.tv_nsec = (miliseconds % 1000) * 1000000;
-
-        do
-        {
-            res = nanosleep(&ts, &ts);
-        } while (res && errno == EINTR);
+        // Genode::log("Start to sleep (", miliseconds, "): ", main_obj->_sleep_timer.elapsed_ms());
+        main_obj->_sleep_timer.msleep(miliseconds);
+        // Genode::log("Finish to sleep (", miliseconds, "): ", main_obj->_sleep_timer.elapsed_ms());
     }
 
     void hal_disable_preemption()
