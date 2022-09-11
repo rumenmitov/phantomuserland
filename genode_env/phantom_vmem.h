@@ -76,9 +76,9 @@ private:
         // TODO : fix IP
         if (_pf_handler != nullptr)
         {
-            Libc::with_libc([&](){
+            // Libc::with_libc([&](){
                 _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
-            });
+            // });
         }
         else
         {

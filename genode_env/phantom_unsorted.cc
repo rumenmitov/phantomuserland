@@ -23,11 +23,11 @@ extern "C"
 
     void hal_disable_preemption()
     {
-        Genode::log("STUB: disabled preemption");
+        // Genode::log("STUB: disabled preemption");
     }
 
     void hal_enable_preemption()
     {
-        Genode::log("STUB: enabled preemption");
+        // Genode::log("STUB: enabled preemption");
     }
 }

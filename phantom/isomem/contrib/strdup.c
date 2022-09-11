@@ -32,7 +32,7 @@ char *ph_strndup(const char *str, size_t n)
 	if( len > n ) len = n;
 
 
-	copy = malloc(len);
+	copy = ph_malloc(len);
 	if (copy == 0)
 		return 0;
 

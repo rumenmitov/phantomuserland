@@ -107,8 +107,8 @@ void Libc::Component::construct(Libc::Env &env)
 	// void *f_addr = 0x0;
 	// log(*((int *)f_addr));
 
-	Libc::with_libc([&]()
-					{
+	// Libc::with_libc([&]()
+	// 				{
 		log("--- Phantom init ---");
 
 		log("Waiting for continue");
@@ -146,7 +146,8 @@ void Libc::Component::construct(Libc::Env &env)
 		int p_argc = 1;
 		char **p_argv = nullptr;
 		char **p_envp = nullptr;
-		phantom_main_entry_point(p_argc, p_argv, p_envp); });
+		phantom_main_entry_point(p_argc, p_argv, p_envp); 
+	// });
 }
 
 int main()

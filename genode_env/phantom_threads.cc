@@ -10,7 +10,6 @@
 
 #include "phantom_env.h"
 #include "phantom_threads.h"
-#include <ph_malloc.h>
 
 #include <base/child.h>
 
@@ -23,6 +22,7 @@ extern "C"
 {
 
 #include <threads.h>
+#include <ph_malloc.h>
 
     /*
      *
@@ -81,6 +81,14 @@ extern "C"
     tid_t get_current_tid(void)
     {
         return ((PhantomGenericThread *)Thread::myself())->_info.tid;
+    }
+
+    phantom_thread_t *get_current_thread()
+    {
+        // XXX : Dangerous function. Returns an actual pointer
+        // PhantomGenericThread *ph_thread = (PhantomGenericThread *)Thread::myself();
+        // phantom_thread_t *alloced_thread_struct = new (main_obj->_heap) phantom_thread_t(ph_thread->getPhantomStruct());
+        return &(((PhantomGenericThread *)Thread::myself())->_info);
     }
 
     void *get_thread_owner(phantom_thread_t *t)
@@ -227,14 +235,6 @@ extern "C"
     }
 
     // TODO : Remove if not needed
-
-    // phantom_thread_t *get_current_thread()
-    // {
-    //     // XXX: Probably, better to avoid this allocation. It will inevitably lead to dangling pointers
-    //     PhantomGenericThread *ph_thread = (PhantomGenericThread *)Thread::myself();
-    //     phantom_thread_t *alloced_thread_struct = new (main_obj->_heap) phantom_thread_t(ph_thread->getPhantomStruct());
-    //     return alloced_thread_struct;
-    // }
 
     // void phantom_thread_wait_4_snap()
     // {

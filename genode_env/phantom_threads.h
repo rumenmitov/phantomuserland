@@ -144,6 +144,8 @@ private:
             .prio = 0
         });
 
+        thread->start();
+
         // XXX : Very sketchy tid, need something better
         return _thread_count++;
     }
