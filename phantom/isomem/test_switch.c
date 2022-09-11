@@ -5,9 +5,12 @@
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Test suit test selector
+ * 
+ * XXX: setjmp and longjmp are commented out for a while
  *
  *
 **/
+
 
 #define DEBUG_MSG_PREFIX "test"
 #include "debug_ext.h"
@@ -20,7 +23,7 @@
 
 #include <phantom_libc.h>
 #include <errno.h>
-#include <setjmp.h>
+// #include <setjmp.h>
 #include <threads.h>
 
 #include <kernel/init.h>
@@ -40,18 +43,19 @@ void on_fail_call( void (*f)( void *arg), void *arg ) // Call f on failure
     fhandler_arg = arg;
 }
 
-static jmp_buf jb;
+// static jmp_buf jb;
 static int nFailed = 0;
 
 void test_fail(errno_t rc)
 {
-    longjmp( jb, rc );
+    ph_printf( "Test fail!\n");
+    // longjmp( jb, rc );
 }
 
 void test_fail_msg(errno_t rc, const char *msg)
 {
     ph_printf( "Test fail: %s\n", msg );
-    longjmp( jb, rc );
+    // longjmp( jb, rc );
 }
 
 
@@ -68,6 +72,20 @@ void test_fail_msg(errno_t rc, const char *msg)
 
 
 
+#ifdef PHANTOM_GENODE
+
+
+#define TEST(name) \
+    ({                                  		\
+    fhandler_f = 0;                                     \
+    int rc;                                             \
+    {                                                   \
+        if( all || (0 == ph_strcmp( test_name, #name )) )  \
+        report( do_test_##name(test_parm), #name );     \
+    }                                                   \
+    })
+
+#else
 
 #define TEST(name) \
     ({                                  		\
@@ -84,6 +102,7 @@ void test_fail_msg(errno_t rc, const char *msg)
     }                                                   \
     })
 
+#endif
 
 void report( int rc, const char *test_name )
 {
