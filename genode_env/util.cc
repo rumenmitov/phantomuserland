@@ -6,9 +6,34 @@
 
 extern "C"
 {
+    // XXX : It is a buffered output. Buffer will be flush on new line or when full.
+    //       Used mainly in printf.
+
+    static const unsigned int buff_size = 256;
+    static char log_buff[buff_size];
+    static unsigned int log_buff_cnt = 0;
+
     int ph_putchar(char c)
     {
-        Genode::log("%c", c);
+        // flushing if full or new line
+        if (c == '\n' || log_buff_cnt == buff_size - 1)
+        {
+            log_buff[log_buff_cnt] = '\0';
+            Genode::log(Genode::Cstring(log_buff));
+            log_buff_cnt = 0;
+
+            if (log_buff_cnt == buff_size - 1)
+            {
+                log_buff_cnt = 0;
+                log_buff[0] = c;
+            }
+        }
+        else
+        {
+            log_buff[log_buff_cnt] = c;
+            log_buff_cnt++;
+        }
+        return 0;
     }
 
     void *ph_memcpy(void *dst0, const void *src0, size_t length)
@@ -20,12 +45,12 @@ extern "C"
     {
         return Genode::memmove(dst0, src0, length);
     }
-    
+
     int ph_memcmp(const void *s1v, const void *s2v, size_t size)
     {
         return Genode::memcmp(s1v, s2v, size);
     }
-    
+
     void *ph_memset(void *dst0, int c0, size_t length)
     {
         return Genode::memset(dst0, c0, length);

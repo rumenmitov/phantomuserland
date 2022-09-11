@@ -20,7 +20,7 @@ extern "C" void *ph_malloc(size_t size)
 
     // Returning an adjusted pointer
     size_t *adjusted_addr = ((size_t *)original_addr) + 1;
-    Genode::log("ph_malloc: addr=", original_addr, ", size=", size);
+    // Genode::log("ph_malloc: addr=", original_addr, ", size=", size);
 
     return (void *)adjusted_addr;
 }
@@ -33,7 +33,7 @@ extern "C" void ph_free(void *addr)
     void *original_addr = (void *)(adjusted_addr - 1);
 
     size_t size = *((size_t *)original_addr);
-    Genode::log("ph_free: addr=", original_addr, ", size=", size);
+    // Genode::log("ph_free: addr=", original_addr, ", size=", size);
 
     main_obj->_heap.free(original_addr, size + sizeof(size_t));
 }

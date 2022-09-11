@@ -446,7 +446,7 @@ aputchar(int c, void *arg)
 {
 #if 1
     (void) arg;
-    putchar(c);
+    ph_putchar(c);
 #else
     struct putchar_arg *ap = (struct putchar_arg*) arg;
     struct tty *tp = ap->tty;
