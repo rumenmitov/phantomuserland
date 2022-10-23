@@ -118,7 +118,7 @@ ph_vsscanf(const char *inp, char const *fmt0, va_list ap)
 	static short basefix[17] =
 		{ 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-	inr = strlen(inp);
+	inr = ph_strlen(inp);
 	
 	nassigned = 0;
 	nconversions = 0;

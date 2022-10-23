@@ -37,7 +37,7 @@ int snprintf(char *str, size_t size, const char *format, ...);
 //int sprintf(char *buf, const char *cfmt, ...);
 
 int vprintf(const char *fmt, va_list ap);
-int printf(const char *fmt, ...);
+int ph_printf(const char *fmt, ...);
 
 int sscanf(const char *ibuf, const char *fmt, ...);
 
@@ -102,7 +102,7 @@ extern const char	hex2ascii_data[];
 #include <stddef.h>
 #include <ph_io.h>
 
-// One of those required by printf
+// One of those required by ph_printf
 /* BCD conversions. */
 extern const unsigned char	bcd2bin_data[];
 extern const unsigned char	bin2bcd_data[];
@@ -111,6 +111,22 @@ extern const char	hex2ascii_data[];
 #define	bcd2bin(bcd)	(bcd2bin_data[bcd])
 #define	bin2bcd(bin)	(bin2bcd_data[bin])
 #define	hex2ascii(hex)	(hex2ascii_data[hex])
+
+
+// Some of those required in printf and udp_json.c
+static inline int  isspace(unsigned int c) { return ((c) == ' ' || ((c) >= '\t' && (c) <= '\r')); }
+static inline int  isascii(unsigned int c) { return (((c) & ~0x7f) == 0); }
+static inline int  isupper(unsigned int c) { return ((c) >= 'A' && (c) <= 'Z'); }
+static inline int  islower(unsigned int c) { return ((c) >= 'a' && (c) <= 'z'); }
+static inline int  isalpha(unsigned int c) { return (isupper(c) || islower(c)); }
+static inline int  isdigit(unsigned int c) { return ((c) >= '0' && (c) <= '9'); }
+static inline int  isxdigit(unsigned int c) { return (isdigit(c)
+			  || ((c) >= 'A' && (c) <= 'F')
+			  || ((c) >= 'a' && (c) <= 'f')); }
+static inline int  isprint(unsigned int c) { return ((c) >= ' ' && (c) <= '~'); }
+
+static inline int  toupper(unsigned int c) { return ((c) - 0x20 * (((c) >= 'a') && ((c) <= 'z'))); }
+static inline int  tolower(unsigned int c) { return ((c) + 0x20 * (((c) >= 'A') && ((c) <= 'Z'))); }
 
 #endif
 

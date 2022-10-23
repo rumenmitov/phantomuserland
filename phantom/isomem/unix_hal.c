@@ -158,7 +158,12 @@ struct wtty *get_thread_ctty(struct phantom_thread *t)
 }
 int GET_CPU_ID() { return 0; }
 
-void hal_cpu_reset_real() { exit(33); }
+void hal_cpu_reset_real() { 
+
+    ph_printf("ERROR : Supposed to restart!");
+    hal_sleep_msec(1000000);
+
+}
 
 // errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
 // errno_t phantom_disconnect_object( struct data_area_4_connection *da ) { return ENOMEM; }

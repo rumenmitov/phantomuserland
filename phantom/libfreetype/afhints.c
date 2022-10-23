@@ -117,7 +117,7 @@
 
 #ifdef AF_DEBUG
 
-#include <stdio.h>
+// #include <stdio.h>
 
   static const char*
   af_dir_str( AF_Direction  dir )

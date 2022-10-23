@@ -58,7 +58,7 @@ ph_strlcat(char *dst, const char *src, size_t  siz)
 	n = siz - dlen;
 
 	if (n == 0)
-		return(dlen + strlen(s));
+		return(dlen + ph_strlen(s));
 	while (*s != '\0') {
 		if (n != 1) {
 			*d++ = *s;

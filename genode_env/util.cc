@@ -116,4 +116,26 @@ extern "C"
 
         return res;
     }
+
+    // XXX : Inefficient implementation!
+    double ph_pow(double a, double b)
+    {
+        double res = a;
+        if (b > 0)
+        {
+            for (int i=0;i<b;i++)
+            {
+                res = res * a;
+            }
+        } else if (b == 0)
+        {
+            res = 1;
+        } else {
+            res = 1;
+            for (int i=0;i>b;i--)
+            {
+                res = res / a;
+            }
+        }
+    }
 }

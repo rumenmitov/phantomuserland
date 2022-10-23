@@ -57,7 +57,7 @@ FT_BEGIN_HEADER
 
 #ifdef AF_DEBUG
 
-#include <stdio.h>
+// #include <stdio.h>
 
 #define AF_LOG( x )  printf x
 

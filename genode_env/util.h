@@ -17,6 +17,9 @@ extern "C"
     long ph_strtol(const char *nptr, char **endptr, int base);
     long long ph_strtoq(const char *nptr, char **endptr, int base);
     unsigned long long ph_strtouq(const char *nptr, char **endptr, int base);
+
+    // Math functions
+    double ph_pow(double, double);
 }
 
 #endif GENODE_PHANTOM_UTIL_H

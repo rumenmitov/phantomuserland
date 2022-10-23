@@ -6,7 +6,7 @@
 
 // #  define NO_NETWORK
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdarg.h>
 #include <ph_string.h>
 #include <unistd.h>

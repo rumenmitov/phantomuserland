@@ -8,7 +8,7 @@
  */
 
 #include <errno.h>
-#include <stdio.h>
+// #include <stdio.h>
 
 #include <shorttypes.h>
 #include <time.h>

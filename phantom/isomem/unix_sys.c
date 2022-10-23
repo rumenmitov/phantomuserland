@@ -21,12 +21,14 @@ void panic(const char *fmt, ...)
     va_end(vl);
 
     //save_mem(mem, size);
-    getchar();
+    // getchar();
     // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
     ph_printf("\nPress Enter from memcheck...");
     pvm_memcheck();
     //ph_printf("\nPress Enter...");	getchar();
-    exit(1);
+    // exit(1);
+    // XXX : Add some real panic code here
+    hal_sleep_msec(1000000);
 }
 
 
@@ -35,12 +37,12 @@ void phantom_wakeup_after_msec(long msec)
     hal_sleep_msec(msec);
 }
 
-time_t time(time_t *);
+// time_t time(time_t *);
 
-//time_t fast_time(void)
-long fast_time(void)
-{
-    return time(0);
-}
+// //time_t fast_time(void)
+// long fast_time(void)
+// {
+//     return time(0);
+// }
 
 extern int sleep(int);

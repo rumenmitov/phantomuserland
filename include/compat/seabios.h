@@ -18,7 +18,7 @@ unsigned int usb_intr_pipe_count(int ms);
 #include <hal.h>
 #include <malloc.h>
 #include <string.h>
-#include <stdio.h>
+// #include <stdio.h>
 #include <threads.h>
 
 #include <dev/pci/pci_regs.h>

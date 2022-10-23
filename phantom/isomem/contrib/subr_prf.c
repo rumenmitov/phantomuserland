@@ -513,7 +513,7 @@ ph_snprintf(char *str, size_t size, const char *format, ...)
     va_list ap;
 
     va_start(ap, format);
-    retval = vsnprintf(str, size, format, ap);
+    retval = ph_vsnprintf(str, size, format, ap);
     va_end(ap);
     return(retval);
 }
@@ -797,7 +797,7 @@ kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
         if (p == NULL)
             p = "(null)";
         if (!dot)
-            n = strlen (p);
+            n = ph_strlen (p);
         else
             for (n = 0; n < dwidth && p[n]; n++)
                 continue;

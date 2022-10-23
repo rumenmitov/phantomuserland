@@ -1322,7 +1322,7 @@
 
 #ifdef DEBUG_GRAYS
 
-#include <stdio.h>
+// #include <stdio.h>
 
   static void
   gray_dump_cells( RAS_ARG )

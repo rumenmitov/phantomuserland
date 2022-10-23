@@ -13,7 +13,7 @@
 #include <kunix.h> // default write func
 
 #ifndef PHANTOM_GENODE
-#include <stdio.h> // default write func
+// #include <stdio.h> // default write func
 #endif
 
 static inline char hex_nibble(char c)

@@ -19,6 +19,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <ph_string.h>
+
 #include <kernel/vm.h>
 #include <kernel/stats.h>
 #include <kernel/page.h>

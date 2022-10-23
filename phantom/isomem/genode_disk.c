@@ -7,7 +7,7 @@
 // Required to access vmem functions
 #include <hal.h>
 
-#include <stdio.h>
+// // #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 

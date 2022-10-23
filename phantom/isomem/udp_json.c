@@ -42,10 +42,17 @@
 
 const struct _json_value json_value_none;
 
-#include <stdio.h>
 #include <ph_string.h>
+#include <ph_malloc.h>
+
+#ifdef PHANTOM_GENODE
+#include <ph_math.h>
+#else
+// #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#endif
+
 #include <phantom_libc.h>
 #include <limits.h>
 
@@ -107,7 +114,7 @@ static void * default_alloc (size_t size, int zero, void * user_data)
 
 static void default_free (void * ptr, void * user_data)
 {
-   free (ptr);
+   ph_free (ptr);
 }
 
 static void * json_alloc (json_state * state, unsigned long size, int zero)
@@ -838,7 +845,7 @@ json_value * json_parse_ex (json_settings * settings,
                         goto e_failed;
                      }
 
-                     top->u.dbl += num_fraction / pow (10.0, num_digits);
+                     top->u.dbl += num_fraction / ph_pow (10.0, num_digits);
                   }
 
                   if (b == 'e' || b == 'E')
@@ -864,7 +871,7 @@ json_value * json_parse_ex (json_settings * settings,
                      goto e_failed;
                   }
 
-                  top->u.dbl *= pow (10.0, (flags & flag_num_e_negative ? - num_e : num_e));
+                  top->u.dbl *= ph_pow (10.0, (flags & flag_num_e_negative ? - num_e : num_e));
                }
 
                if (flags & flag_num_negative)

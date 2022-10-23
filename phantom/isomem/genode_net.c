@@ -1,4 +1,5 @@
-#include <kernel/net.h>
+// #include <kernel/net.h>
+#include <sys/errno.h>
 #include "genode_misc.h"
 
 errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *headers ){

@@ -16,7 +16,7 @@
 #include <video/screen.h>
 #include <video/window.h>
 #include <video/internal.h>
-#include <stdio.h>
+// #include <stdio.h>
 
 #if VIDEO_NEW_BG_WIN
 

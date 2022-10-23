@@ -98,12 +98,16 @@
 #define ft_strcmp   strcmp
 #define ft_strcpy   strcpy
 #define ft_strlen   strlen
+#ifdef PHANTOM_GENODE
+#define ft_strncmp  ph_strncmp
+#else
 #define ft_strncmp  strncmp
+#endif
 #define ft_strncpy  strncpy
 #define ft_strrchr  strrchr
 
 
-#include <stdio.h>
+// #include <stdio.h>
 
 #define ft_sprintf  sprintf
 

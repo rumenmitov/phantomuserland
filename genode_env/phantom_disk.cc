@@ -1,7 +1,7 @@
 #include <base/log.h>
 // #include <stdio.h>
 // #include <stddef.h>
-#include <stdlib.h>
+// #include <stdlib.h>
 #include "phantom_env.h"
 
 using namespace Phantom;
