@@ -83,7 +83,7 @@
 
 
 #include <ph_string.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include "vm/internal_da.h"
 #include "vm/exec.h"
 

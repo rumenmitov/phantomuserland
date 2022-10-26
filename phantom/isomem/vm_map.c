@@ -16,10 +16,10 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
-#include <sys/syslog.h>
+#include <ph_syslog.h>
 #include <kernel/debug_graphical.h>
 
-// #include <assert.h>
+#include <phantom_assert.h>
 
 
 //---------------------------------------------------------------------------
@@ -219,7 +219,7 @@ static vm_page *addr_to_vm_page(unsigned long addr, struct trap_state *ts)
 
     int pageno = addr / __MEM_PAGE;
 
-    if(FAULT_DEBUG) syslog( 0, "fault 0x%lX pgno %d\n", addr, pageno );
+    if(FAULT_DEBUG) ph_syslog( 0, "fault 0x%lX pgno %d\n", addr, pageno );
 
     return vm_map_map + pageno;
 }
@@ -258,7 +258,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 
     vm_page *vmp = vm_map_map + pageno;
 
-    if(FAULT_DEBUG) syslog( 0, "fault 0x%X pgno %d\n", addr, pageno );
+    if(FAULT_DEBUG) ph_syslog( 0, "fault 0x%X pgno %d\n", addr, pageno );
 
 #endif
 
@@ -1412,7 +1412,7 @@ void do_snapshot(void)
 {
     int			  enabled; // interrupts
 
-    syslog( 0, "snap: started");
+    ph_syslog( 0, "snap: started");
     // prerequisites
     //
     // - no pages with flag_have_make can exist! check that?
@@ -1429,7 +1429,7 @@ void do_snapshot(void)
 
 
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: wait 4 pgout to settle");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: wait 4 pgout to settle");
 
     // Back to orig prio
     t_current_set_priority( prio );
@@ -1437,13 +1437,13 @@ void do_snapshot(void)
     // commented out to stress the pager
     //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: stop world");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: stop world");
 
 
     // MUST BE BEFORE hal_mutex_lock!
     phantom_snapper_wait_4_threads();
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: threads stopped");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: threads stopped");
 
     enabled = hal_save_cli();
 
@@ -1459,7 +1459,7 @@ void do_snapshot(void)
 
     // !!!! SnapShot !!!!
 
-    syslog( 0, "snap: hold still, say 'cheese!'...");
+    ph_syslog( 0, "snap: hold still, say 'cheese!'...");
 
     // TODO: we have top do more. such as stop oher CPUS, force VMs into the
     // special snap-friendly state, etc
@@ -1468,7 +1468,7 @@ void do_snapshot(void)
     vm_map_for_all_locked( mark_for_snap );
     t_smp_enable(1);
 
-    syslog( 0, "snap: thank you ladies");
+    ph_syslog( 0, "snap: thank you ladies");
 
     if(enabled) hal_sti();
 
@@ -1484,13 +1484,13 @@ void do_snapshot(void)
     // write in a short time.
 
     // This pageout request is needed - if I skip it, snaps are incomplete
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: pgout");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: pgout");
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
 
-    //if(SNAP_STEPS_DEBUG) syslog( 0, "snap: go kick ass those lazy pages");
+    //if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: go kick ass those lazy pages");
     //if(SNAP_DEBUG) getchar();
 
-    syslog( 0, "snap: will finalize_snap");
+    ph_syslog( 0, "snap: will finalize_snap");
     // scan nonsnapped pages, snap them manually (or just access to cause
     // page fault?)
     vm_map_for_all( finalize_snap );
@@ -1509,11 +1509,11 @@ void do_snapshot(void)
     disk_page_no_t new_snap_head = 0;
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating primary pagelist root");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating primary pagelist root");
     if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating pagelist...");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist...");
     //if(SNAP_DEBUG) getchar();
 
     {
@@ -1528,7 +1528,7 @@ void do_snapshot(void)
         pagelist_finish(&saver);
     }
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: waiting for all pages to be flushed...");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: waiting for all pages to be flushed...");
     // make sure page data has been written
     vm_map_for_all( wait_commit_snap );
 
@@ -1567,7 +1567,7 @@ void do_snapshot(void)
     pager_fence();
 
     // DONE!
-    syslog( 0, "Snapshot done!");
+    ph_syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
 
@@ -1576,7 +1576,7 @@ void do_snapshot(void)
 #endif
 
     hal_sleep_msec(20000);
-    syslog( 0, "snap: wait for 10 sec more");
+    ph_syslog( 0, "snap: wait for 10 sec more");
     hal_sleep_msec(10000);
 
 }
@@ -1909,7 +1909,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (!head)
         return;
 
-    if (SNAP_STEPS_DEBUG) syslog( 0, "snap: verification started...");
+    if (SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: verification started...");
 
 #if !USE_SYNC_IO
     disk_page_io page_io;
@@ -1954,7 +1954,7 @@ static void vm_verify_snap(disk_page_no_t head)
             errno_t rc = phantom_sync_read_block( pp, buf, block, 1 );
             if( rc )
             {
-                syslog( 0, "snap: verification read err %d", rc );
+                ph_syslog( 0, "snap: verification read err %d", rc );
                 return;
             }
 
@@ -1975,7 +1975,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (SNAP_STEPS_DEBUG)
     {
 	hal_printf("\n");
-	syslog( 0, "snap: verification completed");
+	ph_syslog( 0, "snap: verification completed");
     }
 }
 

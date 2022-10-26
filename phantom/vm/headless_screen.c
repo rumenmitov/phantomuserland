@@ -13,7 +13,7 @@
 
 
 #include <ph_string.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <video/screen.h>
 #include <video/internal.h>

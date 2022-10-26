@@ -6,7 +6,7 @@
 #include <stdlib.h>
 //// #include <stdio.h>
 #include "zbuffer.h"
-#include <assert.h>
+#include <phantom_assert.h>
 
 #ifdef PHANTOM_GENODE
 #include <arch/arch-types.h>

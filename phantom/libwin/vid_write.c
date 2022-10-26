@@ -12,7 +12,7 @@
 #include <video/vops.h>
 #include <video/internal.h>
 #include <video/screen.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <sys/types.h>
 
 #ifdef PHANTOM_GENODE

@@ -24,7 +24,7 @@
 
 Phantom::Main *Phantom::main_obj = nullptr;
 
-void setup_adapters(Libc::Env &env)
+void setup_adapters(Env &env)
 {
 	static Phantom::Main local_main(env);
 	Phantom::main_obj = &local_main;
@@ -94,7 +94,8 @@ bool test_hal()
 
 // extern "C" void wait_for_continue(void);
 
-void Libc::Component::construct(Libc::Env &env)
+// void Libc::Component::construct(Libc::Env &env)
+void Component::construct(Env &env)
 {
 
 	// Libc::with_libc([&]()
@@ -150,7 +151,7 @@ void Libc::Component::construct(Libc::Env &env)
 	// });
 }
 
-int main()
-{
-	log("What are we doing here???");
-}
+// int main()
+// {
+// 	log("What are we doing here???");
+// }

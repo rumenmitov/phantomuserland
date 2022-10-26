@@ -13,7 +13,7 @@
 //#include <jsmn.h>
 #include <ph_string.h>
 #include <errno.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_malloc.h>
 
 /*

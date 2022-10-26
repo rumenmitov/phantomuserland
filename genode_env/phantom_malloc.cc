@@ -42,3 +42,8 @@ extern "C" void *ph_calloc(size_t n_elem, size_t elem_size)
 {
     return ph_malloc(n_elem * elem_size);
 }
+
+extern "C" void *ph_realloc(void *ptr, size_t size){
+    Genode::error("Unimplemented function ph_realloc()!");
+    return ptr;
+}

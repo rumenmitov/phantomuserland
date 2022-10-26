@@ -17,7 +17,7 @@
 
 #include <kernel/debug.h>
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 //#include <event.h>
 //#include <spinlock.h>

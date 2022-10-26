@@ -20,7 +20,7 @@
 
 #if VIDEO_NEW_PAINTER
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <kernel/init.h>
 #include <kernel/libkern.h>
 #include <kernel/sem.h>

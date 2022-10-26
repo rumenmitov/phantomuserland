@@ -17,7 +17,7 @@
 #include <disk.h>
 #include <pc/disk_partition.h>
 #include <phantom_disk.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_malloc.h>
 #include <phantom_libc.h>
 #include <ph_string.h>
@@ -412,8 +412,8 @@ static errno_t doPartGetName( phantom_disk_partition_t *p, char *buf, size_t buf
 {
     if( p->base )
         partGetName( p->base, buf, bufsz );
-    if( strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
-    if( strlcat( buf, p->name, bufsz ) >= bufsz ) return ENOMEM;
+    if( ph_strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
+    if( ph_strlcat( buf, p->name, bufsz ) >= bufsz ) return ENOMEM;
     return 0;
 }
 
@@ -422,7 +422,7 @@ errno_t partGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
 {
 	*buf = 0;
     if( p == 0 )
-        if( strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
+        if( ph_strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
     return doPartGetName( p, buf, bufsz );
 }
 

@@ -10,7 +10,7 @@
 **/
 
 #include <video/vops.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <sys/types.h>
 
 

@@ -305,17 +305,17 @@ phantom_process_boot_options(void)
         case 'd':
         case 'e':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_error = (int)atol( arg+3 );
+            debug_max_level_error = (int)ph_atol( arg+3 );
             break;
 
         case 'f':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_flow = (int)atol( arg+3 );
+            debug_max_level_flow = (int)ph_atol( arg+3 );
             break;
 
         case 'i':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_info = (int)atol( arg+3 );
+            debug_max_level_info = (int)ph_atol( arg+3 );
             break;
 
         case 's':

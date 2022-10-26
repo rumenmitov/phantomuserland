@@ -16,7 +16,7 @@
 //#include <phantom_libc.h>
 
 #include <ph_string.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <drv_video_screen.h>
 

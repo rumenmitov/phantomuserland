@@ -21,7 +21,7 @@
 #include <kernel/config.h>
 #include <phantom_libc.h>
 #include <errno.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include "test.h"
 
 // includes needed for stuff we test come after

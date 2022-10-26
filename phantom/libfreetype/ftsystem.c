@@ -106,7 +106,7 @@
     FT_UNUSED( memory );
     FT_UNUSED( cur_size );
 
-    return realloc( block, new_size );
+    return ph_realloc( block, new_size );
   }
 
 

@@ -477,16 +477,16 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
 
     ph_memset( buf, 0, sizeof(buf) );
     ph_strlcpy( buf, "GET /", sizeof(buf) );
-    strlcat( buf, path, sizeof(buf) );
+    ph_strlcat( buf, path, sizeof(buf) );
     //rlcat( buf, "\r\n\r\n", sizeof(buf) );
-    strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
-    strlcat( buf, host, sizeof(buf) );
-    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n", sizeof(buf) );
+    ph_strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
+    ph_strlcat( buf, host, sizeof(buf) );
+    ph_strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n", sizeof(buf) );
 
     if(headers)
-        strlcat( buf, headers, sizeof(buf) );
+        ph_strlcat( buf, headers, sizeof(buf) );
 
-    strlcat( buf, "\r\n", sizeof(buf) );
+    ph_strlcat( buf, "\r\n", sizeof(buf) );
 
     //ph_snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = ph_strlen(buf);
@@ -512,7 +512,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
         }
         
         buf[nread] = 0;
-        strlcat( obuf, buf, obufsize );
+        ph_strlcat( obuf, buf, obufsize );
         //bytes_recvd += nread;
     }
 

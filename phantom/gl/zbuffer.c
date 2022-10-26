@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 //// #include <stdio.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_string.h>
 #include "zbuffer.h"
 

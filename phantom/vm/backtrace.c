@@ -51,7 +51,7 @@ void pvm_exec_panic0( const char *reason )
 {
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
-    //syslog()
+    //ph_syslog()
     ph_printf("pvm_exec_panic: %s\n", reason );
     pvm_backtrace_current_thread();
 
@@ -68,7 +68,7 @@ void pvm_exec_panic( const char *reason, struct data_area_4_thread *tda )
 {
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
-    //syslog()
+    //ph_syslog()
     ph_printf("pvm_exec_panic: %s\n", reason );
     pvm_backtrace(tda);
 

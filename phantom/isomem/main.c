@@ -368,7 +368,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
         run_test( argv[2], argv[3] );
 	// CI: this message is being watched by CI scripts (ci-runtest.sh)
         SHOW_FLOW0( 0, "Test done, reboot");
-        exit(0);
+
+        // XXX : Do proper exit!
+        // exit(0);
+        hal_sleep_msec(1000000);
     }
 #else
     {

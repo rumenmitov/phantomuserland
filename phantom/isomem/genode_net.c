@@ -1,4 +1,5 @@
 // #include <kernel/net.h>
+#include <stddef.h>
 #include <sys/errno.h>
 #include "genode_misc.h"
 

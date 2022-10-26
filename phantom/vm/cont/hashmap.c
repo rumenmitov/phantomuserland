@@ -1,6 +1,6 @@
 #include "hashmap.h"
 #include <malloc.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_string.h>
 
 // TODO convert to phantom objects

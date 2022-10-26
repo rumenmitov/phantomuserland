@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <phantom_assert.h>
 #include <kernel/vm.h>
 #include <kernel/page.h>
 

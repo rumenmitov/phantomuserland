@@ -11,7 +11,7 @@
 
 
 //#include "drv_video_screen.h"
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_string.h>
 #include <errno.h>
 #include <sys/libkern.h>

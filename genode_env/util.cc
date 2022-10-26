@@ -6,6 +6,10 @@
 
 extern "C"
 {
+    #include <ph_setjmp.h>
+    #include <ph_io.h>
+    #include <stdarg.h>
+
     // XXX : It is a buffered output. Buffer will be flush on new line or when full.
     //       Used mainly in printf.
 
@@ -54,6 +58,23 @@ extern "C"
     void *ph_memset(void *dst0, int c0, size_t length)
     {
         return Genode::memset(dst0, c0, length);
+    }
+
+    char *	ph_strrchr(const char *p, int ch){
+        char* res = (char*)p;
+        Genode::warning("Unimplemented function ph_strrchr()!");
+        return res;
+    }
+
+
+    long ph_atol(const char *nptr)
+    {
+
+        long res = 0;
+
+        Genode::ascii_to(nptr, res);
+
+        return res;
     }
 
     long ph_strtol(const char *nptr, char **endptr, int base)
@@ -137,5 +158,27 @@ extern "C"
                 res = res / a;
             }
         }
+    }
+
+    void ph_syslog(int level, const char * fmt, ...) {
+        va_list ap;
+
+        va_start(ap, fmt);
+        ph_vprintf(fmt, ap);
+        va_end(ap);
+    }
+
+    int ph_setjmp (jmp_buf b){
+        Genode::error("Unimplemented ph_setjmp()!");
+        return 0;
+    }
+
+    void ph_longjmp (jmp_buf b, int s){
+        Genode::error("Unimplemented ph_longjmp()!");
+    }
+
+    void ph_qsort( void *ptr, size_t count, size_t size,
+            int (*comp)(const void *, const void *) ){
+        Genode::error("Unimplemented ph_qsort()!");
     }
 }

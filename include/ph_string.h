@@ -27,6 +27,7 @@ size_t 	ph_strnlen(const char *s, size_t count);
 char *	ph_strrchr(const char *p, int ch);
 char *	ph_strstr(const char *s1, const char *s2);
 
+long 	ph_atol(const char *nptr);
 long 	ph_strtol(const char *nptr, char **endptr, int base);
 long long   ph_strtoq(const char *nptr, char **endptr, int base);
 unsigned long long   ph_strtouq(const char *nptr, char **endptr, int base);

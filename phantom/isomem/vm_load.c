@@ -26,7 +26,7 @@
 // #include <stdio.h>
 #include <ph_malloc.h>
 #include <ph_string.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <multiboot.h>
 

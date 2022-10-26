@@ -29,7 +29,7 @@
 
 #include "ids/opcode_ids.h"
 
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <video/screen.h>
 

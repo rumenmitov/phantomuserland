@@ -60,7 +60,7 @@ int 	bcmp(const void *s1, const void *s2, size_t n);
 void 	bzero(void *dst0, size_t length);
 void *	memset(void *dst0, int c0, size_t length);
 
-long 	atol(const char *str);
+long 	ph_atol(const char *str);
 long 	strtol(const char *nptr, char **endptr, int base);
 unsigned long strtoul(const char * __restrict nptr, char ** __restrict endptr, int base);
 

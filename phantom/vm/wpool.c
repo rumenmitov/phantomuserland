@@ -27,7 +27,7 @@ void init_new_windows(void)
 #include <video/vops.h>
 
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
 #include <phantom_libc.h>

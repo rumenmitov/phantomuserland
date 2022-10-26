@@ -1,5 +1,5 @@
 #include "zgl.h"
-#include <assert.h>
+#include <phantom_assert.h>
 //// #include <stdio.h>
 
 #define VERTEX_ARRAY   0x0001

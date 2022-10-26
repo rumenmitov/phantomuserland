@@ -89,22 +89,23 @@
 
 
 #include <string.h>
+#include <ph_string.h>
 
-#define ft_memcmp   memcmp
-#define ft_memcpy   memcpy
-#define ft_memmove  memmove
-#define ft_memset   memset
-#define ft_strcat   strcat
-#define ft_strcmp   strcmp
-#define ft_strcpy   strcpy
-#define ft_strlen   strlen
+#define ft_memcmp   ph_memcmp
+#define ft_memcpy   ph_memcpy
+#define ft_memmove  ph_memmove
+#define ft_memset   ph_memset
+#define ft_strcat   ph_strcat
+#define ft_strcmp   ph_strcmp
+#define ft_strcpy   ph_strcpy
+#define ft_strlen   ph_strlen
 #ifdef PHANTOM_GENODE
 #define ft_strncmp  ph_strncmp
 #else
-#define ft_strncmp  strncmp
+#define ft_strncmp  ph_strncmp
 #endif
-#define ft_strncpy  strncpy
-#define ft_strrchr  strrchr
+#define ft_strncpy  ph_strncpy
+#define ft_strrchr  ph_strrchr
 
 
 // #include <stdio.h>
@@ -120,11 +121,12 @@
 
 
 #include <stdlib.h>
+#include <ph_qsort.h>
 
-#define ft_qsort  qsort
+#define ft_qsort  ph_qsort
 #define ft_exit   exit    /* only used to exit from unhandled exceptions */
 
-#define ft_atol   atol
+#define ft_atol   ph_atol
 
 
   /**********************************************************************/
@@ -134,14 +136,14 @@
   /**********************************************************************/
 
 
-#include <setjmp.h>
+#include <ph_setjmp.h>
 
 #define ft_jmp_buf  jmp_buf   /* note: this cannot be a typedef since */
                               /*       jmp_buf is defined as a macro  */
                               /*       on certain platforms           */
 
-#define ft_setjmp   setjmp    /* same thing here */
-#define ft_longjmp  longjmp   /* "               */
+#define ft_setjmp   ph_setjmp    /* same thing here */
+#define ft_longjmp  ph_longjmp   /* "               */
 
 
   /* the following is only used for debugging purposes, i.e. when */

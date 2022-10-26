@@ -21,7 +21,7 @@
 //#include <drv_video_screen.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 //#include <video.h>
 #include <video/rect.h>

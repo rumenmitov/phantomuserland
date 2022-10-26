@@ -20,7 +20,7 @@
 #include <video/window.h>
 #include <video/internal.h>
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 #include <event.h>
 #include <wtty.h>

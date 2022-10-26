@@ -21,7 +21,7 @@
 #include <video/font.h>
 #include <kernel/libkern.h>
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <ph_string.h>
 #include <phantom_libc.h>
 

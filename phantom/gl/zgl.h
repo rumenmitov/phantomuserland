@@ -6,7 +6,7 @@
 #include <stdlib.h>
 //// #include <stdio.h>
 #include <math.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <GL/gl.h>
 #include "zbuffer.h"
 #include "zmath.h"

@@ -207,7 +207,10 @@ phantom_disk_partition_t *select_phantom_partition(void)
     do {
 
         ph_printf("Press digit (0-%d): \n", n_phantom_fs_partitions-1 );
-        char c = (char)getchar();
+
+        // TODO : Implement using proper getchar
+        // char c = (char)getchar();
+        char c = '0';
 
         if( c < '0' || c > '9' )
             continue;

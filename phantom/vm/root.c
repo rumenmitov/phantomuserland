@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 
 
@@ -712,7 +712,7 @@ static void runclass(int ac, char **av)
 
     if( ac > 1 )
     {
-        method = atol( *av++ );
+        method = ph_atol( *av++ );
     }
 
     create_and_run_object(cname, method );

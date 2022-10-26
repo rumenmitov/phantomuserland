@@ -3,7 +3,7 @@
 #include "zgl.h"
 #include <GL/gl.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 static int buffercnt = 0;
 
