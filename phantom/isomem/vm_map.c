@@ -34,6 +34,7 @@
 #include <kernel/snap_sync.h>
 #include <kernel/physalloc.h>
 #include <kernel/init.h>
+#include <kernel/trap.h>
 
 #include <threads.h>
 
@@ -46,8 +47,10 @@
 #include <arch/arch_vmem_util.h>
 #endif
 
-#include <time.h>
+#include <ph_time.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 
 #include "vm_map.h"

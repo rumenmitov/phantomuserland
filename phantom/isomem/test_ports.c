@@ -1,10 +1,11 @@
-#include <sys/unistd.h>
 #include <user/sys_port.h>
 #include <phantom_libc.h>
 
 #include "test.h"
 
 #ifndef PHANTOM_GENODE
+
+#include <sys/unistd.h>
 
 #define BSIZE 256
 

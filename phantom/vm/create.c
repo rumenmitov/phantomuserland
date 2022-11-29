@@ -15,6 +15,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_string.h>
+
 #include <kernel/vm.h>
 #include <spinlock.h>
 

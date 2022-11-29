@@ -24,9 +24,9 @@ typedef int			ssize_t;
 
 
 //void *ph_malloc( int size );
-void *ph_malloc(size_t size);
+// void *ph_malloc(size_t size);
 
-void ph_free( void *mem );
+// void ph_free( void *mem );
 
 FILE * fopen( const char *fn, const char *mode );
 int fread( void *ptr, int, int, FILE *f );

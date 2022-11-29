@@ -14,6 +14,7 @@
 //#include <errno.h> // travis Ci fail
 #include <pthread.h>
 #include <unistd.h>
+#include <ph_os.h>
 
 #include "unixhal.h"
 

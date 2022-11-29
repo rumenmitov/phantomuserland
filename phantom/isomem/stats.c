@@ -14,8 +14,10 @@
 #include <kernel/stats.h>
 #include <kernel/debug.h>
 #include <kernel/snap_sync.h>
-#include <time.h>
+#include <ph_time.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 //! Counts value during one second
 int			*stat_sec_counters;

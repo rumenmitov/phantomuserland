@@ -14,6 +14,7 @@
 
 #include <phantom_libc.h>
 
+#include <ph_string.h>
 
 
 void

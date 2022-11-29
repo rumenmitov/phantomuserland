@@ -21,6 +21,8 @@
 #include <phantom_libc.h>
 #include <phantom_assert.h>
 
+#include <ph_malloc.h>
+
 
 #include "vm/internal_da.h"
 #include "vm/code.h"

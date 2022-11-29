@@ -99,7 +99,13 @@
 #include <stdarg.h>
 #include "freebsd_types.h"
 
+// Functions that are supposed to be used only here
+
+static int kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
+
 #endif
+
+#include <ph_string.h>
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 //#define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
@@ -610,8 +616,10 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
  * XXX:  %D  -- Hexdump, takes pointer and separator string:
  *		("%6D", ptr, ":")   -> XX:XX:XX:XX:XX:XX
  *		("%*D", len, ptr, " " -> XX XX XX XX ...
+ *
+ * XXX : Defined as static here!
  */
-int
+static int
 kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
 {
 #define PCHAR(c) {int cc=(c); if (func) (*func)(cc,arg); else *d++ = cc; retval++; }

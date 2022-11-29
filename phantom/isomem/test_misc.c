@@ -24,6 +24,8 @@
 #include <phantom_assert.h>
 #include "test.h"
 
+#include <ph_string.h>
+
 // includes needed for stuff we test come after
 
 

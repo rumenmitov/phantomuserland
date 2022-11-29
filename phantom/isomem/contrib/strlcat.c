@@ -31,7 +31,7 @@
 //__FBSDID("$FreeBSD: src/lib/libc/string/strlcat.c,v 1.10.18.1 2008/11/25 02:59:29 kensmith Exp $");
 
 //#include <sys/types.h>
-//#include <string.h>
+#include <ph_string.h>
 
 #include <phantom_libc.h>
 

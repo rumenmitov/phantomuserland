@@ -31,7 +31,7 @@
 // #include "main.h"
 #include "vm/alloc.h"
 
-#include "unixhal.h"
+// #include "unixhal.h"
 
 // struct hardware_abstraction_level hal;
 

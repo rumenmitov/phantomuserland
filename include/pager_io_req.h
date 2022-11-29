@@ -24,7 +24,7 @@
 #include <phantom_types.h>
 #include <queue.h>
 #include <errno.h>
-#include <string.h>
+#include <ph_string.h>
 #include <kernel/pool.h>
 
 #include <spinlock.h>
@@ -80,7 +80,7 @@ typedef struct pager_io_request
 static __inline__ void
 pager_io_request_init( pager_io_request *me )
 { 
-    memset(me, 0, sizeof(*me));
+    ph_memset(me, 0, sizeof(*me));
     me->flag_pagein     = 0;
     me->flag_pageout    = 0;
     //me->flag_ioerror    = 0;

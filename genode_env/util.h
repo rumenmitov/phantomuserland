@@ -6,7 +6,7 @@
 
 extern "C"
 {
-#include <stddef.h>
+#include <phantom_types.h>
 
     long ph_strtol(const char *nptr, char **endptr, int base);
     int ph_putchar(char c);

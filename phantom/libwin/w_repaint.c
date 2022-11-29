@@ -17,6 +17,8 @@
 
 #include <kernel/debug.h>
 
+#include <ph_string.h>
+
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 //#include <event.h>

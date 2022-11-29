@@ -15,6 +15,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
+#include <ph_os.h>
 
 #include <video/screen.h>
 #include <video/font.h>

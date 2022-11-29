@@ -44,6 +44,8 @@
 
 #include "console.h"
 
+#include <ph_io.h>
+
 #ifdef DEBUG_WAIT_ON_MSG
 #define DEBUG_WAIT thread_snooze( DEBUG_WAIT_ON_MSG );
 #define DEBUG_WAIT_FLOW thread_snooze( DEBUG_WAIT_ON_MSG );

@@ -13,6 +13,7 @@
 
 
 #include <ph_string.h>
+#include <ph_malloc.h>
 #include <phantom_assert.h>
 
 #include <video/screen.h>

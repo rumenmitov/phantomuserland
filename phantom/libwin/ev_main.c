@@ -25,6 +25,8 @@
 
 #include <kernel/snap_sync.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include "ev_private.h"
 

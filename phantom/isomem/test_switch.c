@@ -29,10 +29,18 @@
 #include <kernel/init.h>
 #include <hal.h>
 
+#include <ph_string.h>
+
 #include "misc.h"
 #include "test.h"
 
 #include "svn_version.h"
+
+// Prototypes of functions implementing tests
+int do_test_ps2_mouse();
+int do_test_vm_map();
+
+
 
 static void (*fhandler_f)( void *arg);
 static void *fhandler_arg;

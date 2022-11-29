@@ -14,6 +14,8 @@
 
 #include <phantom_libc.h>
 
+#include <ph_string.h>
+
 
 //#if CONF_USE_VM_SYS_SIZE
 

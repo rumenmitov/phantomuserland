@@ -19,7 +19,7 @@
 //#include <event.h>
 //#include <spinlock.h>
 
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 #include "trig_func.inc"
 

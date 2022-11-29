@@ -18,12 +18,14 @@
 
 #include <phantom_libc.h>
 
+#include <ph_string.h>
+
 #include <video/window.h>
 #include <video/internal.h>
 #include <video/zbuf.h>
 #include <video/screen.h>
 
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 #if 1 // last version
 

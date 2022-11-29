@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+int ph_putchar(char c);
+
 int ph_vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap);
 int ph_vsnprintf(char *str, size_t size, const char *format, va_list ap);
 int ph_snprintf(char *str, size_t size, const char *format, ...);

@@ -25,6 +25,8 @@
 #include <video/screen.h>
 #include <event.h>
 
+#include <ph_string.h>
+
 #ifndef LOG_FLOW0
 #define LOG_FLOW0 SHOW_FLOW0
 #endif

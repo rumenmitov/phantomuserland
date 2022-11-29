@@ -21,6 +21,8 @@
 #include <hal.h>
 #include <kernel/timedcall.h>
 
+#include <ph_string.h>
+
 #define TEST_CHATTY 0
 #define TEST_SOFTIRQ 1
 

@@ -22,11 +22,31 @@
 #include <hal.h>
 
 // #include <kernel/interrupts.h>
-// #include <kernel/trap.h>
+#include <kernel/trap.h>
 #include <kernel/board.h>
 #include <queue.h>
 
 #include "genode_interrupts.h"
+#include "genode_misc.h"
+
+#include <ph_malloc.h>
+
+// TODO : Remove or implement
+void profile_interrupt_enter( void ){
+    _stub_print();
+}
+void profile_interrupt_leave( int n_interrupt ){
+    _stub_print();
+}
+
+// TODO : Replace when needed
+#define ENABLE_SOFT_IRQ()
+#define DISABLE_SOFT_IRQ()
+#define REQUEST_SOFT_IRQ()
+
+// void            dump_ss(struct trap_state *st){
+//     _stub_print();
+// }
 
 struct handler_q
 {

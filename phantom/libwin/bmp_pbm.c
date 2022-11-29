@@ -15,6 +15,9 @@
 #include <errno.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <video/bitmap.h>
 #include <video/internal.h>
 

@@ -3,6 +3,7 @@
 #include "zgl.h"
 
 #include <stdlib.h>
+#include <ph_os.h>
 
 #include "tinyphantom.h"
 

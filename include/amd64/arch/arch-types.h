@@ -21,7 +21,12 @@ typedef	unsigned long long  u_int64_t;
 
 
 typedef void *                vmem_ptr_t;
+
+#ifdef PHANTOM_GENODE
+#include <stdint.h>
+#else
 typedef u_int64_t 	      addr_t;
+#endif
 
 // physical mem address 	
 typedef u_int64_t             physaddr_t;

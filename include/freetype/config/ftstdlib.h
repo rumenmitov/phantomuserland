@@ -88,7 +88,6 @@
 #define ft_isxdigit  isxdigit
 
 
-#include <string.h>
 #include <ph_string.h>
 
 #define ft_memcmp   ph_memcmp

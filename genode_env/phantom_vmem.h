@@ -192,9 +192,12 @@ struct Phantom::Vmem_adapter
         void *ptr_obj = env.rm().attach_at(_obj_space.dataspace(), OBJECT_SPACE_START, OBJECT_SPACE_SIZE);
 
         Dataspace_client rm_obj_client(_obj_space.dataspace());
+        log(_obj_space.dataspace());
+        // log(_obj_space.state().type);
         addr_t const addr_obj = reinterpret_cast<addr_t>(ptr_obj);
-        log(" region obj.space        ",
-            Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
+        // XXX : Commented out since Genode on Linux doesn't give a real capability to dataspace
+        // log(" region obj.space        ",
+        //     Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
     }
 
     ~Vmem_adapter() {}

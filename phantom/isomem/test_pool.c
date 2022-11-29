@@ -23,6 +23,7 @@
 
 #include <kernel/pool.h>
 
+#include <ph_string.h>
 
 static pool_t *pool;
 

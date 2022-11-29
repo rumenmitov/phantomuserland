@@ -9,8 +9,8 @@
  *
 **/
 
-#ifndef TIME_H
-#define TIME_H
+#ifndef PH_TIME_H
+#define PH_TIME_H
 
 #include <phantom_types.h>
 #include <phantom_time.h>
@@ -93,8 +93,8 @@ void set_polled_timeout( polled_timeout_t *timer, bigtime_t timeout_uSec );
 bool check_polled_timeout( polled_timeout_t *timer );
 
 
-#include <vm/internal_da.h>
-void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc);
+// #include <vm/internal_da.h>
+// void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc);
 
 
 #endif // TIME_H

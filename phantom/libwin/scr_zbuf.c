@@ -28,6 +28,8 @@
 #include <video/zbuf.h>
 #include <video/screen.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 
 /** Z buffer itself. */

@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <ph_os.h>
 #include "zgl.h"
 
 void gl_fatal_error(char *format, ...) //__attribute__((noreturn))

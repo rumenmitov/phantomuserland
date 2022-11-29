@@ -17,6 +17,8 @@
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 
+#include <ph_string.h>
+
 
 // Will trigger const definitions in pvm_object_flags.h
 #define POSF_CONST_INIT

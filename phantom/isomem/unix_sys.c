@@ -10,6 +10,9 @@
 
 #include "event.h"
 
+// pvm_memcheck
+#include <vm/alloc.h>
+
 void panic(const char *fmt, ...)
 {
     va_list vl;

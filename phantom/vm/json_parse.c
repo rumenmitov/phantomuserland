@@ -16,6 +16,8 @@
 #define debug_level_error 11
 #define debug_level_info 11
 
+#include <ph_string.h>
+
 //#include <hashfunc.h>
 #include <vm/syscall.h>
 #include <vm/object.h>

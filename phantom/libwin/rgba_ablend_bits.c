@@ -12,7 +12,7 @@
 #include <video/vops.h>
 #include <phantom_assert.h>
 #include <sys/types.h>
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 
 

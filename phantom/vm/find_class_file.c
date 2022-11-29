@@ -19,6 +19,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <vm/bulk.h>
 #include "main.h"
 

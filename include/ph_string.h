@@ -14,11 +14,16 @@ void *	ph_memmove(void *dst0, const void *src0, size_t length);
 int 	ph_memcmp(const void *s1v, const void *s2v, size_t size);
 void *	ph_memset(void *dst0, int c0, size_t length);
 
+void    bcopy(const void *src0, void *dst0, size_t length);
+void    bzero(void *dst0, size_t length);
+
 char *	ph_strcat(char *s, const char *add);
+size_t  ph_strlcat(char *dst, const char *src, size_t  siz);
 char *	ph_strchr(const char *p, int ch);
 int 	ph_strcmp(const char *s1, const char *s2);
 char *	ph_strcpy(char *to, const char *from);
 char *	ph_strdup( const char *);
+char *  ph_strndup(const char *str, size_t n);
 size_t 	ph_strlcpy(char *dst, const char *src, size_t siz);
 size_t 	ph_strlen(const char *string);
 int 	ph_strncmp(const char *s1, const char *s2, size_t n);

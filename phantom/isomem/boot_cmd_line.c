@@ -24,6 +24,9 @@
 //#include <hal.h>
 #include "misc.h"
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 static const char *default_argv[] = {"phantom", 0};
 static const char *default_env[] = {0};
 
@@ -90,7 +93,7 @@ phantom_parse_cmd_line( const char* cmdline )
             {
                 assert(ntoken > 0 );
                 token_len[ntoken-1] = cp - last_token_start;
-                token[ntoken-1] = strndup( token_start[ntoken-1], token_len[ntoken-1] );
+                token[ntoken-1] = ph_strndup( token_start[ntoken-1], token_len[ntoken-1] );
             }
 
             if( ntoken >= MAXTOK )
@@ -113,7 +116,7 @@ phantom_parse_cmd_line( const char* cmdline )
         {
             assert(ntoken > 0 );
             token_len[ntoken-1] = cp - last_token_start;
-            token[ntoken-1] = strndup( token_start[ntoken-1], token_len[ntoken-1] );
+            token[ntoken-1] = ph_strndup( token_start[ntoken-1], token_len[ntoken-1] );
         }
 
     }

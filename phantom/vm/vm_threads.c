@@ -29,7 +29,7 @@
 #include <threads.h>
 #include <thread_private.h>
 
-#include <time.h>
+#include <ph_time.h>
 
 #include <kernel/snap_sync.h>
 #include <hal.h>

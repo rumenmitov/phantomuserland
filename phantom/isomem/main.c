@@ -10,6 +10,7 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <ph_string.h>
+// #include <ph_malloc.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
 #include <kernel/boot.h>
@@ -30,6 +31,20 @@
 
 
 #include <kernel/amap.h>
+
+#include <vm/alloc.h>
+#include <kernel/dpc.h>
+#include "svn_version.h"
+#include <video/internal.h>
+#include "vm_map.h"
+#include "pager.h"
+#include <kernel/snap_sync.h>
+#include <vm/root.h>
+
+
+#include <ph_malloc.h>
+#include <ph_io.h>
+#include <ph_os.h>
 
 static amap_t ram_map;
 
@@ -53,9 +68,34 @@ extern int pvm_video_init(); // We need it only here
 
 // Init functions
 
+
+void start_phantom();
+
+
 void
 phantom_multiboot_main()
 {
+    // TODO : REMOVE
+
+
+    char test_string[] = "hello there!"; 
+    char* a = (char*)ph_malloc(ph_strlen(test_string) + 1);
+    if (ph_memcpy(a, test_string, ph_strlen(test_string) + 1) != a){
+        ph_printf("memcpy returned not dest address!!!\n");
+    }
+    if (ph_memcmp(a, test_string, ph_strlen(test_string) + 1)){
+        ph_free(a);
+        ph_printf("not equal!!!\n");
+    }
+    
+    // ph_printf("a[]=%c\n", a[0]);
+    ph_printf("a[]=%c\n", a[1]);
+    ph_printf("a[]=%c\n", a[12]);
+    ph_printf("a[]=%c\n", a[13]);
+
+    ph_printf("a[]=%c\n", a[14]);
+    ph_free(a);
+
     // Assuming we don't really need arch and board init. If we need, enable and implement
     /*
         arch_init_early();

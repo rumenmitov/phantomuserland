@@ -33,7 +33,17 @@
 #ifndef _MACHINE_ENDIAN_H_
 #define	_MACHINE_ENDIAN_H_
 
-#include <sys/_types.h>
+// #include <sys/_types.h>
+#ifdef PHANTOM_GENODE
+
+#include <phantom_types.h>
+
+typedef u_int64_t __uint64_t;
+typedef u_int32_t __uint32_t;
+typedef u_int16_t __uint16_t;
+
+#endif
+
 
 /*
  * Definitions for byte order, according to byte significance from low

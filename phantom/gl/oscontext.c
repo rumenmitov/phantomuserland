@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <stdlib.h>
 #include <phantom_assert.h>
+#include <ph_os.h>
 
 static int buffercnt = 0;
 

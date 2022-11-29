@@ -19,7 +19,7 @@
 #include <video/screen.h>
 
 // min/max
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 
 

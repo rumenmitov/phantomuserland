@@ -9,6 +9,7 @@
  *     Taken from http://www.ddj.com/articles/1996/9604/9604b/9604b.htm?topic=algorithms
  *-------------------------------------------------------------*/
 #include <limits.h>
+
 #define BITS_IN_int     ( sizeof(int) * CHAR_BIT )
 #define THREE_QUARTERS  ((int) ((BITS_IN_int * 3) / 4))
 #define ONE_EIGHTH      ((int) (BITS_IN_int / 8))
@@ -16,7 +17,7 @@
 
 static void update_hash(unsigned int *hash_value, const char *datum)
 {
-    unsigned int i;
+    unsigned int i = UINT_MAX;
 
     *hash_value = ( *hash_value << ONE_EIGHTH ) + *datum;
 

@@ -28,6 +28,8 @@
 #include <queue.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+
 #include <kernel/snap_sync.h>
 
 

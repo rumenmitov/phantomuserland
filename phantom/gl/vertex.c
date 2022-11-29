@@ -1,5 +1,7 @@
 #include "zgl.h"
 
+#include <ph_string.h>
+
 void glopNormal(GLContext * c, GLParam * p)
 {
     V3 v;

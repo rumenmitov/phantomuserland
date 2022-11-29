@@ -31,6 +31,8 @@
 #include <hal.h>
 #include <kernel/timedcall.h>
 
+#include <ph_random.h>
+
 #define TEST_CHATTY 0
 #define TEST_SOFTIRQ 0
 
@@ -103,7 +105,7 @@ static void t_empty(void *a)
 
     ref_inc_p(&p);
 
-    hal_sleep_msec( random() % 6000 );
+    hal_sleep_msec( ph_random() % 6000 );
     // TODO do some random things, such as sleep, set timer, etc
 
     ref_inc_p(&p);
@@ -167,7 +169,7 @@ static void thread1(void *a)
         hal_mutex_unlock(&m);
         if(TEST_CHATTY) ph_printf("unlocked mutex\n");
 
-        if( random() & 1 )
+        if( ph_random() & 1 )
             hal_sem_acquire( &s );
 
         counter++;
@@ -532,7 +534,7 @@ static void simple_thread(void *a)
     ph_snprintf( tn, sizeof(tn), "test t %d", tc );
     t_current_set_name(tn);
 
-    hal_sleep_msec( (random() % 100) + 2000 );
+    hal_sleep_msec( (ph_random() % 100) + 2000 );
     still_have_threads--;
 }
 

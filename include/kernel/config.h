@@ -192,5 +192,13 @@
 #endif
 #endif // ASSEMBLER
 
+#ifdef PHANTOM_GENODE
+
+#ifndef NULL
+#define NULL (void*)0
+#endif
+
+#endif
+
 
 #endif // CONFIG_H

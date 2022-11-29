@@ -60,8 +60,9 @@ void hal_halt()
 {
     //fflush(stderr);
     ph_printf("\n\nhal halt called, exiting.\n");
-    (void)getchar();
-    exit(1);
+    // (void)getchar();
+    // exit(1);
+    panic("halt");
 }
 
 
@@ -174,7 +175,8 @@ hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapp
 void hal_assert_failed(char *file, int line)
 {
     ph_printf("Assert failed at %s:%d", file, line );
-    _exit(33);
+    // _exit(33);
+    panic("Failed assert!");
 }
 
 

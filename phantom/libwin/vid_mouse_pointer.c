@@ -13,6 +13,8 @@
 #include <video/screen.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+
 #define ms_hot_shift_x 0
 // #define ms_hot_shift_y (mpointer->ysize)
 #define ms_hot_shift_y 0

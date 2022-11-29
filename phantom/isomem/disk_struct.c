@@ -12,6 +12,10 @@
 
 #include <phantom_disk.h>
 
+#include <ph_string.h>
+// #include <ph_malloc.h>
+#include <ph_io.h>
+
 
 static u_int32_t sb_chksum( unsigned char *sbp )
 {

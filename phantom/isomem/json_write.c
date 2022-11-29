@@ -10,9 +10,12 @@
 **/
 
 #include <kernel/json.h>
-#include <kunix.h> // default write func
+
+#include <ph_malloc.h>
+#include <ph_io.h>
 
 #ifndef PHANTOM_GENODE
+#include <kunix.h> // default write func
 // #include <stdio.h> // default write func
 #endif
 
@@ -227,16 +230,16 @@ void json_out_int_array(json_output *jo, const char *name, int *value, size_t co
 void json_out_string_array(json_output *jo, const char *name, const char *value, size_t count);
 
 //! Default output function, assumes that jo->putc_arg contains kernel file descriptor for k_write()
-void json_putc_kfd(json_output *jo, char c)
-{
-    int nwrite = 0;
-    errno_t e = k_write(&nwrite, jo->putc_arg, (void *)&c, 1);
+// void json_putc_kfd(json_output *jo, char c)
+// {
+//     int nwrite = 0;
+//     errno_t e = k_write(&nwrite, jo->putc_arg, (void *)&c, 1);
 
-    if (e)
-        jo->err = e;
-    else if (nwrite != 1)
-        jo->err = EIO;
-}
+//     if (e)
+//         jo->err = e;
+//     else if (nwrite != 1)
+//         jo->err = EIO;
+// }
 
 //! Default output function, console
 void json_putc_console(json_output *jo, char c)

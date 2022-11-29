@@ -14,6 +14,10 @@
 #include "genode_disk.h"
 #include <arch/arch-page.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+#include <ph_io.h>
+
 static int seq_number = 0;
 static genode_disk_dev_t vdev;
 static char vdev_name[32] = "GenodeDisk0";

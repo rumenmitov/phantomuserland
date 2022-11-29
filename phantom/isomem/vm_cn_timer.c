@@ -5,6 +5,8 @@
 #define debug_level_info 10
 
 
+#include <ph_time.h>
+
 #include <vm/connect.h>
 #include <vm/alloc.h>
 #include <vm/p2c.h>
@@ -14,15 +16,15 @@
 #include <kernel/timedcall.h>
 #include <kernel/net_timer.h>
 
-#include <time.h>
 
 #define CN_TM_NET 1
 
+time_t          fast_time(void);
 
 static void cn_timer_timedcall_func( void *a )
 {
     struct data_area_4_connection *c = a;
-    time_t t = fast_time();
+    long t = fast_time();
 
     SHOW_FLOW( 1, "timer callback %ld", (long)t );
 

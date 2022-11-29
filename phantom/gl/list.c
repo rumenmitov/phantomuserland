@@ -1,5 +1,7 @@
 #include "zgl.h"
 
+#include <ph_io.h>
+
 static char *op_table_str[]=
 {
 #define ADD_OP(a,b,c) "gl" #a " " #c,

@@ -21,7 +21,7 @@
 #include <disk.h>
 #include <kernel/pool.h>
 #include <kernel/init.h>
-#include <kernel/libkern.h>
+// #include <kernel/libkern.h>
 #include <kernel/page.h>
 
 

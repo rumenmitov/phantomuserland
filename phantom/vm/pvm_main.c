@@ -19,6 +19,7 @@
 #define debug_level_info 10
 
 #include <stdarg.h>
+#include <ph_os.h>
 
 #include <phantom_libc.h>
 #include <kernel/boot.h>

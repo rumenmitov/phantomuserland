@@ -19,7 +19,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
-#include <time.h>
+#include <ph_time.h>
 #include <threads.h>
 
 #include <kernel/snap_sync.h>

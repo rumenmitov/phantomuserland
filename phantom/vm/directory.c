@@ -16,6 +16,8 @@
 #define debug_level_error 1
 #define debug_level_info 0
 
+#include <ph_malloc.h>
+
 #include <hashfunc.h>
 #include <vm/syscall.h>
 #include <vm/object.h>

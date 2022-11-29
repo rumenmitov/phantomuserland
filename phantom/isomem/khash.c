@@ -14,6 +14,8 @@
 #include <hal.h>
 #include <kernel/khash.h>
 
+#include <ph_malloc.h>
+#include <ph_io.h>
 
 #define VERIFY_TABLE 0
 
@@ -282,15 +284,15 @@ void hash_dump(void *_hash_table)
 	struct hash_table *t = _hash_table;
 	unsigned int i;
 
-	dprintf("hash table dump of table at %p\n", t);
-	dprintf("\tnext_ptr_offset %d\n", t->next_ptr_offset);
-	dprintf("\ttable_size %d\n", t->table_size);
-	dprintf("\tnum_elems %d\n", t->num_elems);
-	dprintf("\tflags 0x%x\n", t->flags);
-	dprintf("\tcompare %p hash %p\n", t->compare_func, t->hash_func);
-	dprintf("\ttable %p:\n", t->table);
+	ph_printf("hash table dump of table at %p\n", t);
+	ph_printf("\tnext_ptr_offset %d\n", t->next_ptr_offset);
+	ph_printf("\ttable_size %d\n", t->table_size);
+	ph_printf("\tnum_elems %d\n", t->num_elems);
+	ph_printf("\tflags 0x%x\n", t->flags);
+	ph_printf("\tcompare %p hash %p\n", t->compare_func, t->hash_func);
+	ph_printf("\ttable %p:\n", t->table);
 	for(i = 0; i < t->table_size; i++) {
-		dprintf("\t\t%p\n", t->table[i]);
+		ph_printf("\t\t%p\n", t->table[i]);
 	}
 }
 

@@ -18,6 +18,9 @@
 #include <phantom_libc.h>
 #include <event.h>
 
+#include <ph_string.h>
+#include <ph_malloc.h>
+
 #include <video/window.h>
 #include <video/control.h>
 #include <video/internal.h>

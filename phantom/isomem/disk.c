@@ -19,6 +19,7 @@
 #include <phantom_disk.h>
 #include <phantom_assert.h>
 #include <ph_malloc.h>
+#include <ph_string.h>
 #include <phantom_libc.h>
 #include <ph_string.h>
 #include <kernel/vm.h>

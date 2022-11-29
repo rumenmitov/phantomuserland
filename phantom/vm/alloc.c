@@ -15,6 +15,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_string.h>
+
 #include <vm/alloc.h>
 #include <vm/object_flags.h>
 #include <kernel/stats.h>

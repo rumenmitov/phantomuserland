@@ -22,6 +22,8 @@
 
 #include <kernel/net/udp.h>
 
+#include <ph_string.h>
+#include <ph_malloc.h>
 
 
 errno_t cn_url_do_operation( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *t, pvm_object_t o )

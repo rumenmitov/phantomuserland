@@ -21,6 +21,9 @@
 
 #include <kernel/pool.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <video/rect.h>
 #include <video/window.h>
 #include <video/bitmap.h>

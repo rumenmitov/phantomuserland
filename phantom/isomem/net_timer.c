@@ -21,7 +21,7 @@ int cancel_net_timer(net_timer_event *e)
 // #include <threads.h>
 // #include <kernel/net_timer.h>
 // #include "misc.h"
-// #include <time.h>
+// #include <ph_time.h>
 // #include <compat/newos.h>
 
 // #define NET_TIMER_INTERVAL 100 // 100 ms

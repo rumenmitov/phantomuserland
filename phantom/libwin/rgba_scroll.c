@@ -14,7 +14,8 @@
 #include <phantom_assert.h>
 #include <ph_string.h>
 #include <errno.h>
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
+// #include <math.h>
 #include <video/color.h>
 //#include <video/internal.h>
 

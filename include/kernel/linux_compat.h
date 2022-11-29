@@ -11,7 +11,7 @@
 // #include <stdio.h>
 
 #include <shorttypes.h>
-#include <time.h>
+#include <ph_time.h>
 #include <hal.h>
 
 #include <ia32/pio.h>

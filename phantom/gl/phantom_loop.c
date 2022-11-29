@@ -12,6 +12,9 @@
 //#include "drv_video_screen.h"
 #include "tinyphantom.h"
 
+#include <ph_malloc.h>
+#include <ph_os.h>
+
 //static	GR_WINDOW_ID	w1;		/* id for large window */
 //static	GR_GC_ID	gc1;		/* graphics context for text */
 

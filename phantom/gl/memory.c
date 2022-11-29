@@ -2,6 +2,7 @@
  * Memory allocator for TinyGL
  */
 #include "zgl.h"
+#include <ph_malloc.h>
 
 /* modify these functions so that they suit your needs */
 

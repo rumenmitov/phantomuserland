@@ -1,5 +1,4 @@
 #include "phantom_env.h"
-#include <pthread.h>
 
 extern "C"
 {
@@ -9,6 +8,8 @@ extern "C"
 #include <kernel/timedcall.h>
 #include <kernel/stats.h>
 #include <kernel/board.h>
+
+#include <ph_time.h>
 
 
     static bigtime_t msecDivider = 0;
@@ -48,7 +49,7 @@ extern "C"
         hal_mutex_unlock(time_mutex);
     }
 
-    long fast_time(void)
+    time_t fast_time(void)
     {
         // TODO : Implement using Genode's RTC
         return 1337;

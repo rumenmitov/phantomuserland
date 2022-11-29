@@ -37,6 +37,8 @@
 #include <kernel/khash.h>
 #include <threads.h>
 
+#include <ph_string.h>
+#include <ph_malloc.h>
 
 /**
  *
