@@ -31,8 +31,14 @@ char *	ph_strncpy(char *to, const char *from, ssize_t count);
 size_t 	ph_strnlen(const char *s, size_t count);
 char *	ph_strrchr(const char *p, int ch);
 char *	ph_strstr(const char *s1, const char *s2);
+char *  ph_strnstrn(char const *s1, int l1, char const *s2, int l2);
+
+#define ph_index(p, ch) ph_strchr(p, ch)
 
 long 	ph_atol(const char *nptr);
+long    ph_atoln(const char *str, size_t n);
+int     ph_atoin(const char *str, size_t n);
+
 long 	ph_strtol(const char *nptr, char **endptr, int base);
 long long   ph_strtoq(const char *nptr, char **endptr, int base);
 unsigned long long   ph_strtouq(const char *nptr, char **endptr, int base);

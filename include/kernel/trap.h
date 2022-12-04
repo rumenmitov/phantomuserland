@@ -59,8 +59,9 @@ struct trap_state {
 
 #ifndef ASSEMBLER
 
+#ifndef PHANTOM_GENODE
 int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts);
-
+#endif
 
 //! This is what called from low-level asm trap code
 void phantom_kernel_trap( struct trap_state *ts );

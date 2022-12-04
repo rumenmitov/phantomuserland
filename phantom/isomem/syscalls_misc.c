@@ -8,7 +8,7 @@
 
 
 long
-atoln(const char *str, size_t n)
+ph_atoln(const char *str, size_t n)
 {
     char buf[80];
 
@@ -20,14 +20,14 @@ atoln(const char *str, size_t n)
     return(ph_strtol(buf, (char **)0, 10));
 }
 
-int  atoin(const char *str, size_t n)
+int ph_atoin(const char *str, size_t n)
 {
-    return (int)atoln(str, n); 
+    return (int)ph_atoln(str, n); 
 }
 
 
 char *
-strnstrn(char const *s1, int l1, char const *s2, int l2)
+ph_strnstrn(char const *s1, int l1, char const *s2, int l2)
 {
 	//int l1, l2;
 

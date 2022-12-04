@@ -12,6 +12,7 @@
 #ifndef P2C_H
 #define P2C_H
 
+#include <ph_string.h>
 #include "vm/internal_da.h"
 
 #define IS_PHANTOM_INT(obj) (obj->_class == pvm_get_int_class())

@@ -77,7 +77,7 @@ void			tenmicrosec(void);
 //
 // Example: struct tm *tmp, myTime; tmp = current_time; myTime = *tmp;
 //
-struct tm *		current_time;
+// struct tm *		current_time;
 
 // Called once a second to update per second statistics
 void stat_update_second_stats(void);

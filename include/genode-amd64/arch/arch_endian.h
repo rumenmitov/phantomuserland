@@ -55,6 +55,12 @@ typedef u_int16_t __uint16_t;
 
 #define	_BYTE_ORDER	_LITTLE_ENDIAN
 
+#ifdef PHANTOM_GENODE
+
+#define	BYTE_ORDER      _BYTE_ORDER
+
+#endif
+
 #if __BSD_VISIBLE
 #define	LITTLE_ENDIAN   _LITTLE_ENDIAN
 #define	BIG_ENDIAN      _BIG_ENDIAN

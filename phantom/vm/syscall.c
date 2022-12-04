@@ -22,6 +22,7 @@
 
 #include <phantom_libc.h>
 #include <ph_time.h>
+#include <ph_string.h>
 #include <threads.h>
 
 #include <kernel/snap_sync.h>
@@ -589,7 +590,7 @@ static int si_string_12_find( pvm_object_t me, pvm_object_t *ret, struct data_ar
     struct data_area_4_string *meda = pvm_object_da( me, string );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
-    unsigned char * cret = (unsigned char *)strnstrn(
+    unsigned char * cret = (unsigned char *)ph_strnstrn(
                 (char *)meda->data, meda->length,
                 (char *)himda->data, himda->length );
 
@@ -610,7 +611,7 @@ static int si_string_16_toint( pvm_object_t me, pvm_object_t *ret, struct data_a
     CHECK_PARAM_COUNT(0);
 
     struct data_area_4_string *meda = pvm_object_da( me, string );
-    SYSCALL_RETURN(pvm_create_int_object( atoin( (char *)meda->data, meda->length ) ) );
+    SYSCALL_RETURN(pvm_create_int_object( ph_atoin( (char *)meda->data, meda->length ) ) );
 }
 
 
@@ -620,7 +621,7 @@ static int si_string_17_tolong( pvm_object_t me, pvm_object_t *ret, struct data_
     CHECK_PARAM_COUNT(0);
 
     struct data_area_4_string *meda = pvm_object_da( me, string );
-    SYSCALL_RETURN(pvm_create_long_object( atoln( (char *)meda->data, meda->length ) ) );
+    SYSCALL_RETURN(pvm_create_long_object( ph_atoln( (char *)meda->data, meda->length ) ) );
 }
 
 static int si_string_18_tofloat( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )

@@ -16,6 +16,8 @@
 
 #include <phantom_libc.h>
 #include <ph_os.h>
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include <video/screen.h>
 #include <video/font.h>
@@ -23,7 +25,9 @@
 #include <unistd.h>
 #include <kunix.h>
 
+#ifndef PHANTOM_GENODE
 #include "winhal.h"
+#endif
 
 
 #define WXS (240*3)
@@ -82,7 +86,7 @@ void videotest_truetype(void)
 
     drv_video_winblt( w );
 
-    (void) getchar();
+    // (void) getchar();
 }
 
 
@@ -200,7 +204,7 @@ void videotest_pbm()
             w_draw_bitmap( w, 0, 0, bmp );
             drv_video_winblt( w );
 
-            getchar();
+            // getchar();
         }
 
 

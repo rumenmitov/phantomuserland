@@ -45,10 +45,10 @@ extern "C" void *ph_malloc(size_t size)
     Genode::log("ph_malloc: addr=", original_addr, "(", adjusted_addr, "), size=", size, " total_size=", total_size);
     
     // TODO : REMOVE!!!111
-    char* test_str = (char*) adjusted_addr;
-    Genode::log(test_str[0]);
-    Genode::log(test_str[1]);
-    Genode::log(test_str[2]);
+    // char* test_str = (char*) adjusted_addr;
+    // Genode::log(test_str[0]);
+    // Genode::log(test_str[1]);
+    // Genode::log(test_str[2]);
 
     return (void *)adjusted_addr;
 }

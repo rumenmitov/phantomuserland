@@ -20,6 +20,7 @@
 
 #include <stdarg.h>
 #include <ph_os.h>
+#include <ph_string.h>
 
 #include <phantom_libc.h>
 #include <kernel/boot.h>
@@ -345,7 +346,7 @@ static void args(int argc, char* argv[])
     {
         char *arg = *++argv;
 
-        if( *arg != '-' && index( arg, '=' ) )
+        if( *arg != '-' && ph_index( arg, '=' ) )
         {
             if( main_envc >= MAXENVBUF )
             {

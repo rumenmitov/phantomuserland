@@ -13,6 +13,8 @@
 
 #include <phantom_libc.h>
 
+#include <ph_string.h>
+
 #include <endian.h>
 
 #include "vm/object.h"

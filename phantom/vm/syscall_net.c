@@ -20,6 +20,8 @@
 
 
 #include <phantom_libc.h>
+#include <ph_malloc.h>
+#include <ph_string.h>
 #include <vm/syscall_net.h>
 #include <vm/alloc.h>
 #include <kernel/snap_sync.h>

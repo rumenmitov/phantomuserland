@@ -581,7 +581,7 @@ static void load_kernel_boot_env(void)
     {
         const char *e = *ep++;
 
-        const char *eq = index( e, '=' );
+        const char *eq = ph_index( e, '=' );
 
         if( eq == 0 )
         {
