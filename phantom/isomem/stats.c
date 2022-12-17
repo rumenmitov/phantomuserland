@@ -19,6 +19,8 @@
 #include <ph_malloc.h>
 #include <ph_string.h>
 
+#include <init_routines.h>
+
 //! Counts value during one second
 int			*stat_sec_counters;
 
@@ -47,7 +49,7 @@ static void stat_update_persistent_storage( void *ign );
 
 void stat_dump_all( int av, char **ac );
 
-static void phantom_init_stat_counters(void)
+void phantom_init_stat_counters(void)
 {
     stat_sec_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
     stat_per_sec_counters	= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
@@ -61,7 +63,7 @@ static void phantom_init_stat_counters(void)
 }
 
 
-static void phantom_init_stat_counters2(void)
+void phantom_init_stat_counters2(void)
 {
     dbg_add_command(&stat_dump_all, "stats", "dump kernel event statistics");
 

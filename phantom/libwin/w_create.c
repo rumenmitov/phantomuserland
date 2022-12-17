@@ -226,6 +226,7 @@ drv_video_window_create(
     if(w == 0)
         return 0;
 
+    ph_memset(w, 0x0, sizeof(drv_video_window_t));
 
     drv_video_window_init( w, 0, xsize, ysize, x, y, bg, flags, title );
     //w->flags = flags;

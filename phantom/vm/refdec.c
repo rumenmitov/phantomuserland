@@ -26,11 +26,12 @@
 #include <vm/alloc.h>
 #include <vm/object.h>
 
+#include <init_routines.h>
+
 static int inited = 0;
 static volatile int stop_refdec_thread = 0;
 
 
-static void deferred_refdec_init(void);
 static void deferred_refdec_thread(void *a);
 
 
@@ -52,7 +53,7 @@ static hal_cond_t  start_refdec_cond, end_refdec_cond;
 static tid_t deferred_refdec_thread_id;
 
 
-static void deferred_refdec_init(void)
+void deferred_refdec_init(void)
 {
     // ph_printf("DEBUG: Started refdec init!\n");
     hal_mutex_init( &deferred_refdec_mutex, "refdec");

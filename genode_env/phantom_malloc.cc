@@ -5,6 +5,7 @@
 extern "C"
 {
 #include <ph_malloc.h>
+#include <ph_string.h>
 }
 
 extern "C" void *ph_malloc(size_t size)
@@ -71,7 +72,13 @@ extern "C" void *ph_calloc(size_t n_elem, size_t elem_size)
     return ph_malloc(n_elem * elem_size);
 }
 
+// XXX : Allocates new area each time!
 extern "C" void *ph_realloc(void *ptr, size_t size){
-    Genode::error("Unimplemented function ph_realloc()!");
-    return ptr;
+    // Genode::error("Unimplemented function ph_realloc()!");
+    size_t old_size = *(((size_t*)ptr) - 1);
+    Genode::log("ph_realloc: ", ptr, " size=", size, ", old_size=", old_size);
+    void* new_area = ph_malloc(size);
+    ph_memcpy(new_area, ptr, old_size);
+    ph_free(ptr);
+    return new_area;
 }

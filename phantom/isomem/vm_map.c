@@ -38,6 +38,8 @@
 
 #include <threads.h>
 
+#include <init_routines.h>
+
 #ifdef ARCH_ia32
 #include <ia32/proc_reg.h>
 #include <ia32/phantom_pmap.h>
@@ -372,7 +374,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 // vm_map_init is not called for tests, so we leave there just real vm_map init code
 // and general init is here
 
-static void vm_map_pre_init(void)
+void vm_map_pre_init(void)
 {
     page_clear_engine_init();
 

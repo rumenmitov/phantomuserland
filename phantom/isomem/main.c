@@ -41,6 +41,7 @@
 #include <kernel/snap_sync.h>
 #include <vm/root.h>
 
+#include <init_routines.h>
 
 #include <ph_malloc.h>
 #include <ph_io.h>

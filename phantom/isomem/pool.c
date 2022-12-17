@@ -97,6 +97,10 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 
     p->flag_autodestroy = 1;
 
+    // XXX : Probably should be null
+    p->init = 0;
+    p->destroy = 0;
+
     //hal_mutex_unlock( &p->mutex );
     //POOL_UNLOCK(p);
     return p;
