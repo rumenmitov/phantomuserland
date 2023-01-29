@@ -8,7 +8,7 @@
 #include <base/entrypoint.h>
 #include <base/registry.h>
 
-#include <libc/component.h>
+// #include <libc/component.h>
 
 #include <cpu/memory_barrier.h>
 

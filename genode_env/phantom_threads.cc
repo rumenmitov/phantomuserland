@@ -189,6 +189,7 @@ extern "C"
 
         // XXX : May be not that efficient. Used mainly while waiting disk IO
         hal_spin_lock(lock_to_be_unlocked);
+        hal_spin_unlock(lock_to_be_unlocked);
 
         // _stub_print();
     }

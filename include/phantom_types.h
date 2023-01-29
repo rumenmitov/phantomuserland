@@ -19,7 +19,7 @@
 
 #ifdef PHANTOM_GENODE
 
-#include <stdbool.h>
+// #include <stdbool.h>
 
 // next are for Unix emulation env
 typedef int		_pid_t;
@@ -55,6 +55,11 @@ typedef unsigned short 	_mode_t;
 typedef _mode_t		mode_t;
 typedef int		_sigset_t;
 typedef _sigset_t	sigset_t;
+
+#ifndef __cplusplus
+typedef u_int8_t        bool;
+// typedef u_int8_t        Bool; // vmware svga
+#endif
 
 
 #else

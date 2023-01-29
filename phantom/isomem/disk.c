@@ -135,12 +135,14 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     SHOW_FLOW0( 3, "start io" );
     if( (ret = p->asyncIo( p, &rq )) )
     {
+        SHOW_FLOW0( 3, "failed asyncIo" );
         rq.flag_sleep = 0;
         hal_spin_unlock(&(rq.lock));
         if( ei ) hal_sti();
         //return ret;
         goto ret;
     }
+    SHOW_FLOW0( 3, "About to block" );
     thread_block( THREAD_SLEEP_IO, &(rq.lock) );
     SHOW_FLOW0( 3, "unblock" );
     if( ei ) hal_sti();
