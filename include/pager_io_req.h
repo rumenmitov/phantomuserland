@@ -40,7 +40,7 @@ typedef struct pager_io_request
     struct pager_io_request *  next_page;       // used for pager or some other queue
 
     // Used internally by disk partitions support/driver code
-    long                blockNo;         	// disk sector (usually 512-byte) no - this is what real io code looks at
+    u_int64_t           blockNo;         	// disk sector (usually 512-byte) no - this is what real io code looks at
     int                 nSect;                 	// no of disk sectors to be transferred
 
     unsigned char       flag_pagein;            // Read

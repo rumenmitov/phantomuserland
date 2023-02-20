@@ -17,9 +17,9 @@ namespace Phantom
         Env &_env;
         Phantom::Vmem_adapter _vmem_adapter{_env};
         Heap _heap{_env.ram(), _env.rm()};
-        Phantom::Disk_backend _disk{_env, _heap};
-        Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
         Phantom::Timer_adapter _timer_adapter{_env};
+        Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
+        Phantom::Disk_backend _disk{_env, _heap};
         // XXX : docs says that it "allows only one timeout at a time"
         Timer::Connection _sleep_timer{_env, "phantom_sleep_timer"};
 

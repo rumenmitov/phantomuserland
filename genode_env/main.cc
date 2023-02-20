@@ -43,10 +43,10 @@ void test_adapters()
 	Phantom::test_remapping();
 	log("finished remapping test!");
 
-	// TODO : Uncomment when adapter is fixed!
-	// log("Starting block device test!");
+	log("Starting block device test!");
 	// Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
-	// log("Finished block device test!");
+	// Phantom::test_block_alignment(Phantom::main_obj->_disk);
+	log("Finished block device test!");
 }
 
 bool test_hal()
@@ -111,6 +111,7 @@ void Component::construct(Env &env)
 	// Libc::with_libc([&]()
 	// 				{
 		log("--- Phantom init ---");
+		env.exec_static_constructors();
 
 		log("Waiting for continue");
 		wait_for_continue();
@@ -140,7 +141,7 @@ void Component::construct(Env &env)
 
 		log("--- finished Phantom env test ---");
 
-		// env.exec_static_constructors(); <- This thing might break pthreads!
+		 	// env.exec_static_constructors(); <- This thing might break pthreads!
 
 		// Actual Phantom code
 

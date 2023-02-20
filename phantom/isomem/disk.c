@@ -133,6 +133,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     rq.sleep_tid = GET_CURRENT_THREAD()->tid;
 
     SHOW_FLOW0( 3, "start io" );
+    hal_printf("!!! blockNo : %d\n", rq.blockNo);
     if( (ret = p->asyncIo( p, &rq )) )
     {
         SHOW_FLOW0( 3, "failed asyncIo" );

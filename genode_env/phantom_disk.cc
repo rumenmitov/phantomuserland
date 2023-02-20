@@ -58,14 +58,25 @@ extern "C"
     {
         const int sector_size = 512;
 
+        Genode::log("!!! : received blockNo ", rq->blockNo);
+
         // Getting data from rq
-        int blockNo = rq->blockNo;
+        u_int64_t blockNo = rq->blockNo;
+
+        // XXX : For some reason, data from C code looks different here
+        //       so rq->blockNo is exactly 1 less than in C except for 0.
+        //       Need to fix somehow
+        // if (blockNo != 0){
+        //     blockNo--;
+        // }
+
         int nSect = rq->nSect;
         physaddr_t pa = rq->phys_page;
 
         // Calculating size
         int length_in_bytes = nSect * sector_size;
         int length_in_blocks = length_in_bytes / part->block_size + ((length_in_bytes % part->block_size) ? 1 : 0);
+        Genode::log("!!! Calcs:", blockNo , ", ", length_in_bytes / part->block_size, " (", length_in_bytes % part->block_size, ")" );
 
         // XXX : Seems to be not used
         rq->parts = nSect;

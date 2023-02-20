@@ -39,9 +39,12 @@ phantom_calc_sb_checksum( phantom_disk_superblock *sb )
 
     sb->checksum = sb_chksum( (unsigned char *)sb );
 
-    ph_printf("SB_CHKSUM: cs_ok=%d, m1_ok=%d, m2_ok=%d\n", 
+    ph_printf("SB_CHKSUM: cs_ok=%x(%d), m1_ok=%x(%d), m2_ok=%x(%d)\n", 
+        sb->checksum, 
         sb->checksum == old_cs,
+        sb->magic,
         sb->magic   == DISK_STRUCT_MAGIC_SUPERBLOCK,
+        sb->magic2,
         sb->magic2  == DISK_STRUCT_MAGIC_SUPER_2);
 
     return

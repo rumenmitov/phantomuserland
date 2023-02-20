@@ -36,20 +36,20 @@ class Phantom::Disk_backend
 protected:
     Genode::Env &_env;
     Genode::Heap &_heap;
-    Genode::Entrypoint &_ep;
+    Genode::Entrypoint _ep{_env, 2*1024*sizeof(long) , "disk_ep", Genode::Affinity::Location()};
     Genode::Allocator_avl _block_alloc{&_heap};
 
-    struct Job : Block::Connection<Job>::Job
+    struct DJob : Block::Connection<DJob>::Job
     {
         pager_io_request *_req;
 
-        Job(Block::Connection<Job> &connection, Block::Operation operation, pager_io_request *req)
-            : Block::Connection<Job>::Job(connection, operation), _req(req)
+        DJob(Block::Connection<DJob> &connection, Block::Operation operation, pager_io_request *req)
+            : Block::Connection<DJob>::Job(connection, operation), _req(req)
         {
         }
     };
 
-    Block::Connection<Job> _block{_env, &_block_alloc};
+    Block::Connection<DJob> _block{_env, &_block_alloc, 8 * 1024 * 1024};
     Block::Session::Info _info{_block.info()};
     Genode::Mutex _session_mutex{};
 
@@ -61,7 +61,7 @@ protected:
     }
 
     Genode::Signal_handler<Disk_backend> _block_io_sigh{
-        _env.ep(), *this, &Disk_backend::_handle_block_io};
+        _ep, *this, &Disk_backend::_handle_block_io};
 
 public:
     enum class Operation
@@ -105,30 +105,28 @@ public:
     /**
      * Block::Connection::Update_jobs_policy
      */
-    void produce_write_content(Job &job, Block::seek_off_t offset, char *dst, size_t length)
+    void produce_write_content(DJob &job, Block::seek_off_t offset, char *dst, size_t length)
     {
         Genode::log("Produce content req=", job._req);
         // Producing content to write on the disk
         transferData(job._req->phys_page, (void *)dst, length, false);
-        job._req->pager_callback(job._req, true);
     }
 
     /**
      * Block::Connection::Update_jobs_policy
      */
-    void consume_read_result(Job &job, Block::seek_off_t offset,
+    void consume_read_result(DJob &job, Block::seek_off_t offset,
                              char const *src, size_t length)
     {
         Genode::log("Consuming result req=", job._req);
         // Consuming content read from the disk
         transferData(job._req->phys_page, (void *)src, length, true);
-        job._req->pager_callback(job._req, false);
     }
 
     /**
      * Block_connection::Update_jobs_policy
      */
-    void completed(Job &job, bool success)
+    void completed(DJob &job, bool success)
     {
         Genode::log("Completed req=", job._req);
         // XXX : pager_io_request requires some finishing operations
@@ -140,6 +138,11 @@ public:
         job._req->flag_pageout = 0;
         job._req->flag_pagein = 0;
 
+        // Calling pager callback
+        if (job._req->pager_callback != 0){
+            job._req->pager_callback(job._req, true);
+        }
+
         // TODO : error handling
 
         hal_spin_unlock(&job._req->lock);
@@ -147,7 +150,7 @@ public:
         destroy(_heap, &job);
     }
 
-    Disk_backend(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap), _ep(env.ep())
+    Disk_backend(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap)
     {
         _block.sigh(_block_io_sigh);
         Genode::log("block device with block size ", _info.block_size, " block count ",
@@ -166,8 +169,12 @@ public:
 
     void startAsyncJob(Block::Operation op, pager_io_request *req)
     {
-        // Allocating Job in the heap. Should be destroyed on completed() callback
-        new (_heap) Job(_block, op, req);
+        Genode::log("Starting async job req=", req);
+        Genode::log(op);
+        // Allocating DJob in the heap. Should be destroyed on completed() callback
+        new (_heap) DJob(_block, op, req);
+
+        _block.update_jobs(*this);
     }
 
     /*
