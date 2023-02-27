@@ -47,6 +47,10 @@ void test_adapters()
 	// Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
 	// Phantom::test_block_alignment(Phantom::main_obj->_disk);
 	log("Finished block device test!");
+
+	log("Starting bulk code test!");
+	Phantom::test_bulk();
+	log("finished bulk code test!");
 }
 
 bool test_hal()
@@ -92,7 +96,7 @@ bool test_hal()
 	return ok;
 }
 
-extern "C" void wait_for_continue(void);
+// extern "C" void wait_for_continue(void);
 
 // void Libc::Component::construct(Libc::Env &env)
 void Component::construct(Env &env)
@@ -114,7 +118,7 @@ void Component::construct(Env &env)
 		env.exec_static_constructors();
 
 		log("Waiting for continue");
-		wait_for_continue();
+		// wait_for_continue();
 		log("GO");
 
 		{

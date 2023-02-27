@@ -3,6 +3,7 @@
 
 #include <base/component.h>
 #include <base/heap.h>
+#include <rom_session/connection.h>
 #include "disk_backend.h"
 #include "phantom_vmem.h"
 #include "phantom_timer.h"
@@ -23,8 +24,14 @@ namespace Phantom
         // XXX : docs says that it "allows only one timeout at a time"
         Timer::Connection _sleep_timer{_env, "phantom_sleep_timer"};
 
+        // ROM with bulk classes
+        Rom_connection _bulk_class_rom{_env, "phantom_classes"};
+        void* const _bulk_code_ptr{_env.rm().attach(_bulk_class_rom.dataspace())};
+        const size_t _bulk_code_size{Dataspace_client(_bulk_class_rom.dataspace()).size()};
+
         Main(Env &env) : _env(env)
         {
+
         }
     };
 

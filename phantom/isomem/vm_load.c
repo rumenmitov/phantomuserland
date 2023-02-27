@@ -110,7 +110,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
 // Boot module classloader support
 // -----------------------------------------------------------------------
 
-
+#ifndef PHANTOM_GENODE
 
 static void *bulk_code;
 static unsigned int bulk_size = 0;
@@ -165,4 +165,5 @@ void load_classes_module()
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 }
 
+#endif
 

@@ -140,7 +140,7 @@ bool Phantom::test_block_device_adapter(Phantom::Disk_backend &disk)
 bool Phantom::test_block_alignment(Phantom::Disk_backend &disk)
 {
     phantom_init_stat_counters();
-    
+
     const size_t block_size = 512;
     phantom_disk_partition_t stub_partition = {0};
     // required by startSync
@@ -149,9 +149,9 @@ bool Phantom::test_block_alignment(Phantom::Disk_backend &disk)
 
     // for (int i = 1; i <= 1; i++)
     // {
-        char data[block_size];
-        ph_memset(data, 1, block_size);
-        phantom_sync_write_sector(&stub_partition, data, 1, 1);
+    char data[block_size];
+    ph_memset(data, 1, block_size);
+    phantom_sync_write_sector(&stub_partition, data, 1, 1);
     // }
 }
 
@@ -191,4 +191,25 @@ bool Phantom::test_remapping()
     main_obj->_vmem_adapter.unmap_page((addr_t)v);
 
     return true;
+}
+
+bool Phantom::test_bulk()
+{
+    Genode::log("bulk classes ptr=", main_obj->_bulk_code_ptr, " size=", main_obj->_bulk_code_size);
+
+    if (main_obj->_bulk_code_ptr == nullptr || main_obj->_bulk_code_size == 0){
+        return false;
+    }
+
+    char first_str[16];
+    memset(first_str, 0, 16);
+    memcpy(first_str, main_obj->_bulk_code_ptr, 7);
+
+    Genode::log("bulk classes rom data (0-7): '", Genode::Cstring(first_str), "'");
+
+    if (strcmp(first_str, "phantom") == 0){
+        return true;
+    } else {
+        return false;
+    }
 }
