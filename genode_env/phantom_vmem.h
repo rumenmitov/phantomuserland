@@ -77,7 +77,7 @@ private:
         if (_pf_handler != nullptr)
         {
             // Libc::with_libc([&](){
-                _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
+            _pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
             // });
         }
         else
@@ -204,29 +204,29 @@ struct Phantom::Vmem_adapter
 
     void map_page(addr_t phys_addr, addr_t virt_addr, bool writeable)
     {
-        (void)writeable;
-
         log("Mapping phys ", Hex(phys_addr), " to virt ", Hex(virt_addr));
 
+        // Getting the region
+        Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
+
+        if (region == nullptr)
+        {
+            Genode::error("Mapping incorrect phys address [",
+                          Hex(phys_addr), "->", Hex(virt_addr),
+                          "]! Will not map");
+            return;
+        }
+
+        addr_t offset = phys_addr - region->_pseudo_addr;
+
+        Genode::memory_barrier();
+
+        // If in object space, map to objects space rm, otherwise, map to env rm
         if (virt_addr >= OBJECT_SPACE_START && virt_addr < OBJECT_SPACE_START + OBJECT_SPACE_SIZE)
         {
-            Genode::memory_barrier();
 
             // TODO : Error handling
             //        Handle 0 return address
-
-            // Getting the region
-            Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
-
-            if (region == nullptr)
-            {
-                Genode::error("Mapping incorrect phys address [",
-                              Hex(phys_addr), "->", Hex(virt_addr),
-                              "]! Will not map");
-                return;
-            }
-
-            addr_t offset = phys_addr - region->_pseudo_addr;
 
             Region_map::Local_addr laddr = _obj_space.attach(
                 region->_ram_ds,
@@ -247,26 +247,79 @@ struct Phantom::Vmem_adapter
         }
         else
         {
-            warning("Trying to map outside object space! Will not map");
+            // TODO : Error handling
+            //        Handle 0 return address
+
+            Region_map::Local_addr laddr = _env.rm().attach(
+                region->_ram_ds,
+                PAGE_SIZE,
+                offset,
+                true,
+                virt_addr,
+                false,
+                writeable);
+
+            if ((addr_t)laddr != virt_addr)
+            {
+                error("Mapped addr does not correspond to virtual one! Got ",
+                      Hex((addr_t)laddr), " expected ", Hex(virt_addr));
+            }
+
+            log("Map returned laddr=", Hex((addr_t)laddr));
         }
+    }
+
+    void *map_somewhere(addr_t phys_addr, bool writeable, size_t n_pages)
+    {
+        // Getting the region
+        Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
+
+        log("Mapping phys ", Hex(phys_addr), " to some virt ");
+
+        if (region == nullptr)
+        {
+            Genode::error("Mapping incorrect phys address [",
+                          Hex(phys_addr), "-> somewehere",
+                          "]! Will not map");
+            return nullptr;
+        }
+
+        addr_t offset = phys_addr - region->_pseudo_addr;
+
+        Genode::memory_barrier();
+
+        // TODO : Error handling
+        //        Handle 0 return address
+
+        Region_map::Local_addr laddr = _env.rm().attach(
+            region->_ram_ds,
+            n_pages * PAGE_SIZE,
+            offset,
+            false,
+            nullptr,
+            false,
+            writeable);
+
+        log("Map returned laddr=", Hex((addr_t)laddr));
+
+        return laddr;
     }
 
     void unmap_page(addr_t virt_addr)
     {
-
-        log("unmapping virt ", Hex(virt_addr), " obj_space_addr=", virt_addr - OBJECT_SPACE_START);
+        Genode::memory_barrier();
 
         if (virt_addr >= OBJECT_SPACE_START && virt_addr < OBJECT_SPACE_START + OBJECT_SPACE_SIZE)
         {
-
-            Genode::memory_barrier();
+            log("unmapping virt ", Hex(virt_addr), " obj_space_addr=", virt_addr - OBJECT_SPACE_START);
 
             // TODO : Error handling
             _obj_space.detach(virt_addr - OBJECT_SPACE_START);
         }
         else
         {
-            warning("Trying to map outside object space! Will not map");
+            log("unmapping virt ", Hex(virt_addr));
+            _env.rm().detach(virt_addr);
         }
     }
 

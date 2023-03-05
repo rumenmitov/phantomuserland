@@ -58,12 +58,13 @@ bool test_hal()
 	bool ok = true;
 
 	// Phantom::test_hal_vmem_alloc();
-	log("--- Starting vmem alloc test");
-	if (!test_hal_vmem_alloc())
-	{
-		ok = false;
-		log("Failed vmem alloc test!");
-	}
+	// XXX : Commented since allocating only vmem is not supported
+	// log("--- Starting vmem alloc test");
+	// if (!test_hal_vmem_alloc())
+	// {
+	// 	ok = false;
+	// 	log("Failed vmem alloc test!");
+	// }
 
 	log("--- Starting phys alloc test");
 	if (!test_hal_phys_alloc())

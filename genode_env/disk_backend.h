@@ -75,31 +75,33 @@ public:
     void transferData(physaddr_t phys_addr, void *virt_addr, size_t length, bool to_phys)
     {
         // XXX : Replace with something defined in header
-        const size_t PAGE_SIZE = 4096;
+        // const size_t PAGE_SIZE = 4096;
         // TODO : Rework to be more efficient
         // TODO : IT SHOULD NOT HAPPEN IN OBJECT SPACE! Use another allocator
         // TODO : Also, might result in some memory leaks
         // Need to write to pseudo phys page. It means that we need to map it first
-        void *temp_mapping = nullptr;
+        // void *temp_mapping = nullptr;
 
-        size_t length_in_pages = length / PAGE_SIZE + ((length % PAGE_SIZE > 0) ? 1 : 0);
+        // size_t length_in_pages = length / PAGE_SIZE + ((length % PAGE_SIZE > 0) ? 1 : 0);
 
-        hal_alloc_vaddress(&temp_mapping, length_in_pages);
-        hal_pages_control(phys_addr, temp_mapping, length_in_pages, page_map, to_phys ? page_rw : page_ro);
+        // hal_alloc_vaddress(&temp_mapping, length_in_pages);
+        // hal_pages_control(phys_addr, temp_mapping, length_in_pages, page_map, to_phys ? page_rw : page_ro);
 
         // Transfer data
         if (to_phys)
         {
-            ph_memcpy(temp_mapping, virt_addr, length);
+            // ph_memcpy(temp_mapping, virt_addr, length);
+            memcpy_v2p(phys_addr, virt_addr, length);
         }
         else
         {
-            ph_memcpy(virt_addr, temp_mapping, length);
+            // ph_memcpy(virt_addr, temp_mapping, length);
+            memcpy_p2v(virt_addr, phys_addr, length);
         }
 
         // Now we can remove temporary mapping and dealloc address
-        hal_pages_control(0, temp_mapping, length_in_pages, page_unmap, page_rw);
-        hal_free_vaddress(temp_mapping, length_in_pages);
+        // hal_pages_control(0, temp_mapping, length_in_pages, page_unmap, page_rw);
+        // hal_free_vaddress(temp_mapping, length_in_pages);
     }
 
     /**

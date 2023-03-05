@@ -352,28 +352,28 @@ static void 		replentishThread(void *arg);
 // -----------------------------------------------------------------------
 
 
-void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
-{
-    int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
+// void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
+// {
+//     int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
 
-    if( hal_alloc_vaddress(va, npages) )
-        panic("out of vaddr");
+//     if( hal_alloc_vaddress(va, npages) )
+//         panic("out of vaddr");
 
-    if( hal_alloc_phys_pages( pa, npages) )
-        panic("out of physmem");
+//     if( hal_alloc_phys_pages( pa, npages) )
+//         panic("out of physmem");
 
-    hal_pages_control( *pa, *va, npages, page_map, page_rw );
-}
+//     hal_pages_control( *pa, *va, npages, page_map, page_rw );
+// }
 
-void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
-{
-    int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
+// void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
+// {
+//     int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
 
-    hal_pages_control( pa, va, npages, page_unmap, page_noaccess );
+//     hal_pages_control( pa, va, npages, page_unmap, page_noaccess );
 
-    hal_free_vaddress(va, npages);
-    hal_free_phys_pages( pa, npages); // TODO BUG causes crash in VM86 if called before
-}
+//     hal_free_vaddress(va, npages);
+//     hal_free_phys_pages( pa, npages); // TODO BUG causes crash in VM86 if called before
+// }
 
 
 
@@ -438,111 +438,111 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 
 // XXX : Seem to be not needed. However, should be reimplemented on Genode
 
-void
-memcpy_v2p( physaddr_t to, void *from, size_t size )
-{
-    void *addr;
-    if(hal_alloc_vaddress( &addr, 1))
-        panic("out of vaddresses");
+// void
+// memcpy_v2p( physaddr_t to, void *from, size_t size )
+// {
+//     void *addr;
+//     if(hal_alloc_vaddress( &addr, 1))
+//         panic("out of vaddresses");
 
-#if 1 // panics, need test
-    if(!PAGE_ALIGNED(to))
-    {
-        // Process partial page
+// #if 1 // panics, need test
+//     if(!PAGE_ALIGNED(to))
+//     {
+//         // Process partial page
 
-        physaddr_t page = PREV_PAGE_ALIGN(to);
-        int shift = to-page;
-        size_t part = PAGE_SIZE-shift;
+//         physaddr_t page = PREV_PAGE_ALIGN(to);
+//         int shift = to-page;
+//         size_t part = PAGE_SIZE-shift;
 
-        if( part > size ) part = size;
+//         if( part > size ) part = size;
 
-        assert( shift < PAGE_SIZE );
-        assert( shift > 0 );
+//         assert( shift < PAGE_SIZE );
+//         assert( shift > 0 );
 
-        hal_page_control( page, addr, page_map, page_rw );
+//         hal_page_control( page, addr, page_map, page_rw );
 
-        ph_memcpy( addr+shift, from, part );
+//         ph_memcpy( addr+shift, from, part );
 
-        hal_page_control( page, addr, page_unmap, page_noaccess );
+//         hal_page_control( page, addr, page_unmap, page_noaccess );
 
-        to += part;
-        from += part;
-        size -= part;
-    }
-#endif
+//         to += part;
+//         from += part;
+//         size -= part;
+//     }
+// #endif
 
-    if( size > 0 ) assert(PAGE_ALIGNED(to));
+//     if( size > 0 ) assert(PAGE_ALIGNED(to));
 
-    while( size > 0 )
-    {
-        int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
-        size -= stepSize;
+//     while( size > 0 )
+//     {
+//         int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
+//         size -= stepSize;
 
-        hal_page_control( to, addr, page_map, page_rw );
+//         hal_page_control( to, addr, page_map, page_rw );
 
-        ph_memcpy( addr, from, stepSize );
+//         ph_memcpy( addr, from, stepSize );
 
-        hal_page_control( to, addr, page_unmap, page_noaccess );
+//         hal_page_control( to, addr, page_unmap, page_noaccess );
 
-        to += PAGE_SIZE;
-        from += PAGE_SIZE;
+//         to += PAGE_SIZE;
+//         from += PAGE_SIZE;
 
-    }
+//     }
 
-    assert( size == 0 );
-
-
-    hal_free_vaddress(addr, 1);
-}
+//     assert( size == 0 );
 
 
-void
-memcpy_p2v( void *to, physaddr_t from, size_t size )
-{
-    void *addr;
-    if(hal_alloc_vaddress( &addr, 1))
-        panic("out of vaddresses");
-
-    assert(PAGE_ALIGNED(from));
-
-    do
-    {
-        int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
-        size -= stepSize;
-
-        hal_page_control( from, addr, page_map, page_rw );
-
-        ph_memcpy( to, addr, stepSize );
-
-        hal_page_control( from, addr, page_unmap, page_noaccess );
-
-        to += PAGE_SIZE;
-        from += PAGE_SIZE;
-
-    } while( size > 0 );
-
-    assert( size == 0 );
+//     hal_free_vaddress(addr, 1);
+// }
 
 
-    hal_free_vaddress(addr, 1);
-}
+// void
+// memcpy_p2v( void *to, physaddr_t from, size_t size )
+// {
+//     void *addr;
+//     if(hal_alloc_vaddress( &addr, 1))
+//         panic("out of vaddresses");
+
+//     assert(PAGE_ALIGNED(from));
+
+//     do
+//     {
+//         int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
+//         size -= stepSize;
+
+//         hal_page_control( from, addr, page_map, page_rw );
+
+//         ph_memcpy( to, addr, stepSize );
+
+//         hal_page_control( from, addr, page_unmap, page_noaccess );
+
+//         to += PAGE_SIZE;
+//         from += PAGE_SIZE;
+
+//     } while( size > 0 );
+
+//     assert( size == 0 );
+
+
+//     hal_free_vaddress(addr, 1);
+// }
 
 
 
 
-void
-hal_copy_page_v2p( physaddr_t to, void *from )
-{
-    void *addr;
-    if(hal_alloc_vaddress( &addr, 1))
-        panic("out of vaddresses");
-    hal_page_control( to, addr, page_map, page_rw );
+// void
+// hal_copy_page_v2p( physaddr_t to, void *from )
+// {
+//     void *addr;
+//     if(hal_alloc_vaddress( &addr, 1))
+//         panic("out of vaddresses");
+//     hal_page_control( to, addr, page_map, page_rw );
 
-    ph_memcpy( addr, from, hal_mem_pagesize() );
+//     ph_memcpy( addr, from, hal_mem_pagesize() );
 
-    hal_page_control( to, addr, page_unmap, page_noaccess );
-    hal_free_vaddress(addr, 1);
-}
+//     hal_page_control( to, addr, page_unmap, page_noaccess );
+//     hal_free_vaddress(addr, 1);
+// }
 
 // XXX : Seem to be not used, but should be reimplemented for Genode
 

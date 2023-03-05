@@ -1778,7 +1778,8 @@ static void vm_map_deferred_disk_alloc_thread(void)
 
 
 
-static void * 		page_clear_vaddr; // Place in address space to map page to clear
+// XXX : Not used
+// static void * 		page_clear_vaddr; // Place in address space to map page to clear
 static hal_spinlock_t	page_clear_lock;
 
 // TODO idle time pre-clear to some queue
@@ -1788,8 +1789,8 @@ static void page_clear_engine_init(void)
     hal_spin_init(&page_clear_lock);
     hal_spin_lock(&page_clear_lock);
 
-    if( hal_alloc_vaddress( &page_clear_vaddr, 1 ) )
-        panic("page_clear_vaddr alloc failed");
+    // if( hal_alloc_vaddress( &page_clear_vaddr, 1 ) )
+    //     panic("page_clear_vaddr alloc failed");
 
     hal_spin_unlock(&page_clear_lock);
     if(ie) hal_sti();
@@ -1803,19 +1804,24 @@ static void page_clear_engine_clear_page(physaddr_t p)
     int enabled = hal_save_cli();
     hal_spin_lock(&page_clear_lock);
 
+    static char static_clear_page[PAGE_SIZE] = {0};
+
     if(FAULT_DEBUG)
         hal_printf("page_clear_engine_clear_page( 0x%X )\n", p );
 
-    hal_page_control( p, page_clear_vaddr, page_map, page_rw );
+    // XXX : Inefficient!
+    memcpy_v2p(p, static_clear_page, PAGE_SIZE);
+
+    // hal_page_control( p, page_clear_vaddr, page_map, page_rw );
 
     // TODO use MMX clear code
     //ph_memset( page_clear_vaddr, '#', __MEM_PAGE );
-    ph_memset( page_clear_vaddr, 0, __MEM_PAGE );
+    // ph_memset( page_clear_vaddr, 0, __MEM_PAGE );
 
     // TODO Broken!
     //fast_clear_page( page_clear_vaddr );
 
-    hal_page_control( p, page_clear_vaddr, page_unmap, page_ro );
+    // hal_page_control( p, page_clear_vaddr, page_unmap, page_ro );
 
     hal_spin_unlock(&page_clear_lock);
     if (enabled) hal_sti();
