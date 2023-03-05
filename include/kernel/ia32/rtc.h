@@ -1,6 +1,6 @@
 
 #include <phantom_types.h>
-#include <time.h>
+#include <ph_time.h>
 
 //int rtcin(int reg);
 unsigned int isa_rtc_read_reg(int reg);

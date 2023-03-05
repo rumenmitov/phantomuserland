@@ -36,31 +36,31 @@ static int _empty() { return hsp == 0; }
 
 static void _show_free()
 {
-    if(verbose) printf( "%d free, %d used in pool\n", pool_get_free( pool ), pool_get_used( pool ) );
+    if(verbose) ph_printf( "%d free, %d used in pool\n", pool_get_free( pool ), pool_get_used( pool ) );
 }
 
 
 static void _create_free( int i )
 {
-    if(verbose) printf( "create/free %d\n", i );
+    if(verbose) ph_printf( "create/free %d\n", i );
 
     while(i-- > 0)
     {
-        //printf("%d ", i);
+        //ph_printf("%d ", i);
         pool_handle_t  h = pool_create_el( pool, "aaa" );
         test_check_ge(h, 0);
         test_check_false(pool_release_el( pool, h ));
         //pool_destroy_el( pool, h );
-        //if( (i%10) == 0 ) printf(".");
-        //if( (i%100) == 0 ) printf("\n");
+        //if( (i%10) == 0 ) ph_printf(".");
+        //if( (i%100) == 0 ) ph_printf("\n");
     }
-    //printf("\n");
+    //ph_printf("\n");
     //_show_free();
 }
 
 static void _create( int i )
 {
-    if(verbose) printf( "create %d\n", i );
+    if(verbose) ph_printf( "create %d\n", i );
 
     while(i-- > 0)
     {
@@ -74,7 +74,7 @@ static void _create( int i )
 
 static void _release( int i)
 {
-    if(verbose) printf( "release %d\n", i );
+    if(verbose) ph_printf( "release %d\n", i );
 
     while(i-- > 0)
         test_check_false(pool_release_el( pool, _pop() ));
@@ -115,7 +115,7 @@ static errno_t _ff_fail(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 
 
 TEST_FUNCT(pool) {
-    //printf("test case 1\n");
+    //ph_printf("test case 1\n");
 
     pool = create_pool();
     pool->flag_nofail = 0; // return errors, don't panic
@@ -138,7 +138,7 @@ TEST_FUNCT(pool) {
     test_check_true( 1 == pool_get_used( pool ) );
     test_check_true( 2 == pool_el_refcount( pool, h ) );
 
-    printf("pool_get_used() = %d\n", pool_get_used( pool ) );
+    ph_printf("pool_get_used() = %d\n", pool_get_used( pool ) );
 
     test_check_false(pool_release_el( pool, h ));
     test_check_true( 1 == pool_get_used( pool ) );
@@ -204,15 +204,15 @@ TEST_FUNCT(pool) {
 
 TEST_FUNCT(foo2)
 {
-    //printf("test case 2\n");
-    /* ”¥©ª®¢ë© ª®¤ */
+    //ph_printf("test case 2\n");
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     //CU_ASSERT_EQUAL(1, 1);
 }
 
 void runSuite(void) {
-    /* Š®¤ â¥áâ-áìîâ  */
+    /* ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ */
 
-    //printf("test suite\n");
+    //ph_printf("test suite\n");
 
     CU_pSuite suite = CUnitCreateSuite("Pool");
     if (suite) {

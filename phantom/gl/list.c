@@ -1,5 +1,7 @@
 #include "zgl.h"
 
+#include <ph_io.h>
+
 static char *op_table_str[]=
 {
 #define ADD_OP(a,b,c) "gl" #a " " #c,
@@ -83,19 +85,19 @@ void gl_print_op(GLParam *p)
       s++;
       switch (*s++) {
       case 'f':
-	printf("%g",p[0].f);
+	ph_printf("%g",p[0].f);
 	break;
       default:
-	printf("%d",p[0].i);
+	ph_printf("%d",p[0].i);
 	break;
       }
       p++;
     } else {
-      putchar(*s);
+      ph_putchar(*s);
       s++;
     }
   }
-  printf("\n");
+  ph_printf("\n");
 }
 
 

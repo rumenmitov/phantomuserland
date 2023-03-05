@@ -22,11 +22,31 @@
 #include <hal.h>
 
 // #include <kernel/interrupts.h>
-// #include <kernel/trap.h>
+#include <kernel/trap.h>
 #include <kernel/board.h>
 #include <queue.h>
 
 #include "genode_interrupts.h"
+#include "genode_misc.h"
+
+#include <ph_malloc.h>
+
+// TODO : Remove or implement
+void profile_interrupt_enter( void ){
+    _stub_print();
+}
+void profile_interrupt_leave( int n_interrupt ){
+    _stub_print();
+}
+
+// TODO : Replace when needed
+#define ENABLE_SOFT_IRQ()
+#define DISABLE_SOFT_IRQ()
+#define REQUEST_SOFT_IRQ()
+
+// void            dump_ss(struct trap_state *st){
+//     _stub_print();
+// }
 
 struct handler_q
 {
@@ -88,7 +108,7 @@ void call_irq_handler(struct trap_state *s, unsigned irq)
 
     if( queue_empty( &heads[irq] ) )
     {
-        printf("\nNo handler for IRQ %d\n", irq);
+        ph_printf("\nNo handler for IRQ %d\n", irq);
         return;
     }
 
@@ -140,18 +160,18 @@ errno_t hal_irq_alloc( int irq, void (*func)(void *arg), void *_arg, int is_shar
 
     if( (!is_shareable) && !queue_empty( &heads[irq] ) )
     {
-        printf("IRQ %d asked exculsive, but other user exist", irq);
+        ph_printf("IRQ %d asked exculsive, but other user exist", irq);
         return EMLINK;
     }
 
     if( is_shareable && !queue_empty( &heads[irq] ) && (!((struct handler_q *)queue_first( &heads[irq] ))->is_shareable) )
     {
-        printf("IRQ %d asked shared, but already exclusive", irq);
+        ph_printf("IRQ %d asked shared, but already exclusive", irq);
         return EMLINK;
     }
 
 
-    struct handler_q *out = malloc(sizeof(struct handler_q));
+    struct handler_q *out = ph_malloc(sizeof(struct handler_q));
     if(out == 0)
         return ENOMEM;
 

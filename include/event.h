@@ -14,8 +14,8 @@
 
 #ifdef PHANTOM_GENODE
 
-#include <stdio.h>
-#include <time.h>
+// // #include <stdio.h>
+#include <ph_time.h>
 
 #endif
 

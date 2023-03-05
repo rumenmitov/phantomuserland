@@ -97,7 +97,7 @@ static int dpc_threads = 0;
 void dpc_thread(void)
 {
 
-    printf("DEBUG: DPC THREAD STARTED!!!");
+    ph_printf("DEBUG: DPC THREAD STARTED!!!");
     t_current_set_name("DPC Work");
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 

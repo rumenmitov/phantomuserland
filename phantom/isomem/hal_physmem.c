@@ -22,7 +22,7 @@
 #include <kernel/config.h>
 #include <kernel/physalloc.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <threads.h>
 
 #include <kernel/init.h>
@@ -110,7 +110,7 @@ static map_elem_t    	mapbuf[MAP_SIZE_ELEM(PHYSALLOC_MAXPAGES)];
 //     STAT_INC_CNT_N(STAT_CNT_VA_ALLOC, num);
 
 //     *result = (void *)(ret * PAGE_SIZE);
-//     //printf("hal_alloc_vaddress req %d pages, ret 0x%X (internal %d)\n", num, *result, ret );
+//     //ph_printf("hal_alloc_vaddress req %d pages, ret 0x%X (internal %d)\n", num, *result, ret );
 //     return rc;
 // }
 
@@ -237,7 +237,7 @@ static void 		replentishThread(void *arg);
 
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-// //printf("PhysMem alloc %08X-%08X\n",           *result, (physaddr_t)((ret+npages) * PAGE_SIZE) );
+// //ph_printf("PhysMem alloc %08X-%08X\n",           *result, (physaddr_t)((ret+npages) * PAGE_SIZE) );
 //     return rc;
 // }
 
@@ -304,7 +304,7 @@ static void 		replentishThread(void *arg);
 //     STAT_INC_CNT_N(STAT_CNT_PMEM_ALLOC, 1);
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-// //printf("PhysMem alloc %08X\n", *result );
+// //ph_printf("PhysMem alloc %08X\n", *result );
 //     return rc;
 // }
 
@@ -410,7 +410,7 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 //     STAT_INC_CNT_N(STAT_CNT_LOMEM_ALLOC, npages);
 
 //     *result = (physaddr_t)(ret * PAGE_SIZE);
-//     //printf("hal_alloc_phys_pages_low req %d pages, ret 0x%X (internal %d)\n", npages, *result, ret );
+//     //ph_printf("hal_alloc_phys_pages_low req %d pages, ret 0x%X (internal %d)\n", npages, *result, ret );
 //     return rc;
 // }
 
@@ -461,7 +461,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
 
         hal_page_control( page, addr, page_map, page_rw );
 
-        memcpy( addr+shift, from, part );
+        ph_memcpy( addr+shift, from, part );
 
         hal_page_control( page, addr, page_unmap, page_noaccess );
 
@@ -480,7 +480,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
 
         hal_page_control( to, addr, page_map, page_rw );
 
-        memcpy( addr, from, stepSize );
+        ph_memcpy( addr, from, stepSize );
 
         hal_page_control( to, addr, page_unmap, page_noaccess );
 
@@ -512,7 +512,7 @@ memcpy_p2v( void *to, physaddr_t from, size_t size )
 
         hal_page_control( from, addr, page_map, page_rw );
 
-        memcpy( to, addr, stepSize );
+        ph_memcpy( to, addr, stepSize );
 
         hal_page_control( from, addr, page_unmap, page_noaccess );
 
@@ -538,7 +538,7 @@ hal_copy_page_v2p( physaddr_t to, void *from )
         panic("out of vaddresses");
     hal_page_control( to, addr, page_map, page_rw );
 
-    memcpy( addr, from, hal_mem_pagesize() );
+    ph_memcpy( addr, from, hal_mem_pagesize() );
 
     hal_page_control( to, addr, page_unmap, page_noaccess );
     hal_free_vaddress(addr, 1);
@@ -666,7 +666,7 @@ static void dump_mem_stat( physalloc_t *map, const char *name, long div, const c
     int total = PG2MB(map->allocable_size, div);
     int free = PG2MB( (map->allocable_size - map->n_used_pages), div );
     int used = PG2MB(map->n_used_pages, div);
-    printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
+    ph_printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
 }
 
 // size_t pahantom_total_phys_mem_kb() { return PG2KB(pm_map.allocable_size); }

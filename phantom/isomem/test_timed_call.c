@@ -41,7 +41,7 @@ static volatile int called = 0;
 static void echo(  void *_a )
 {
     called++;
-    printf("Echo: '%s'\n", (char *)_a);
+    ph_printf("Echo: '%s'\n", (char *)_a);
 }
 
 
@@ -57,7 +57,7 @@ int do_test_timed_call(const char *test_parm)
     (void) test_parm;
 
 
-    printf("Testing timed call undo, must be no echoes:\n");
+    ph_printf("Testing timed call undo, must be no echoes:\n");
     called = 0;
 
     phantom_request_timed_call( &t2, 0 );
@@ -74,7 +74,7 @@ int do_test_timed_call(const char *test_parm)
 
     called = 0;
 
-    printf("Testing timed calls, wait for echoes:\n");
+    ph_printf("Testing timed calls, wait for echoes:\n");
 
     phantom_request_timed_call( &t1, 0 );
     //test_check_false(called); // it is still possible for this test to fail with correct code!
@@ -113,7 +113,7 @@ int do_test_timed_call(const char *test_parm)
 
 
 
-    printf("Done testing timed calls\n");
+    ph_printf("Done testing timed calls\n");
     return 0;
 }
 

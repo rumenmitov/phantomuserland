@@ -14,8 +14,12 @@
 #include <kernel/stats.h>
 #include <kernel/debug.h>
 #include <kernel/snap_sync.h>
-#include <time.h>
+#include <ph_time.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
+#include <init_routines.h>
 
 //! Counts value during one second
 int			*stat_sec_counters;
@@ -45,21 +49,21 @@ static void stat_update_persistent_storage( void *ign );
 
 void stat_dump_all( int av, char **ac );
 
-static void phantom_init_stat_counters(void)
+void phantom_init_stat_counters(void)
 {
-    stat_sec_counters		= calloc( sizeof(int), MAX_STAT_COUNTERS );
-    stat_per_sec_counters	= calloc( sizeof(int), MAX_STAT_COUNTERS );
-    to_zero_counters		= calloc( sizeof(int), MAX_STAT_COUNTERS );
+    stat_sec_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
+    stat_per_sec_counters	= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
+    to_zero_counters		= ph_calloc( sizeof(int), MAX_STAT_COUNTERS );
 
-    memset( stat_sec_counters, 0, C_SIZE );
-    memset( stat_per_sec_counters, 0, C_SIZE );
-    memset( to_zero_counters, 0, C_SIZE );
+    ph_memset( stat_sec_counters, 0, C_SIZE );
+    ph_memset( stat_per_sec_counters, 0, C_SIZE );
+    ph_memset( to_zero_counters, 0, C_SIZE );
 
-    memset(stat_total_counters, 0, sizeof(stat_total_counters));
+    ph_memset(stat_total_counters, 0, sizeof(stat_total_counters));
 }
 
 
-static void phantom_init_stat_counters2(void)
+void phantom_init_stat_counters2(void)
 {
     dbg_add_command(&stat_dump_all, "stats", "dump kernel event statistics");
 
@@ -91,7 +95,7 @@ void stat_update_second_stats(void)
     stat_total_seconds++;
     addall( stat_total_counters, last_sec );
 
-    memset( last_sec, 0, C_SIZE );
+    ph_memset( last_sec, 0, C_SIZE );
 
     to_zero_counters = last_sec;
 }
@@ -193,9 +197,9 @@ void stat_dump_all( int av, char **ac )
 
     vm_lock_persistent_memory();
 #if COMPILE_PERSISTENT_STATS
-    printf(" Statistics            /sec t/sec total/run total/life\n");
+    ph_printf(" Statistics            /sec t/sec total/run total/life\n");
 #else
-    printf(" Statistics        \t\tper sec\t     total\ttotal/sec\n");
+    ph_printf(" Statistics        \t\tper sec\t     total\ttotal/sec\n");
 #endif
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
@@ -207,7 +211,7 @@ void stat_dump_all( int av, char **ac )
             continue;
 
 #if COMPILE_PERSISTENT_STATS
-        printf(" %-20s %5d %5ld %10ld %10ld\n",
+        ph_printf(" %-20s %5d %5ld %10ld %10ld\n",
                stat_counter_name[i],
                stat_per_sec_counters[i],
                stat_total_counters[i]/stat_total_seconds,
@@ -215,7 +219,7 @@ void stat_dump_all( int av, char **ac )
                (long)pdata[i].total_prev_and_this_runs
               );
 #else
-        printf(" %-20s\t%7d\t%10ld\t%10ld\n",
+        ph_printf(" %-20s\t%7d\t%10ld\t%10ld\n",
                stat_counter_name[i],
                stat_per_sec_counters[i],
                stat_total_counters[i]/stat_total_seconds,
@@ -233,9 +237,9 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
 {
     int rc;
 #if COMPILE_PERSISTENT_STATS
-    rc = snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      this run    life\x1b[37m");
+    rc = ph_snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      this run    life\x1b[37m");
 #else
-    rc = snprintf(buf, len, " Statistics       \tper sec\ttotal/sec\t     total");
+    rc = ph_snprintf(buf, len, " Statistics       \tper sec\ttotal/sec\t     total");
 #endif
     buf += rc;
     len -= rc;
@@ -271,7 +275,7 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
             scol = "\x1b[33m";
 
 #if COMPILE_PERSISTENT_STATS
-        rc = snprintf(buf, len, "\n %s%-17s%5d %5ld %10ld %10ld",
+        rc = ph_snprintf(buf, len, "\n %s%-17s%5d %5ld %10ld %10ld",
                       scol,
                       stat_counter_name[i],
                       stat_per_sec_counters[i],
@@ -281,7 +285,7 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
                       (long)ps->total_prev_and_this_runs
                      );
 #else
-        rc = snprintf(buf, len, "\n %s%-17s\t%7d\t%10ld\t%10ld",
+        rc = ph_snprintf(buf, len, "\n %s%-17s\t%7d\t%10ld\t%10ld",
                       scol,
                       stat_counter_name[i],
                       stat_per_sec_counters[i],
@@ -315,7 +319,7 @@ errno_t get_stats_record( int id, struct kernel_stats *out )
     if( stat_counter_name[id] == 0 )
         return EINVAL;
 
-    strlcpy( out->name, stat_counter_name[id], KERNEL_STATS_MAX_NAME );
+    ph_strlcpy( out->name, stat_counter_name[id], KERNEL_STATS_MAX_NAME );
 
     out->current_per_second	= stat_per_sec_counters[id];
     out->average_per_second	= stat_total_counters[id]/stat_total_seconds;
@@ -366,7 +370,7 @@ static void stat_update_persistent_storage( void *ign )
     {
         int rc = set_net_timer( &e, 10000, stat_update_persistent_storage, 0, 0 );
         if( rc )
-            printf( "can't set timer, persistent stats are dead" );
+            ph_printf( "can't set timer, persistent stats are dead" );
             //SHOW_ERROR0( 0, "can't set timer, persistent stats are dead" );
     }
 

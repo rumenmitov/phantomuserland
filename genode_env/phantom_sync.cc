@@ -1,11 +1,8 @@
 #include <cpu/atomic.h>
 #include <cpu/memory_barrier.h>
 
-#include <pthread.h>
-
 #include "phantom_sync.h"
 #include "phantom_env.h"
-
 // TODO : Error handling!
 // TODO : Verify that snapshotted structures behave correctly
 
@@ -21,7 +18,8 @@ extern "C"
 {
 
 #include <hal.h>
-#include <stdlib.h>
+#include <ph_malloc.h>
+
 
     /*
      *
@@ -31,8 +29,8 @@ extern "C"
 
     int hal_mutex_init(hal_mutex_t *m, const char *name)
     {
-        m->impl = (phantom_mutex_impl *)malloc(sizeof(struct phantom_mutex_impl));
-        m->impl->lock = (Phantom::Phantom_mutex_wrapper *)malloc(sizeof(Phantom::Phantom_mutex_wrapper));
+        m->impl = (phantom_mutex_impl *)ph_malloc(sizeof(struct phantom_mutex_impl));
+        m->impl->lock = (Phantom::Phantom_mutex_wrapper *)ph_malloc(sizeof(Phantom::Phantom_mutex_wrapper));
         construct_at<Phantom::Phantom_mutex_wrapper>(m->impl->lock);
 
         m->impl->name = name;
@@ -55,7 +53,7 @@ extern "C"
     int hal_mutex_is_locked(hal_mutex_t *m)
     {
         int res = m->impl->lock->isLocked() ? 1 : 0;
-        // log("Getting mutex state: ", m->impl->name, "={", res, "}");
+        log("Getting mutex state: ", m->impl->name, "={", res, "}");
         return res;
     }
 
@@ -63,8 +61,8 @@ extern "C"
     {
         m->impl->lock->~Phantom_mutex_wrapper();
         // main_obj->_heap.free(m->impl->lock, sizeof(Genode::Mutex));
-        free(m->impl->lock);
-        free(m->impl);
+        ph_free(m->impl->lock);
+        ph_free(m->impl);
         m->impl->lock = 0;
         return 0;
     }
@@ -77,55 +75,36 @@ extern "C"
 
     int hal_sem_acquire(hal_sem_t *s)
     {
-        int count = -111111;
-        sem_getvalue(&s->impl->sem  , &count);
-        // log("Acquiring sema '", s->impl->name, "' (", count , ")");
-        // s->impl->sem->down();
-        int err = sem_wait(&s->impl->sem);
-        if (err)
-        {
-            Genode::error("sem_wait failed with ", err);
-        }
+        log("Acquiring sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->down();
         return 0;
     }
 
     void hal_sem_release(hal_sem_t *s)
     {
-        int count = -111111;
-        sem_getvalue(&s->impl->sem  , &count);
-        // log("Releasing sema '", s->impl->name, "' (", count, ")");
-        // s->impl->sem->up();
-        int err = sem_post(&s->impl->sem);
-        if (err)
-        {
-            Genode::error("sem_wait failed with ", err);
-        }
+        log("Releasing sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        s->impl->sem->up();
     }
 
     int hal_sem_init(hal_sem_t *s, const char *name)
     {
         // main_obj->_heap.alloc(sizeof(Genode::Semaphore), (void **)&s->impl->sem);
-        s->impl = (phantom_sem_impl *)malloc(sizeof(struct phantom_sem_impl));
-        // s->impl->sem = (Genode::Semaphore *)malloc(sizeof(Genode::Semaphore));
-        // construct_at<Genode::Semaphore>(s->impl->sem, 0);
+        s->impl = (phantom_sem_impl *)ph_malloc(sizeof(struct phantom_sem_impl));
+        s->impl->sem = (Genode::Semaphore *)ph_malloc(sizeof(Genode::Semaphore));
+        construct_at<Genode::Semaphore>(s->impl->sem, 0);
 
         s->impl->name = name;
-
-        sem_init(&s->impl->sem, 0, 0);
 
         return 0;
     }
 
     void hal_sem_destroy(hal_sem_t *s)
     {
-        // s->impl->sem->~Semaphore();
+        s->impl->sem->~Semaphore();
         // main_obj->_heap.free(s->impl->sem, sizeof(Genode::Semaphore));
-        // free(s->impl->sem);
-
-        sem_destroy(&s->impl->sem);
-
-        free(s->impl);
-        // s->impl->sem = 0;
+        ph_free(s->impl->sem);
+        ph_free(s->impl);
+        s->impl->sem = 0;
     }
 
     /*
@@ -160,12 +139,12 @@ extern "C"
 
     int hal_cond_init(hal_cond_t *c, const char *name)
     {
-        c->impl = (phantom_cond_impl *)malloc(sizeof(phantom_cond_impl));
+        c->impl = (phantom_cond_impl *)ph_malloc((size_t)sizeof(phantom_cond_impl));
         // main_obj->_heap.alloc(sizeof(Genode::Blockade), (void **)&c->impl->blockade);
-        c->impl->blockade = (Genode::Blockade *)malloc(sizeof(Genode::Blockade));
+        c->impl->blockade = (Genode::Blockade *)ph_malloc(sizeof(Genode::Blockade));
         construct_at<Genode::Blockade>(c->impl->blockade);
         // main_obj->_heap.alloc(sizeof(Genode::Mutex), (void **)&c->impl->mutex);
-        c->impl->mutex = (Genode::Mutex *)malloc(sizeof(Genode::Mutex));
+        c->impl->mutex = (Genode::Mutex *)ph_malloc(sizeof(Genode::Mutex));
         construct_at<Genode::Mutex>(c->impl->mutex);
 
         c->impl->name = name;
@@ -240,12 +219,12 @@ extern "C"
 
         c->impl->blockade->~Blockade();
         // main_obj->_heap.free(c->impl->blockade, sizeof(Genode::Blockade));
-        free(c->impl->blockade);
+        ph_free(c->impl->blockade);
 
         c->impl->mutex->~Mutex();
         // main_obj->_heap.free(c->impl->mutex, sizeof(Genode::Mutex));
-        free(c->impl->mutex);
-        free(c->impl);
+        ph_free(c->impl->mutex);
+        ph_free(c->impl);
 
         c->impl = 0;
         return 0;

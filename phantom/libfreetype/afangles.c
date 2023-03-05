@@ -283,7 +283,7 @@ for n in r:
 
 #ifdef TEST
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <math.h>
 
 int main( void )
@@ -311,7 +311,7 @@ int main( void )
 
       if ( delta >= 2 )
       {
-        printf( "dist:%4d angle:%4d => (%4d,%4d) angle1:%4d angle2:%4d\n",
+        ph_printf( "dist:%4d angle:%4d => (%4d,%4d) angle1:%4d angle2:%4d\n",
                 dist, angle, dx, dy, angle1, angle2 );
       }
     }

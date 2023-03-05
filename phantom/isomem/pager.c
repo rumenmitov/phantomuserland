@@ -16,8 +16,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <errno.h>
+
+#include <ph_string.h>
 
 #include <kernel/vm.h>
 #include <kernel/stats.h>
@@ -994,7 +996,7 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
 {
     struct phantom_disk_blocklist freelist;
 
-    memset( &freelist, 0, sizeof( freelist ) );
+    ph_memset( &freelist, 0, sizeof( freelist ) );
 
     freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
     freelist.head.used = 0;
@@ -1202,7 +1204,7 @@ pager_refill_free_reserve()
                 list->head._reserved != 0
                 )
                 {
-                printf("Free list head values are insane, need fsck\n");
+                ph_printf("Free list head values are insane, need fsck\n");
                 list->head.used = 0;
                 list->head.next = 0;
                 list->head.magic = 0;
@@ -1210,7 +1212,7 @@ pager_refill_free_reserve()
                 // We are possibly still able to do a snap because
                 // superblock.free_start allocations are possibly available
                 // (btw we better try to reclaim superblock.free_start space
-                // in free()), and we can find out if we can make one
+                // in ph_free()), and we can find out if we can make one
                 // more snap...
                 break;
                 }

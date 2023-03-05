@@ -316,10 +316,10 @@ static void gl_draw_triangle_clip(GLContext *c,
     /* this test can be true only in case of rounding errors */
     if (clip_bit == 6) {
 #if 0
-      printf("Error:\n");
-      printf("%f %f %f %f\n",p0->pc.X,p0->pc.Y,p0->pc.Z,p0->pc.W);
-      printf("%f %f %f %f\n",p1->pc.X,p1->pc.Y,p1->pc.Z,p1->pc.W);
-      printf("%f %f %f %f\n",p2->pc.X,p2->pc.Y,p2->pc.Z,p2->pc.W);
+      ph_printf("Error:\n");
+      ph_printf("%f %f %f %f\n",p0->pc.X,p0->pc.Y,p0->pc.Z,p0->pc.W);
+      ph_printf("%f %f %f %f\n",p1->pc.X,p1->pc.Y,p1->pc.Z,p1->pc.W);
+      ph_printf("%f %f %f %f\n",p2->pc.X,p2->pc.Y,p2->pc.Z,p2->pc.W);
 #endif
       return;
     }

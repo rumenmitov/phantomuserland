@@ -57,7 +57,7 @@
 
 
     va_start( ap, fmt );
-    vprintf( fmt, ap );
+    ph_vprintf( fmt, ap );
     va_end( ap );
   }
 
@@ -71,7 +71,7 @@
 
 
     va_start( ap, fmt );
-    vprintf( fmt, ap );
+    ph_vprintf( fmt, ap );
     va_end( ap );
 
     //exit( EXIT_FAILURE );

@@ -16,6 +16,8 @@
 #define debug_level_error 1
 #define debug_level_info 0
 
+#include <ph_malloc.h>
+
 #include <hashfunc.h>
 #include <vm/syscall.h>
 #include <vm/object.h>
@@ -208,7 +210,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     assert(dir->values != 0);
     assert(dir->flags != 0);
 
-    if(debug_print) printf("---- hdir add %.*s\n", i_key_len, ikey );
+    if(debug_print) ph_printf("---- hdir add %.*s\n", i_key_len, ikey );
 
     //hexdump( dir->flags, dir->capacity, "find add flags", 0 );
 
@@ -376,7 +378,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
         initial_size = DEFAULT_SIZE;
     }
 
-    //printf("---- hdir init sz %d\n", initial_size );
+    //ph_printf("---- hdir init sz %d\n", initial_size );
 
 #if DIR_MUTEX_O
     pvm_spin_init( &dir->pvm_lock );
@@ -390,7 +392,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 
     dir->keys = pvm_create_array_object();
     dir->values = pvm_create_array_object();
-    dir->flags = calloc( sizeof(u_int8_t), initial_size );
+    dir->flags = ph_calloc( sizeof(u_int8_t), initial_size );
 
     //hexdump( dir->flags, dir->capacity, "hdir flags", 0 );
 
@@ -409,7 +411,7 @@ errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out )
     int kasize1 = get_array_size( dir->keys );
     int i, j;
 
-    //printf("n keys = %d\n", kasize1 );
+    //ph_printf("n keys = %d\n", kasize1 );
 
     for( i = 0; i < kasize1; i++ )
     {
@@ -421,12 +423,12 @@ errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out )
         if(!flags) // No indirection
         {
             pvm_append_array( keys, okey ); 
-            //pvm_object_print( okey ); printf(" "); 
+            //pvm_object_print( okey ); ph_printf(" "); 
         }
         else
         {
             int ksasize = get_array_size( okey );
-            //printf("n sub keys = %d\n", ksasize );
+            //ph_printf("n sub keys = %d\n", ksasize );
             for( j = 0; j < ksasize; j++ )
             {
                 pvm_object_t subkey = pvm_get_array_ofield( okey, j );
@@ -471,7 +473,7 @@ void pvm_internal_init_directory(pvm_object_t  os)
     //da->nEntries = 0;
 
     //da->container = pvm_create_binary_object( da->elSize * da->capacity , 0 );
-    //printf("---- hdir init obj\n" );
+    //ph_printf("---- hdir init obj\n" );
 
     errno_t rc = hdir_init( da, 0 );
     if( rc ) panic("can't create directory"); // TODO do not panic? must return errno?

@@ -74,7 +74,7 @@ void glGetFloatv(int pname, float *v)
         break;
 
     default:
-        printf("warning: unknown pname in glGetFloatv()\n");
+        ph_printf("warning: unknown pname in glGetFloatv()\n");
         break;
     }
 }

@@ -14,8 +14,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
+
+#include <ph_string.h>
 
 
 // Will trigger const definitions in pvm_object_flags.h
@@ -147,7 +149,7 @@ static void process_generic_restarts(pvm_object_t root)
 
     if( !pvm_is_null( prev_restart_list ) )
     {
-        printf("Processing restart list: %d items.\n", items);
+        ph_printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
             pvm_object_t o = pvm_get_array_ofield(prev_restart_list, i);
@@ -158,7 +160,7 @@ static void process_generic_restarts(pvm_object_t root)
             // Orphans will be killed below
         }
 
-        printf("Done processing restart list.\n");
+        ph_printf("Done processing restart list.\n");
         ref_dec_o(prev_restart_list); // now kill it and 1-link children
     }
 
@@ -173,7 +175,7 @@ static void start_persistent_stats(void)
     if( bda->data_size < STAT_CNT_PERSISTENT_DA_SIZE )
     {
         //SHOW_ERROR( 0, "persistent stats data < %d", STAT_CNT_PERSISTENT_DA_SIZE );
-        printf( "persistent stats data < %ld\n", (long)STAT_CNT_PERSISTENT_DA_SIZE );
+        ph_printf( "persistent stats data < %ld\n", (long)STAT_CNT_PERSISTENT_DA_SIZE );
         // TODO resize object!
     }
     else
@@ -458,11 +460,11 @@ static void pvm_boot()
 
     char boot_class[128];
     if( !phantom_getenv("root.boot", boot_class, sizeof(boot_class) ) )
-        strcpy( boot_class, ".ru.dz.phantom.system.boot" );
+        ph_strcpy( boot_class, ".ru.dz.phantom.system.boot" );
 
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
     {
-        printf("Unable to load boot class '%s'", boot_class );
+        ph_printf("Unable to load boot class '%s'", boot_class );
         pvm_exec_panic0("Unable to load user boot class");
     }
 
@@ -492,7 +494,7 @@ static int get_env_name_pos( const char *name )
         char *ed = pvm_get_str_data(o);
         //int el = pvm_get_str_len(o);
 
-        char *eqpos = strchr( ed, '=' );
+        char *eqpos = ph_strchr( ed, '=' );
         if( eqpos == 0 )
         {
             // Strange...
@@ -500,7 +502,7 @@ static int get_env_name_pos( const char *name )
         }
         int keylen = eqpos - ed;
 
-        if( 0 == strncmp( ed, name, keylen ) )
+        if( 0 == ph_strncmp( ed, name, keylen ) )
         {
             return i;
         }
@@ -514,11 +516,11 @@ void phantom_setenv( const char *name, const char *value )
 {
     char ename[MAX_ENV_KEY];
 
-    strncpy( ename, name, MAX_ENV_KEY-2 );
+    ph_strncpy( ename, name, MAX_ENV_KEY-2 );
     ename[MAX_ENV_KEY-2] = '\0';
-    strcat( ename, "=" );
+    ph_strcat( ename, "=" );
 
-    pvm_object_t s = pvm_create_string_object_binary_cat( ename, strlen(ename), value, strlen(value) );
+    pvm_object_t s = pvm_create_string_object_binary_cat( ename, ph_strlen(ename), value, ph_strlen(value) );
 
     int pos = get_env_name_pos( name );
 
@@ -540,9 +542,9 @@ int phantom_getenv( const char *name, char *value, int vsize )
     char *ed = pvm_get_str_data(o);
     int el = pvm_get_str_len(o);
 
-    //printf("full '%.*s'\n", el, ed );
+    //ph_printf("full '%.*s'\n", el, ed );
 
-    char *eqpos = strchr( ed, '=' );
+    char *eqpos = ph_strchr( ed, '=' );
     if( eqpos == 0 )
     {
         *value = '\0';
@@ -557,7 +559,7 @@ int phantom_getenv( const char *name, char *value, int vsize )
 
     if( vsize > el ) vsize = el;
 
-    strncpy( value, eqpos, vsize );
+    ph_strncpy( value, eqpos, vsize );
     value[vsize-1] = '\0';
 
     return 1;
@@ -579,11 +581,11 @@ static void load_kernel_boot_env(void)
     {
         const char *e = *ep++;
 
-        const char *eq = index( e, '=' );
+        const char *eq = ph_index( e, '=' );
 
         if( eq == 0 )
         {
-            printf("Warning: env without =, '%s'\n", e);
+            ph_printf("Warning: env without =, '%s'\n", e);
             continue;
         }
 
@@ -593,10 +595,10 @@ static void load_kernel_boot_env(void)
         char buf[128+1];
         if( nlen > 128 ) nlen=128;
 
-        strncpy( buf, e, nlen );
+        ph_strncpy( buf, e, nlen );
         buf[nlen] = '\0';
 
-        printf("Loading env '%s'='%s'\n", buf, eq );
+        ph_printf("Loading env '%s'='%s'\n", buf, eq );
         phantom_setenv( buf, eq );
     }
 }
@@ -621,11 +623,11 @@ static o_restart_func_t find_restart_f( pvm_object_t _class )
 static void handle_object_at_restart( pvm_object_t o )
 {
 //#if COMPILE_EXPERIMENTAL
-    printf( "restart 0x%p\n", o );
+    ph_printf( "restart 0x%p\n", o );
 
     if(!(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {
-        printf( "not internal object in restart list!\n" );
+        ph_printf( "not internal object in restart list!\n" );
         return;
     }
     o_restart_func_t rf = find_restart_f( o->_class );
@@ -646,7 +648,7 @@ void pvm_add_object_to_restart_list( pvm_object_t o )
 void pvm_remove_object_from_restart_list( pvm_object_t o )
 {
     int i;
-    //printf("!! unimpl pvm_remove_object_from_restart_list called !!\n");
+    //ph_printf("!! unimpl pvm_remove_object_from_restart_list called !!\n");
 
     pvm_object_t curr_restart_list = pvm_root.restart_list;
 
@@ -656,7 +658,7 @@ void pvm_remove_object_from_restart_list( pvm_object_t o )
 
     if( !pvm_is_null( curr_restart_list ) )
     {
-        //printf("Processing restart list: %d items.\n", items);
+        //ph_printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
             pvm_object_t o1 = pvm_get_array_ofield(curr_restart_list, i);
@@ -668,7 +670,7 @@ void pvm_remove_object_from_restart_list( pvm_object_t o )
             }
         }
 
-        //printf("Done processing restart list.\n");
+        //ph_printf("Done processing restart list.\n");
     }
 }
 
@@ -686,7 +688,7 @@ void create_and_run_object(const char *class_name, int method )
     if( pvm_is_null(user_class))
     {
         //SHOW_ERROR( 0, "Unable to load class '%s'", class_name );
-        printf( "Unable to load class '%s'\n", class_name );
+        ph_printf( "Unable to load class '%s'\n", class_name );
         return;
     }
 
@@ -704,7 +706,7 @@ static void runclass(int ac, char **av)
 
     if( ac < 1 || ac > 2 )
     {
-        printf("runclass class_name [method ordinal]\n");
+        ph_printf("runclass class_name [method ordinal]\n");
         return;
     }
 
@@ -712,7 +714,7 @@ static void runclass(int ac, char **av)
 
     if( ac > 1 )
     {
-        method = atol( *av++ );
+        method = ph_atol( *av++ );
     }
 
     create_and_run_object(cname, method );

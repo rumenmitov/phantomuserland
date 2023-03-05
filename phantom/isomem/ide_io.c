@@ -32,9 +32,9 @@
 
 #include <hal.h>
 
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>
+#include <phantom_assert.h>
+#include <ph_string.h>
+// // #include <stdio.h>
 
 #include <kernel/bus/pci.h>
 
@@ -146,7 +146,7 @@ void setup_simple_ide()
         int bm_b2 = bm_base_reg+2;
         int rc;
         if( (rc = int_enable_irq( 0, 14, bm_b2, 0x1F0+7 )) )
-            printf("Error %d enabling IDE irq\n", rc );
+            ph_printf("Error %d enabling IDE irq\n", rc );
 
         int dma_rc = dma_pci_config( bm_base_reg );
         if(dma_rc)
@@ -240,7 +240,7 @@ static errno_t ide_write( int ndev, long physaddr, long secno, size_t nsect )
 
 #if BLOCKED_IO
     int tries = 5;
-    //if(nsec > 1) printf("nsec %d\n", nsec );
+    //if(nsec > 1) ph_printf("nsec %d\n", nsec );
 
 retry:;
     while( nsect > 0 )
@@ -273,7 +273,7 @@ retry:;
             }
             else
             {
-                printf("IDE write failure sec %ld, retry\n", secno );
+                ph_printf("IDE write failure sec %ld, retry\n", secno );
                 goto retry;
             }
         }
@@ -314,7 +314,7 @@ static errno_t ide_read( int ndev, long physaddr, long secno, size_t nsect )
     hal_mutex_lock( &ide_io );
 
 #if BLOCKED_IO
-    //if(nsec > 1) printf("nsec %d\n", nsect );
+    //if(nsec > 1) ph_printf("nsec %d\n", nsect );
 
 retry:;
     while( nsect > 0 )
@@ -354,7 +354,7 @@ retry:;
             }
             else
             {
-                printf("IDE read failure sec %ld, retry\n", secno );
+                ph_printf("IDE read failure sec %ld, retry\n", secno );
                 goto retry;
             }
         }
@@ -391,7 +391,7 @@ retry:;
             }
             else
             {
-                printf("IDE read failure sec %ld, retry\n", secno );
+                ph_printf("IDE read failure sec %ld, retry\n", secno );
                 goto retry;
             }
         }
@@ -540,7 +540,7 @@ static void make_unit_part( int unit, void *aio )
 #if IDE_TRIM
     p->trim = ideTrim;
 #endif
-    snprintf( p->name, sizeof(p->name), "Ide%d", unit );
+    ph_snprintf( p->name, sizeof(p->name), "Ide%d", unit );
     errno_t err = phantom_register_disk_drive(p);
     if(err)
         SHOW_ERROR( 0, "Ide %d err %d", unit, err );

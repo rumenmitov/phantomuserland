@@ -42,10 +42,17 @@
 
 const struct _json_value json_value_none;
 
-#include <stdio.h>
-#include <string.h>
+#include <ph_string.h>
+#include <ph_malloc.h>
+
+#ifdef PHANTOM_GENODE
+#include <ph_math.h>
+#else
+// #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#endif
+
 #include <phantom_libc.h>
 #include <limits.h>
 
@@ -102,12 +109,12 @@ typedef struct
 
 static void * default_alloc (size_t size, int zero, void * user_data)
 {
-   return zero ? calloc (1, size) : malloc (size);
+   return zero ? ph_calloc (1, size) : ph_malloc (size);
 }
 
 static void default_free (void * ptr, void * user_data)
 {
-   free (ptr);
+   ph_free (ptr);
 }
 
 static void * json_alloc (json_state * state, unsigned long size, int zero)
@@ -270,7 +277,7 @@ json_value * json_parse_ex (json_settings * settings,
    error[0] = '\0';
    end = (json + length);
 
-   memcpy (&state.settings, settings, sizeof (json_settings));
+   ph_memcpy (&state.settings, settings, sizeof (json_settings));
 
    if (!state.settings.mem_alloc)
       state.settings.mem_alloc = default_alloc;
@@ -278,8 +285,8 @@ json_value * json_parse_ex (json_settings * settings,
    if (!state.settings.mem_free)
       state.settings.mem_free = default_free;
 
-   memset (&state.uint_max, 0xFF, sizeof (state.uint_max));
-   memset (&state.ulong_max, 0xFF, sizeof (state.ulong_max));
+   ph_memset (&state.uint_max, 0xFF, sizeof (state.uint_max));
+   ph_memset (&state.ulong_max, 0xFF, sizeof (state.ulong_max));
 
    state.uint_max -= 8; /* limit of how much can be added before next check */
    state.ulong_max -= 8;
@@ -303,7 +310,7 @@ json_value * json_parse_ex (json_settings * settings,
          if (flags & flag_string)
          {
             if (!b)
-            {  snprintf (error, sizeof(error)-1, "Unexpected EOF in string (at %d:%d)", line_and_col);
+            {  ph_snprintf (error, sizeof(error)-1, "Unexpected EOF in string (at %d:%d)", line_and_col);
                goto e_failed;
             }
 
@@ -329,7 +336,7 @@ json_value * json_parse_ex (json_settings * settings,
                         (uc_b3 = hex_value (*++ state.ptr)) == 0xFF ||
                         (uc_b4 = hex_value (*++ state.ptr)) == 0xFF)
                     {
-                        snprintf (error, sizeof(error)-1, "Invalid character value `%c` (at %d:%d)", b, line_and_col);
+                        ph_snprintf (error, sizeof(error)-1, "Invalid character value `%c` (at %d:%d)", b, line_and_col);
                         goto e_failed;
                     }
 
@@ -346,7 +353,7 @@ json_value * json_parse_ex (json_settings * settings,
                             (uc_b3 = hex_value (*++ state.ptr)) == 0xFF ||
                             (uc_b4 = hex_value (*++ state.ptr)) == 0xFF)
                         {
-                            snprintf (error, sizeof(error)-1, "Invalid character value `%c` (at %d:%d)", b, line_and_col);
+                            ph_snprintf (error, sizeof(error)-1, "Invalid character value `%c` (at %d:%d)", b, line_and_col);
                             goto e_failed;
                         }
 
@@ -475,7 +482,7 @@ json_value * json_parse_ex (json_settings * settings,
                if (flags & flag_block_comment)
                {
                   if (!b)
-                  {  snprintf (error, sizeof(error)-1, "%d:%d: Unexpected EOF in block comment", line_and_col);
+                  {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected EOF in block comment", line_and_col);
                      goto e_failed;
                   }
 
@@ -491,12 +498,12 @@ json_value * json_parse_ex (json_settings * settings,
             else if (b == '/')
             {
                if (! (flags & (flag_seek_value | flag_done)) && top->type != json_object)
-               {  snprintf (error, sizeof(error)-1, "%d:%d: Comment not allowed here", line_and_col);
+               {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Comment not allowed here", line_and_col);
                   goto e_failed;
                }
 
                if (++ state.ptr == end)
-               {  snprintf (error, sizeof(error)-1, "%d:%d: EOF unexpected", line_and_col);
+               {  ph_snprintf (error, sizeof(error)-1, "%d:%d: EOF unexpected", line_and_col);
                   goto e_failed;
                }
 
@@ -511,7 +518,7 @@ json_value * json_parse_ex (json_settings * settings,
                      continue;
 
                   default:
-                     snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `%c` in comment opening sequence", line_and_col, b);
+                     ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `%c` in comment opening sequence", line_and_col, b);
                      goto e_failed;
                };
             }
@@ -529,7 +536,7 @@ json_value * json_parse_ex (json_settings * settings,
 
                default:
 
-                  snprintf (error, sizeof(error)-1, "%d:%d: Trailing garbage: `%c`",
+                  ph_snprintf (error, sizeof(error)-1, "%d:%d: Trailing garbage: `%c`",
                            state.cur_line, state.cur_col, b);
 
                   goto e_failed;
@@ -548,7 +555,7 @@ json_value * json_parse_ex (json_settings * settings,
                   if (top && top->type == json_array)
                      flags = (flags & ~ (flag_need_comma | flag_seek_value)) | flag_next;
                   else
-                  {  snprintf (error, sizeof(error)-1, "%d:%d: Unexpected ]", line_and_col);
+                  {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected ]", line_and_col);
                      goto e_failed;
                   }
 
@@ -564,7 +571,7 @@ json_value * json_parse_ex (json_settings * settings,
                      }
                      else
                      {
-                        snprintf (error, sizeof(error)-1, "%d:%d: Expected , before %c",
+                        ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected , before %c",
                                  state.cur_line, state.cur_col, b);
 
                         goto e_failed;
@@ -579,7 +586,7 @@ json_value * json_parse_ex (json_settings * settings,
                      }
                      else
                      { 
-                        snprintf (error, sizeof(error)-1, "%d:%d: Expected : before %c",
+                        ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected : before %c",
                                  state.cur_line, state.cur_col, b);
 
                         goto e_failed;
@@ -705,7 +712,7 @@ json_value * json_parse_ex (json_settings * settings,
                            continue;
                         }
                         else
-                        {  snprintf (error, sizeof(error)-1, "%d:%d: Unexpected %c when seeking value", line_and_col, b);
+                        {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected %c when seeking value", line_and_col, b);
                            goto e_failed;
                         }
                   };
@@ -725,7 +732,7 @@ json_value * json_parse_ex (json_settings * settings,
                   case '"':
 
                      if (flags & flag_need_comma)
-                     {  snprintf (error, sizeof(error)-1, "%d:%d: Expected , before \"", line_and_col);
+                     {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected , before \"", line_and_col);
                         goto e_failed;
                      }
 
@@ -750,7 +757,7 @@ json_value * json_parse_ex (json_settings * settings,
                      } /* FALLTHRU */
 
                   default:
-                     snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `%c` in object", line_and_col, b);
+                     ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `%c` in object", line_and_col, b);
                      goto e_failed;
                };
 
@@ -768,7 +775,7 @@ json_value * json_parse_ex (json_settings * settings,
                      if (! (flags & flag_num_e))
                      {
                         if (flags & flag_num_zero)
-                        {  snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `0` before `%c`", line_and_col, b);
+                        {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Unexpected `0` before `%c`", line_and_col, b);
                            goto e_failed;
                         }
 
@@ -817,7 +824,7 @@ json_value * json_parse_ex (json_settings * settings,
                else if (b == '.' && top->type == json_integer)
                {
                   if (!num_digits)
-                  {  snprintf (error, sizeof(error)-1, "%d:%d: Expected digit before `.`", line_and_col);
+                  {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected digit before `.`", line_and_col);
                      goto e_failed;
                   }
 
@@ -834,11 +841,11 @@ json_value * json_parse_ex (json_settings * settings,
                   if (top->type == json_double)
                   {
                      if (!num_digits)
-                     {  snprintf (error, sizeof(error)-1, "%d:%d: Expected digit after `.`", line_and_col);
+                     {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected digit after `.`", line_and_col);
                         goto e_failed;
                      }
 
-                     top->u.dbl += num_fraction / pow (10.0, num_digits);
+                     top->u.dbl += num_fraction / ph_pow (10.0, num_digits);
                   }
 
                   if (b == 'e' || b == 'E')
@@ -860,11 +867,11 @@ json_value * json_parse_ex (json_settings * settings,
                else
                {
                   if (!num_digits)
-                  {  snprintf (error, sizeof(error)-1, "%d:%d: Expected digit after `e`", line_and_col);
+                  {  ph_snprintf (error, sizeof(error)-1, "%d:%d: Expected digit after `e`", line_and_col);
                      goto e_failed;
                   }
 
-                  top->u.dbl *= pow (10.0, (flags & flag_num_e_negative ? - num_e : num_e));
+                  top->u.dbl *= ph_pow (10.0, (flags & flag_num_e_negative ? - num_e : num_e));
                }
 
                if (flags & flag_num_negative)
@@ -945,17 +952,17 @@ json_value * json_parse_ex (json_settings * settings,
 
 e_unknown_value:
 
-   snprintf (error, sizeof(error)-1, "%d:%d: Unknown value", line_and_col);
+   ph_snprintf (error, sizeof(error)-1, "%d:%d: Unknown value", line_and_col);
    goto e_failed;
 
 e_alloc_failure:
 
-   strlcpy (error, "Memory allocation failure", sizeof(error) );
+   ph_strlcpy (error, "Memory allocation failure", sizeof(error) );
    goto e_failed;
 
 e_overflow:
 
-   snprintf (error, sizeof(error)-1, "%d:%d: Too long (caught overflow)", line_and_col);
+   ph_snprintf (error, sizeof(error)-1, "%d:%d: Too long (caught overflow)", line_and_col);
    goto e_failed;
 
 e_failed:
@@ -963,9 +970,9 @@ e_failed:
    if (error_buf)
    {
       if (*error)
-         strlcpy (error_buf, error, error_buf_len);
+         ph_strlcpy (error_buf, error, error_buf_len);
       else
-         strlcpy (error_buf, "Unknown error", error_buf_len);
+         ph_strlcpy (error_buf, "Unknown error", error_buf_len);
    }
 
    if (state.first_pass)

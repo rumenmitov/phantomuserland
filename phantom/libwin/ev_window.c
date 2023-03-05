@@ -201,7 +201,7 @@ void w_receive_event(ui_event_t *e)
 
     if( e->focus == 0 )
     {
-        //printf("unfocused event");
+        //ph_printf("unfocused event");
         goto ret;
     }
 

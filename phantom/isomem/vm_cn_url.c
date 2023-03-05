@@ -22,6 +22,8 @@
 
 #include <kernel/net/udp.h>
 
+#include <ph_string.h>
+#include <ph_malloc.h>
 
 
 errno_t cn_url_do_operation( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *t, pvm_object_t o )
@@ -50,7 +52,7 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
     //struct cn_url_volatile   *vp = c->v_kernel_state;
     struct cn_url_persistent *pp = c->p_kernel_state;
 
-    char *url = strdup( pp->url ); // todo move to volatile state
+    char *url = ph_strdup( pp->url ); // todo move to volatile state
 
     if( 0 == url )
     {
@@ -76,7 +78,7 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
         }
     }
 
-    free(url);
+    ph_free(url);
 
 //ret:
     if( e )
@@ -134,7 +136,7 @@ errno_t cn_url_init( struct data_area_4_connection *c, struct data_area_4_thread
     //struct cn_url_volatile   *vp = c->v_kernel_state;
     struct cn_url_persistent *pp = c->p_kernel_state;
 
-    strlcpy( pp->url, suffix, sizeof(pp->url) );
+    ph_strlcpy( pp->url, suffix, sizeof(pp->url) );
     /*
 #if HAVE_NET
     int rc = url_open( &vp->url_endpoint );

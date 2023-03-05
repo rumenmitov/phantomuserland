@@ -16,6 +16,9 @@
 
 #include <stddef.h>
 
+// Required here, but is not really compatible with C++ code
+typedef u_int32_t       wchar_t;
+
 #endif
 
 #ifndef VCONFIG_H

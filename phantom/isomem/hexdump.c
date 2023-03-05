@@ -34,35 +34,35 @@ hexdump(const void *ptr, int length, const char *hdr, int flags)
     cp = ptr;
     for (i = 0; i < length; i+= cols) {
         if (hdr != NULL)
-            printf("%s", hdr);
+            ph_printf("%s", hdr);
 
         if ((flags & HD_OMIT_COUNT) == 0)
-            printf("%04x  ", i);
+            ph_printf("%04x  ", i);
 
         if ((flags & HD_OMIT_HEX) == 0) {
             for (j = 0; j < cols; j++) {
                 k = i + j;
                 if (k < length)
-                    printf("%c%02x", delim, cp[k]);
+                    ph_printf("%c%02x", delim, cp[k]);
                 else
-                    printf("   ");
+                    ph_printf("   ");
             }
         }
 
         if ((flags & HD_OMIT_CHARS) == 0) {
-            printf("  |");
+            ph_printf("  |");
             for (j = 0; j < cols; j++) {
                 k = i + j;
                 if (k >= length)
-                    printf(" ");
+                    ph_printf(" ");
                 else if (cp[k] >= ' ' && cp[k] <= '~')
-                    printf("%c", cp[k]);
+                    ph_printf("%c", cp[k]);
                 else
-                    printf(".");
+                    ph_printf(".");
             }
-            printf("|");
+            ph_printf("|");
         }
-        printf("\n");
+        ph_printf("\n");
     }
 }
 

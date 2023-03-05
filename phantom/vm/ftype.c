@@ -56,7 +56,7 @@ void w_ttfont_draw_string(
     rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
     if( rc )
     {
-        printf("\ncan't load font\n");
+        ph_printf("\ncan't load font\n");
         return;
     }
  
@@ -65,7 +65,7 @@ void w_ttfont_draw_string(
     //FT_Set_Pixel_Sizes(ftFace, 50, 0);
  
     //const char *str = s;
-    const size_t strLen = strlen(str);
+    const size_t strLen = ph_strlen(str);
  
     struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;

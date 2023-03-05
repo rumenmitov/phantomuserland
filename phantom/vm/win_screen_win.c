@@ -16,7 +16,7 @@
 #ifndef __linux__
 
 #include <windows.h>
-#include <stdio.h>
+// #include <stdio.h>
 #include "winhal.h"
 
 static const char *CLASSNAME = "Phantom", *WINNAME = "Phantom test environment";
@@ -69,7 +69,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         {
             DWORD err = GetLastError();
             //FormatMessage();
-            printf("Win error %d", (int)err);
+            ph_printf("Win error %d", (int)err);
 
             LPVOID lpMsgBuf;
             FormatMessage(
@@ -83,7 +83,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                           (LPTSTR) &lpMsgBuf,
                           0, NULL );
 
-            printf("WinErr: %s\n", (const char *)lpMsgBuf );
+            ph_printf("WinErr: %s\n", (const char *)lpMsgBuf );
 
         }
         GdiFlush();
@@ -110,7 +110,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            printf("%d,%d\n", xPos, yPos );
+            ph_printf("%d,%d\n", xPos, yPos );
             TrackMouseEvent(&eventTrack);
         }
         break;
@@ -122,7 +122,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
     case WM_CHAR:
         {
-            printf("-%x-", (int)lParam );
+            ph_printf("-%x-", (int)lParam );
         }
         break;
 
@@ -131,7 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
             int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
 
-            //	printf("%d,%d\n", xPos, yPos );
+            //	ph_printf("%d,%d\n", xPos, yPos );
 
 #if 1
             win_scr_mk_mouse_event( wParam, xPos, yPos );
@@ -158,7 +158,7 @@ int win_scr_setup_window(void)
     // NOTE: The memset() here is added to deal with this code crashing on
     // WinNT (reported by Girish Deodhar, solution due to him as well)
     // The extra include statement is for memset() too...
-    memset(&WndClass, 0, sizeof(WndClass));
+    ph_memset(&WndClass, 0, sizeof(WndClass));
     WndClass.cbClsExtra = 0;
     WndClass.cbWndExtra = 0;
     WndClass.hbrBackground = NULL; //(HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -184,7 +184,7 @@ void win_scr_init_window(void)
 {
     // Allocate enough memory for the BITMAPINFOHEADER and 256 RGBQUAD palette entries
     LPBITMAPINFO lpbi;
-    lpbi = (LPBITMAPINFO) malloc(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
+    lpbi = (LPBITMAPINFO) ph_malloc(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
 
     lpbi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     lpbi->bmiHeader.biWidth = VSCREEN_WIDTH;
@@ -208,7 +208,7 @@ void win_scr_init_window(void)
 
 
     ReleaseDC(NULL,hScreenDC);
-    free(lpbi);
+    ph_free(lpbi);
 }
 
 

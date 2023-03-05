@@ -299,7 +299,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 #if 1
 void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
 {
-    //printf("lpush %lld; \n", o);
+    //ph_printf("lpush %lld; \n", o);
     pvm_istack_push( rootda, (int)(o >> 32));
     pvm_istack_push( rootda, (int)o);
 }
@@ -543,7 +543,7 @@ int e_page_foreach( struct data_area_4_exception_stack* s,
                     int (*func)( void *pass, struct pvm_exception_handler *elem ) )
 {
     int cell = s->common.free_cell_ptr;
-//printf("check %d estack cells", cell+1 );
+//ph_printf("check %d estack cells", cell+1 );
     while( --cell >= 0 )
         if( func( pass, s->stack+cell ) )
             return 1;

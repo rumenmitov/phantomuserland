@@ -87,7 +87,7 @@
 # if	defined(HAVE_C99_SNPRINTF) \
 	||	defined(HAVE_SNPRINTF) \
 	||	defined(S_SPLINT_S)
-#	define VERBATIM_COPY(dst, src) (void)snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
+#	define VERBATIM_COPY(dst, src) (void)ph_snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
 # else
 #	define VERBATIM_COPY(dst, src) (void)sprintf(dst, "%.*s", (int)E4C_EXCEPTION_MESSAGE_SIZE - 1, src)
 # endif
@@ -2707,7 +2707,7 @@ static E4C_INLINE e4c_environment * _e4c_environment_allocate(int line, const ch
 
 	e4c_environment * environment;
 
-	environment = malloc( sizeof(*environment) );
+	environment = ph_malloc( sizeof(*environment) );
 
 	/* ensure that there was enough memory */
 	if(environment != NULL){
@@ -2726,7 +2726,7 @@ static E4C_INLINE void _e4c_environment_deallocate(e4c_environment * environment
 		_e4c_frame_deallocate(environment->context.current_frame, environment->context.finalize_handler);
 		environment->context.current_frame = NULL;
 
-		free(environment);
+		ph_free(environment);
 	}
 }
 
@@ -3191,7 +3191,7 @@ static E4C_INLINE e4c_frame * _e4c_frame_allocate(int line, const char * functio
 	e4c_frame * frame;
 
 	/* (using calloc instead of malloc so that jmp_buf is initialized to zero) */
-	frame = calloc( (size_t)1, sizeof(*frame) );
+	frame = ph_calloc( (size_t)1, sizeof(*frame) );
 
 	if(frame == NULL){
 		MEMORY_ERROR(DESC_MALLOC_FRAME, line, function);
@@ -3213,7 +3213,7 @@ static E4C_INLINE void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_han
 		_e4c_exception_deallocate(frame->thrown_exception, finalize_handler);
 		frame->thrown_exception = NULL;
 
-		free(frame);
+		ph_free(frame);
 	}
 }
 
@@ -3718,7 +3718,7 @@ static E4C_INLINE e4c_exception * _e4c_exception_allocate(int line, const char *
 	e4c_exception * exception;
 
 	/* (using calloc instead of malloc so that the message is initialized to zero) */
-	exception = calloc( (size_t)1, sizeof(*exception) );
+	exception = ph_calloc( (size_t)1, sizeof(*exception) );
 
 	/* ensure that there was enough memory */
 	if(exception != NULL){
@@ -3747,7 +3747,7 @@ static E4C_INLINE void _e4c_exception_deallocate(e4c_exception * exception, e4c_
 				/*@=noeffectuncon@*/
 			}
 
-			free(exception);
+			ph_free(exception);
 		}
 	}
 }

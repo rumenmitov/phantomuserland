@@ -19,6 +19,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <vm/bulk.h>
 #include "main.h"
 
@@ -37,14 +40,14 @@ static int do_load_class_from_file(const char *fn, pvm_object_t *out)
     //pvm_object_t out;
     rc = pvm_load_class_from_memory( code, size, out );
 
-    free(code);
+    ph_free(code);
     return rc;
 }
 
 
 int load_class_from_file(const char *cn, pvm_object_t *out)
 {
-    char * have_suffix = (char *)strstr( cn, ".pc" );
+    char * have_suffix = (char *)ph_strstr( cn, ".pc" );
 
     if(*cn == '.') cn++;
 
@@ -75,7 +78,7 @@ int load_class_from_file(const char *cn, pvm_object_t *out)
     }
 
     char fn[1024];
-    snprintf( fn, 1024, "%s/%s", dir, rest );
+    ph_snprintf( fn, 1024, "%s/%s", dir, rest );
     path[0] = fn;
 */
 
@@ -85,17 +88,17 @@ int load_class_from_file(const char *cn, pvm_object_t *out)
     char **prefix;
     for( prefix = path; *prefix; prefix++ )
     {
-        snprintf( buf, BS, "%s/%s%s", *prefix, cn, have_suffix ? "" : ".pc" );
+        ph_snprintf( buf, BS, "%s/%s%s", *prefix, cn, have_suffix ? "" : ".pc" );
 
-        //printf("try '%s'\n", buf );
+        //ph_printf("try '%s'\n", buf );
         if(!do_load_class_from_file(buf, out))
         {
-            if(DEBUG) printf("OK: File found for class '%s'\n", cn );
+            if(DEBUG) ph_printf("OK: File found for class '%s'\n", cn );
             return 0;
         }
     }
 
-    if(DEBUG) printf("ERR: File not found for class '%s'\n", cn );
+    if(DEBUG) ph_printf("ERR: File not found for class '%s'\n", cn );
 
     return 1;
 }

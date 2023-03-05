@@ -44,17 +44,17 @@ void drawbmp(Display *display, Window win, GC gc)
         /* check for failure or success. */
         switch (rc) {
         case BitmapOpenFailed:
-            printf( "XReadBitmapFile - could not open file 'icon.bmp'.\n");
+            ph_printf( "XReadBitmapFile - could not open file 'icon.bmp'.\n");
             exit(1);
             break;
         case BitmapFileInvalid:
-            printf(
+            ph_printf(
                     "XReadBitmapFile - file '%s' doesn't contain a valid bitmap.\n",
                     "icon.bmp");
             exit(1);
             break;
         case BitmapNoMemory:
-            printf( "XReadBitmapFile - not enough memory.\n");
+            ph_printf( "XReadBitmapFile - not enough memory.\n");
             exit(1);
             break;
         }
@@ -106,7 +106,7 @@ void drawbmp(Display *display, Window win, GC gc)
 static XImage *image;
 static void * prepare(Display *display, Window win, GC gc, int xsize, int ysize)
 {
-    char *newBuf = calloc( 4, xsize * ysize );
+    char *newBuf = ph_calloc( 4, xsize * ysize );
     if( newBuf == 0 ) return 0;
 
     image = XCreateImage (display,
@@ -116,7 +116,7 @@ static void * prepare(Display *display, Window win, GC gc, int xsize, int ysize)
                                   xsize, ysize,
                                   32, 0 );
 
-    //memset( newBuf, 4 * xsize * ysize, 0xFF );
+    //ph_memset( newBuf, 4 * xsize * ysize, 0xFF );
     int size = xsize * ysize;
     int *p = (int *)newBuf;
     while(size--)

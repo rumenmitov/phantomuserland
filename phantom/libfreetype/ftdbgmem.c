@@ -33,7 +33,7 @@
                     * memory, however.
                     */
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 
 
@@ -201,13 +201,13 @@
     va_list  ap;
 
 
-    printf( "FreeType.Debug: " );
+    ph_printf( "FreeType.Debug: " );
 
     va_start( ap, fmt );
-    vprintf( fmt, ap );
+    ph_vprintf( fmt, ap );
     va_end( ap );
 
-    printf( "\n" );
+    ph_printf( "\n" );
     exit( EXIT_FAILURE );
   }
 
@@ -356,7 +356,7 @@
 
           if ( node->size > 0 )
           {
-            printf(
+            ph_printf(
               "leaked memory block at address %p, size %8ld in (%s:%ld)\n",
               node->address, node->size,
               FT_FILENAME( node->source->file_name ),
@@ -398,9 +398,9 @@
         table->sources[i] = NULL;
       }
 
-      printf(
+      ph_printf(
         "FreeType: total memory allocations = %ld\n", table->alloc_total );
-      printf(
+      ph_printf(
         "FreeType: maximum memory footprint = %ld\n", table->alloc_max );
 
       ft_mem_table_free( table, table );
@@ -410,7 +410,7 @@
           "FreeType: %ld bytes of memory leaked in %ld blocks\n",
           leaks, leak_count );
 
-      printf( "FreeType: No memory leaks detected!\n" );
+      ph_printf( "FreeType: No memory leaks detected!\n" );
     }
   }
 
@@ -999,13 +999,13 @@
 
       ft_qsort( sources, count, sizeof ( *sources ), ft_mem_source_compare );
 
-      printf( "FreeType Memory Dump: "
+      ph_printf( "FreeType Memory Dump: "
               "current=%ld max=%ld total=%ld count=%ld\n",
               table->alloc_current, table->alloc_max,
               table->alloc_total, table->alloc_count );
-      printf( " block  block    sizes    sizes    sizes   source\n" );
-      printf( " count   high      sum  highsum      max   location\n" );
-      printf( "-------------------------------------------------\n" );
+      ph_printf( " block  block    sizes    sizes    sizes   source\n" );
+      ph_printf( " count   high      sum  highsum      max   location\n" );
+      ph_printf( "-------------------------------------------------\n" );
 
       fmt = "%6ld %6ld %8ld %8ld %8ld %s:%d\n";
 
@@ -1014,13 +1014,13 @@
         FT_MemSource  source = sources[nn];
 
 
-        printf( fmt,
+        ph_printf( fmt,
                 source->cur_blocks, source->max_blocks,
                 source->cur_size, source->max_size, source->cur_max,
                 FT_FILENAME( source->file_name ),
                 source->line_no );
       }
-      printf( "------------------------------------------------\n" );
+      ph_printf( "------------------------------------------------\n" );
 
       ft_mem_table_free( table, sources );
     }

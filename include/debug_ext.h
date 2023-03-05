@@ -44,6 +44,8 @@
 
 #include "console.h"
 
+#include <ph_io.h>
+
 #ifdef DEBUG_WAIT_ON_MSG
 #define DEBUG_WAIT thread_snooze( DEBUG_WAIT_ON_MSG );
 #define DEBUG_WAIT_FLOW thread_snooze( DEBUG_WAIT_ON_MSG );
@@ -104,12 +106,12 @@ extern int debug_max_level_error;
     }} while( 0 )
 
 
-#define SHOW_FLOW(severity, format, param...)  __GEN_DEBUG_1( printf, flow, FLOW, severity, format, param)
-#define SHOW_FLOW0(severity, format)           __GEN_DEBUG_0( printf, flow, FLOW, severity, format)
-#define SHOW_INFO(severity, format, param...)  __GEN_DEBUG_1( printf, info, INFO, severity, format, param)
-#define SHOW_INFO0(severity, format)           __GEN_DEBUG_0( printf, info, INFO, severity, format)
-#define SHOW_ERROR(severity, format, param...) __GEN_DEBUG_1( printf, error, ERROR, severity, format, param)
-#define SHOW_ERROR0(severity, format)          __GEN_DEBUG_0( printf, error, ERROR, severity, format)
+#define SHOW_FLOW(severity, format, param...)  __GEN_DEBUG_1( ph_printf, flow, FLOW, severity, format, param)
+#define SHOW_FLOW0(severity, format)           __GEN_DEBUG_0( ph_printf, flow, FLOW, severity, format)
+#define SHOW_INFO(severity, format, param...)  __GEN_DEBUG_1( ph_printf, info, INFO, severity, format, param)
+#define SHOW_INFO0(severity, format)           __GEN_DEBUG_0( ph_printf, info, INFO, severity, format)
+#define SHOW_ERROR(severity, format, param...) __GEN_DEBUG_1( ph_printf, error, ERROR, severity, format, param)
+#define SHOW_ERROR0(severity, format)          __GEN_DEBUG_0( ph_printf, error, ERROR, severity, format)
 
 
 // Print to log file only, doubles in kernel/debug.h 
@@ -137,42 +139,42 @@ void lprintf(char const *format, ...);
 #define SHOW_FLOW(severity, format, param...) \
     do { if( severity <= debug_level_flow && severity <= DEBUG_MAX_LEVEL_FLOW ) { \
     console_set_message_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT \
     console_set_normal_color(); \
     }} while( 0 )
 
 #define SHOW_FLOW0(severity, format) \
     do { if( severity <= debug_level_flow && severity <= DEBUG_MAX_LEVEL_FLOW ) { \
     console_set_message_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT \
     console_set_normal_color(); \
     }} while( 0 )
 
 #define SHOW_INFO(severity, format, param...) \
     do { if( severity <= debug_level_info && severity <= DEBUG_MAX_LEVEL_INFO ) { \
     console_set_warning_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT \
     console_set_normal_color(); \
     }} while( 0 )
 
 #define SHOW_INFO0(severity, format) \
     do { if( severity <= debug_level_info && severity <= DEBUG_MAX_LEVEL_INFO ) { \
     console_set_warning_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT \
     console_set_normal_color(); \
     }} while( 0 )
 
 #define SHOW_ERROR(severity, format, param...) \
     do { if( severity <= debug_level_error && severity <= DEBUG_MAX_LEVEL_ERROR ) { \
     console_set_error_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT_ERROR \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME, param ); DEBUG_WAIT_ERROR \
     console_set_normal_color(); \
     }} while( 0 )
 
 #define SHOW_ERROR0(severity, format) \
     do { if( severity <= debug_level_error && severity <= DEBUG_MAX_LEVEL_ERROR ) { \
     console_set_error_color(); \
-    printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT_ERROR \
+    ph_printf( "%s/%s%s"format"\n", FUNC_NAME); DEBUG_WAIT_ERROR \
     console_set_normal_color(); \
     }} while( 0 )
 

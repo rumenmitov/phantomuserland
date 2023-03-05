@@ -7,7 +7,7 @@ extern void *outf;
 void save_hdr( char *classnm, long size )
 {
     struct pvm_bulk_class_head h;
-    strncpy( h.name, classnm, PVM_BULK_CN_LENGTH );
+    ph_strncpy( h.name, classnm, PVM_BULK_CN_LENGTH );
     h.data_length = size;
 
     //return 1 ==

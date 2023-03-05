@@ -156,7 +156,7 @@ void pvm_restart_http( pvm_object_t o )
     //da->connected = 0;
     //if( da->connected )
     {
-        printf("restarting HTTP - unimpl!");
+        ph_printf("restarting HTTP - unimpl!");
     }
 
 }

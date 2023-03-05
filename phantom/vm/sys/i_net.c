@@ -156,7 +156,7 @@ void pvm_restart_net( pvm_object_t o )
     //da->connected = 0;
     //if( da->connected )
     {
-        printf("restarting NET - unimpl!");
+        ph_printf("restarting NET - unimpl!");
     }
 
 }

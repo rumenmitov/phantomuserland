@@ -2,7 +2,7 @@
    the function names :-) */
 
 #include <stdlib.h>
-#include <string.h>
+#include <ph_string.h>
 #include <math.h>
 #include "zmath.h"
 
@@ -48,7 +48,7 @@ void gl_M4_MulLeft(M4 *c,M4 *b)
   float s;
   M4 a;
 
-  /*memcpy(&a, c, 16*sizeof(float));
+  /*ph_memcpy(&a, c, 16*sizeof(float));
   */
   a=*c;
 
@@ -62,12 +62,12 @@ void gl_M4_MulLeft(M4 *c,M4 *b)
 
 void gl_M4_Move(M4 *a,M4 *b)
 {
-	memcpy(a,b,sizeof(M4));
+	ph_memcpy(a,b,sizeof(M4));
 }
 
 void gl_MoveV3(V3 *a,V3 *b)
 {
-	memcpy(a,b,sizeof(V3));
+	ph_memcpy(a,b,sizeof(V3));
 }
 
 
@@ -140,7 +140,7 @@ int Matrix_Inv(float *r,float *m,int n)
 	 int i,j,k,l;
 	 float max,tmp,t;
 
-	 /* identitée dans r */
+	 /* identitï¿½e dans r */
 	 for(i=0;i<n*n;i++) r[i]=0;
 	 for(i=0;i<n;i++) r[i*n+i]=1;
 	 
@@ -198,7 +198,7 @@ int Matrix_Inv(float *r,float *m,int n)
 void gl_M4_Inv(M4 *a,M4 *b)
 {
   M4 tmp;
-  memcpy(&tmp, b, 16*sizeof(float));
+  ph_memcpy(&tmp, b, 16*sizeof(float));
   /*tmp=*b;*/
   Matrix_Inv(&a->m[0][0],&tmp.m[0][0],4);
 }

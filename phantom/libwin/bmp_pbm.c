@@ -15,6 +15,9 @@
 #include <errno.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <video/bitmap.h>
 #include <video/internal.h>
 
@@ -118,17 +121,17 @@ static errno_t parseHeader( unsigned char **pfrom, int *width, int *height, int 
 
     skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", width ) )
+    if( 1 != ph_sscanf(from, "%d", width ) )
         return EINVAL;
 
     skip_num( &from ); skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", height ) )
+    if( 1 != ph_sscanf(from, "%d", height ) )
         return EINVAL;
 
     skip_num( &from ); skip_ws( &from ); skip_comment( &from );
 
-    if( 1 != sscanf(from, "%d", maxcolorval ) )
+    if( 1 != ph_sscanf(from, "%d", maxcolorval ) )
         return EINVAL;
 
     skip_num( &from );
@@ -152,7 +155,7 @@ errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *_from )
 
     if( width * height > (4096*4096) ) return EINVAL;
 
-    *to = malloc(drv_video_bitmap_bytes( width, height ));
+    *to = ph_malloc(drv_video_bitmap_bytes( width, height ));
     if( *to == NULL ) return ENOMEM;
 
     drv_video_bitmap_t *bmp = *to;
@@ -199,10 +202,10 @@ errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from )
 {
     size_t bytes = drv_video_bitmap_bytes( from->xsize, from->ysize );
 
-    *to = malloc(bytes);
+    *to = ph_malloc(bytes);
     if( *to == NULL ) return ENOMEM;
 
-    memcpy( *to, from, bytes );
+    ph_memcpy( *to, from, bytes );
     
     return 0;
 }

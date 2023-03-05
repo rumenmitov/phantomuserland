@@ -21,7 +21,9 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
+
+#include <ph_malloc.h>
 
 #include <kernel/pool.h>
 
@@ -151,13 +153,13 @@ void init_task_bar(void)
 
 static void  do_tb_destroy(void *pool_elem)
 {
-    free(pool_elem);
+    ph_free(pool_elem);
 }
 
 static void *do_tb_create(void *arg)
 {
     assert(arg == 0);
-    return calloc(sizeof(task_bar_el_t), 1);
+    return ph_calloc(sizeof(task_bar_el_t), 1);
 }
 
 // -----------------------------------------------------------------------

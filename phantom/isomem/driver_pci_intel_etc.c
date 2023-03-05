@@ -83,7 +83,7 @@ phantom_device_t * driver_intel_PIIX4_pm_probe( pci_cfg_t *pci, int stage )
         return 0;
 
 
-    phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+    phantom_device_t * dev = ph_malloc(sizeof(phantom_device_t));
     dev->name = DEV_NAME " power management unit";
     dev->seq_number = seq_number++;
     dev->drv_private = 0;
@@ -193,7 +193,7 @@ phantom_device_t * driver_intel_1237_bridge_probe( pci_cfg_t *pci, int stage )
         return 0;
 
 
-    phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+    phantom_device_t * dev = ph_malloc(sizeof(phantom_device_t));
     dev->name = DEV_NAME;
     dev->seq_number = seq_number++;
     dev->drv_private = 0;
@@ -223,11 +223,11 @@ static errno_t check_piix4_isa_sanity(int port)
         dec     cx         ; = 0xFFFF
         mov     dx, 0x404
         in      ax, dx
-        cmp     ax, cx     ;примитивно понюхаем есть ли сей порт вообще в наличии?
-         jne    @a         ;если AX <> 0xFFFF - значит существует, будем выключать
+        cmp     ax, cx     ;пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ?
+         jne    @a         ;пїЅпїЅпїЅпїЅ AX <> 0xFFFF - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         mov     dx, 0x4004
         in      ax, dx
-        cmp     ax, cx     ;тогда, может этот есть (т.е. 0x4004)?
+        cmp     ax, cx     ;пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅ.пїЅ. 0x4004)?
          je     @q
 @a:
         mov     ah, 111100b

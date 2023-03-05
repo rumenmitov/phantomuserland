@@ -10,7 +10,7 @@
 **/
 
 #include <video/vops.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <sys/types.h>
 
 
@@ -78,7 +78,7 @@ void bitmap2bitmap(
     if( moveWidth <= 0 || moveHeight <= 0 )
         return;
 
-    //printf("blit %d x %d", moveWidth, moveHeight );
+    //ph_printf("blit %d x %d", moveWidth, moveHeight );
     //int srcShift = srcX * sizeof(struct rgba_t);
     //int dstShift = destX* sizeof(struct rgba_t);
     //int srcLineStep = srcWidth * sizeof(struct rgba_t);
@@ -149,7 +149,7 @@ void bitmap2bitmap_yflip(
     if( moveWidth <= 0 || moveHeight <= 0 )
         return;
 
-    //printf("blit %d x %d", moveWidth, moveHeight );
+    //ph_printf("blit %d x %d", moveWidth, moveHeight );
     //int srcShift = srcX * sizeof(struct rgba_t);
     //int dstShift = destX* sizeof(struct rgba_t);
     //int srcLineStep = srcWidth * sizeof(struct rgba_t);

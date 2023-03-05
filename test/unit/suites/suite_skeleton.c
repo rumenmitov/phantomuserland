@@ -5,20 +5,20 @@
 #include "utils.h"
 
 TEST_FUNCT(foo) {
-    //printf("test case 1\n");
-     /* ”¥©ª®¢ë© ª®¤ */
+    //ph_printf("test case 1\n");
+     /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     CU_ASSERT_EQUAL(0, 0);
 }
 TEST_FUNCT(foo2) {
-    //printf("test case 2\n");
-    /* ”¥©ª®¢ë© ª®¤ */
+    //ph_printf("test case 2\n");
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     CU_ASSERT_EQUAL(1, 1);
 }
 
 void runSuite(void) {
-    /* Š®¤ â¥áâ-áìîâ  */
+    /* ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ */
 
-    //printf("test suite\n");
+    //ph_printf("test suite\n");
 
     CU_pSuite suite = CUnitCreateSuite("Suite1");
     if (suite) {

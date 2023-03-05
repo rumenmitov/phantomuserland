@@ -24,7 +24,7 @@ static void count( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t fla
 
 
 TEST_FUNCT(amap_modify) {
-    //printf("test case 1\n");
+    //ph_printf("test case 1\n");
 
     int modified;
 
@@ -66,7 +66,7 @@ TEST_FUNCT(amap_modify) {
     amap_destroy( &map );
 
 
-    /* ”¥©ª®¢ë© ª®¤ */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     //CU_ASSERT_EQUAL(0, 0);
 }
 

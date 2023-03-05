@@ -121,7 +121,7 @@ errno_t cn_udp_init( struct data_area_4_connection *c, struct data_area_4_thread
         return ENOMEM;
 
 
-    //printf("Init stats");
+    //ph_printf("Init stats");
     return 0;
 }
 

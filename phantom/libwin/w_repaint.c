@@ -17,7 +17,9 @@
 
 #include <kernel/debug.h>
 
-#include <assert.h>
+#include <ph_string.h>
+
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 //#include <event.h>
 //#include <spinlock.h>
@@ -147,7 +149,7 @@ void repaint_all_for_square( rect_t *todo )
 void request_repaint_all_for_square( rect_t *todo )
 {
     ui_event_t e;
-    memset( &e, 0, sizeof(e) );
+    ph_memset( &e, 0, sizeof(e) );
 
     e.type = UI_EVENT_TYPE_GLOBAL;
     e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;

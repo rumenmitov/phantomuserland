@@ -73,7 +73,14 @@ struct cn_udp_volatile
     //int fill;
 };
 
+#ifdef PHANTOM_GENODE
+#define FS_MAX_MOUNT 64
+#define FS_MAX_MOUNT_PATH 128
+#define FS_MAX_PATH_LEN 1024
+
+#else
 #include <unix/uufile.h>
+#endif
 
 struct cn_fio_persistent
 {

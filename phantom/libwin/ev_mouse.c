@@ -16,13 +16,17 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_time.h>
+#include <ph_malloc.h>
+#include <ph_string.h>
+
 #include <event.h>
 #include "ev_private.h"
 
 
 void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons )
 {
-    memset( e, 0, sizeof(struct ui_event) );
+    ph_memset( e, 0, sizeof(struct ui_event) );
 
     e->type = UI_EVENT_TYPE_MOUSE;
     e->time = fast_time();

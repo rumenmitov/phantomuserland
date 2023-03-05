@@ -25,6 +25,8 @@
 
 #include <kernel/snap_sync.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include "ev_private.h"
 
@@ -45,7 +47,7 @@ static int                     ev_events_in_q = 0;
 //! Allocate one more event
 static void ev_allocate_event()
 {
-    struct ui_event *e = calloc( 1, sizeof(struct ui_event) );
+    struct ui_event *e = ph_calloc( 1, sizeof(struct ui_event) );
     assert(e);
     queue_enter(&ev_unused_events, e, struct ui_event *, echain);
 }
@@ -74,7 +76,7 @@ ui_event_t * ev_get_unused()
 void ev_return_unused(ui_event_t *e)
 {
     assert(ev_engine_active);
-    memset( e, 0, sizeof(struct ui_event) );
+    ph_memset( e, 0, sizeof(struct ui_event) );
     hal_mutex_lock( &ev_unused_q_mutex );
     queue_enter(&ev_unused_events, e, struct ui_event *, echain);
     hal_mutex_unlock( &ev_unused_q_mutex );
@@ -111,7 +113,7 @@ static void ev_remove_extra_unused()
     if(c > MAX_EVENT_POOL)
     {
         struct ui_event *e = ev_get_unused();
-        free(e);
+        ph_free(e);
     }
 }
 
@@ -139,7 +141,7 @@ void ev_put_event(ui_event_t *e)
 static void ev_push_event( struct ui_event *e )
 {
     //LOG_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
-    //printf("%d,%d\n", e->abs_x, e->abs_y );
+    //ph_printf("%d,%d\n", e->abs_x, e->abs_y );
     ev_log( 9, e );
 
     if( e->type == UI_EVENT_TYPE_GLOBAL )

@@ -15,6 +15,9 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
+#include <ph_os.h>
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include <video/screen.h>
 #include <video/font.h>
@@ -22,7 +25,9 @@
 #include <unistd.h>
 #include <kunix.h>
 
+#ifndef PHANTOM_GENODE
 #include "winhal.h"
+#endif
 
 
 #define WXS (240*3)
@@ -54,7 +59,7 @@ void videotest_truetype(void)
 
     if( font1 == INVALID_POOL_HANDLE )
     {
-        printf("\n\nTTF 1 FAIL\n\n");
+        ph_printf("\n\nTTF 1 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font1,
@@ -68,7 +73,7 @@ void videotest_truetype(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font2,
@@ -81,7 +86,7 @@ void videotest_truetype(void)
 
     drv_video_winblt( w );
 
-    (void) getchar();
+    // (void) getchar();
 }
 
 
@@ -108,7 +113,7 @@ void videotest_overlay(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
         return;
     }
 
@@ -162,7 +167,7 @@ void videotest_pbm()
 
     if( rc )
         {
-            printf("can't open %s\n", bpm );
+            ph_printf("can't open %s\n", bpm );
             exit(33);
         }
 
@@ -172,9 +177,9 @@ void videotest_pbm()
         k_seek( &size, fd, 0, SEEK_CUR );
         k_seek( 0, fd, 0, SEEK_SET );
 
-        printf("Size of %s is %d\n", bpm, size );
+        ph_printf("Size of %s is %d\n", bpm, size );
 
-        char *data = malloc(size);
+        char *data = ph_malloc(size);
 
         rc = k_read( 0, fd, data, size );
         k_close(fd);
@@ -187,10 +192,10 @@ void videotest_pbm()
         //for( i = 0; i < 1000; i++ )
             result = bmp_ppm_load( &bmp, data );
 
-        free(data);
+        ph_free(data);
 
         if(result)
-            printf("can't parse %s: %d\n", bpm, result );
+            ph_printf("can't parse %s: %d\n", bpm, result );
         else
         {
             drv_video_window_t *w = drv_video_window_create( 900, 600, 10, 10, COLOR_BLACK, "BMP Test Window", WFLAG_WIN_DECORATED );
@@ -199,7 +204,7 @@ void videotest_pbm()
             w_draw_bitmap( w, 0, 0, bmp );
             drv_video_winblt( w );
 
-            getchar();
+            // getchar();
         }
 
 

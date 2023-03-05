@@ -12,6 +12,10 @@
 
 #include <phantom_disk.h>
 
+#include <ph_string.h>
+// #include <ph_malloc.h>
+#include <ph_io.h>
+
 
 static u_int32_t sb_chksum( unsigned char *sbp )
 {
@@ -35,9 +39,12 @@ phantom_calc_sb_checksum( phantom_disk_superblock *sb )
 
     sb->checksum = sb_chksum( (unsigned char *)sb );
 
-    printf("SB_CHKSUM: cs_ok=%d, m1_ok=%d, m2_ok=%d\n", 
+    ph_printf("SB_CHKSUM: cs_ok=%x(%d), m1_ok=%x(%d), m2_ok=%x(%d)\n", 
+        sb->checksum, 
         sb->checksum == old_cs,
+        sb->magic,
         sb->magic   == DISK_STRUCT_MAGIC_SUPERBLOCK,
+        sb->magic2,
         sb->magic2  == DISK_STRUCT_MAGIC_SUPER_2);
 
     return
@@ -56,7 +63,7 @@ void
 phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname )
 {
 
-    memset( sb, 0, sizeof(*sb) );
+    ph_memset( sb, 0, sizeof(*sb) );
 
     sb->version = DISK_STRUCT_VERSION;
     sb->magic   = DISK_STRUCT_MAGIC_SUPERBLOCK;
@@ -72,7 +79,7 @@ phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const ch
     sb->free_list = 0;  // No free list yet.
     sb->fs_is_clean = 0xFF;
 
-    strlcpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
+    ph_strlcpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
 
     phantom_calc_sb_checksum( sb );
 }
@@ -103,39 +110,39 @@ int superblocks_are_equal(const phantom_disk_superblock *a, const phantom_disk_s
 void
 phantom_dump_superblock(phantom_disk_superblock *sb)
 {
-    printf("Superblock is:\n");
-    printf("--------------\n");
-    printf("Magic             0x%x (%s)\n", sb->magic, sb->magic == DISK_STRUCT_MAGIC_SUPERBLOCK ? "ok" : "wrong");
-    printf("Magic 2           0x%x (%s)\n", sb->magic2, sb->magic2 == DISK_STRUCT_MAGIC_SUPER_2 ? "ok" : "wrong");
-    printf("Version           0x%x (%s)\n", sb->version, sb->version == DISK_STRUCT_VERSION ? "ok" : "wrong");
+    ph_printf("Superblock is:\n");
+    ph_printf("--------------\n");
+    ph_printf("Magic             0x%x (%s)\n", sb->magic, sb->magic == DISK_STRUCT_MAGIC_SUPERBLOCK ? "ok" : "wrong");
+    ph_printf("Magic 2           0x%x (%s)\n", sb->magic2, sb->magic2 == DISK_STRUCT_MAGIC_SUPER_2 ? "ok" : "wrong");
+    ph_printf("Version           0x%x (%s)\n", sb->version, sb->version == DISK_STRUCT_VERSION ? "ok" : "wrong");
 
     u_int32_t old_cs = sb->checksum;
     sb->checksum = 0;
     u_int32_t cs = sb_chksum( (unsigned char *)sb );
     sb->checksum = old_cs;
 
-    printf("Checksum          0x%x (%s)\n", sb->checksum, sb->checksum == cs ? "ok" : "wrong");
-    printf("Blocksize         0x%x (%s)\n", sb->blocksize, sb->blocksize == 4096 ? "ok" : "wrong");
-    printf("--------------\n");
+    ph_printf("Checksum          0x%x (%s)\n", sb->checksum, sb->checksum == cs ? "ok" : "wrong");
+    ph_printf("Blocksize         0x%x (%s)\n", sb->blocksize, sb->blocksize == 4096 ? "ok" : "wrong");
+    ph_printf("--------------\n");
 
-    printf("sb2_addr          %d\n", sb->sb2_addr );
-    printf("sb3_addr          %d\n", sb->sb3_addr );
-    printf("disk_start_page   %d\n", sb->disk_start_page );
-    printf("disk_page_count   %d\n", sb->disk_page_count );
-    printf("free_start        %d\n", sb->free_start );
-    printf("free_list         %d\n", sb->free_list );
-    printf("--------------\n");
+    ph_printf("sb2_addr          %d\n", sb->sb2_addr );
+    ph_printf("sb3_addr          %d\n", sb->sb3_addr );
+    ph_printf("disk_start_page   %d\n", sb->disk_start_page );
+    ph_printf("disk_page_count   %d\n", sb->disk_page_count );
+    ph_printf("free_start        %d\n", sb->free_start );
+    ph_printf("free_list         %d\n", sb->free_list );
+    ph_printf("--------------\n");
 
-    printf("fs_is_clean       %d\n", sb->fs_is_clean );
-    printf("general_flags_1   0x%x\n", sb->general_flags_1 );
-    printf("--------------\n");
+    ph_printf("fs_is_clean       %d\n", sb->fs_is_clean );
+    ph_printf("general_flags_1   0x%x\n", sb->general_flags_1 );
+    ph_printf("--------------\n");
 
-    printf("last_snap         %d\n", sb->last_snap );
-    printf("prev_snap         %d\n", sb->prev_snap );
-    printf("--------------\n");
+    ph_printf("last_snap         %d\n", sb->last_snap );
+    ph_printf("prev_snap         %d\n", sb->prev_snap );
+    ph_printf("--------------\n");
 
-    printf("sys_name          %*s\n", DISK_STRUCT_SB_SYSNAME_SIZE, sb->sys_name );
-    printf("obj spc address   0x%lx\n", (unsigned long int)sb->object_space_address );
+    ph_printf("sys_name          %*s\n", DISK_STRUCT_SB_SYSNAME_SIZE, sb->sys_name );
+    ph_printf("obj spc address   0x%lx\n", (unsigned long int)sb->object_space_address );
 
 
 }

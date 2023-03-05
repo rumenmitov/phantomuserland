@@ -117,7 +117,7 @@
 
 #ifdef AF_DEBUG
 
-#include <stdio.h>
+// #include <stdio.h>
 
   static const char*
   af_dir_str( AF_Direction  dir )
@@ -158,13 +158,13 @@
     AF_Point  point;
 
 
-    printf( "Table of points:\n" );
-    printf(   "  [ index |  xorg |  yorg |  xscale |  yscale "
+    ph_printf( "Table of points:\n" );
+    ph_printf(   "  [ index |  xorg |  yorg |  xscale |  yscale "
               "|  xfit  |  yfit  |  flags ]\n" );
 
     for ( point = points; point < limit; point++ )
     {
-      printf( "  [ %5d | %5d | %5d | %-5.2f | %-5.2f "
+      ph_printf( "  [ %5d | %5d | %5d | %-5.2f | %-5.2f "
               "| %-5.2f | %-5.2f | %c%c%c%c%c%c ]\n",
               point - points,
               point->fx,
@@ -180,7 +180,7 @@
               ( point->flags & AF_FLAG_ROUND_X )            ? '(' : ' ',
               ( point->flags & AF_FLAG_ROUND_Y )            ? 'u' : ' ');
     }
-    printf( "\n" );
+    ph_printf( "\n" );
   }
 
 
@@ -200,14 +200,14 @@
       AF_Segment    seg;
 
 
-      printf ( "Table of %s segments:\n",
+      ph_printf ( "Table of %s segments:\n",
                dimension == AF_DIMENSION_HORZ ? "vertical" : "horizontal" );
-      printf ( "  [ index |  pos |  dir  | link | serif |"
+      ph_printf ( "  [ index |  pos |  dir  | link | serif |"
                " numl | first | start ]\n" );
 
       for ( seg = segments; seg < limit; seg++ )
       {
-        printf ( "  [ %5d | %4d | %5s | %4d | %5d | %4d | %5d | %5d ]\n",
+        ph_printf ( "  [ %5d | %4d | %5s | %4d | %5d | %4d | %5d | %5d ]\n",
                  seg - segments,
                  (int)seg->pos,
                  af_dir_str( seg->dir ),
@@ -217,7 +217,7 @@
                  seg->first - points,
                  seg->last - points );
       }
-      printf( "\n" );
+      ph_printf( "\n" );
     }
   }
 
@@ -240,14 +240,14 @@
        *  note: AF_DIMENSION_HORZ corresponds to _vertical_ edges
        *        since they have constant a X coordinate.
        */
-      printf ( "Table of %s edges:\n",
+      ph_printf ( "Table of %s edges:\n",
                dimension == AF_DIMENSION_HORZ ? "vertical" : "horizontal" );
-      printf ( "  [ index |  pos |  dir  | link |"
+      ph_printf ( "  [ index |  pos |  dir  | link |"
                " serif | blue | opos  |  pos  ]\n" );
 
       for ( edge = edges; edge < limit; edge++ )
       {
-        printf ( "  [ %5d | %4d | %5s | %4d |"
+        ph_printf ( "  [ %5d | %4d | %5s | %4d |"
                  " %5d |   %c  | %5.2f | %5.2f ]\n",
                  edge - edges,
                  (int)edge->fpos,
@@ -258,7 +258,7 @@
                  edge->opos / 64.0,
                  edge->pos / 64.0 );
       }
-      printf( "\n" );
+      ph_printf( "\n" );
     }
   }
 

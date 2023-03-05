@@ -24,7 +24,7 @@
 
 Phantom::Main *Phantom::main_obj = nullptr;
 
-void setup_adapters(Libc::Env &env)
+void setup_adapters(Env &env)
 {
 	static Phantom::Main local_main(env);
 	Phantom::main_obj = &local_main;
@@ -43,10 +43,14 @@ void test_adapters()
 	Phantom::test_remapping();
 	log("finished remapping test!");
 
-	// TODO : Uncomment when adapter is fixed!
-	// log("Starting block device test!");
+	log("Starting block device test!");
 	// Phantom::test_block_device_adapter(Phantom::main_obj->_disk);
-	// log("Finished block device test!");
+	// Phantom::test_block_alignment(Phantom::main_obj->_disk);
+	log("Finished block device test!");
+
+	log("Starting bulk code test!");
+	Phantom::test_bulk();
+	log("finished bulk code test!");
 }
 
 bool test_hal()
@@ -94,7 +98,8 @@ bool test_hal()
 
 // extern "C" void wait_for_continue(void);
 
-void Libc::Component::construct(Libc::Env &env)
+// void Libc::Component::construct(Libc::Env &env)
+void Component::construct(Env &env)
 {
 
 	// Libc::with_libc([&]()
@@ -107,9 +112,10 @@ void Libc::Component::construct(Libc::Env &env)
 	// void *f_addr = 0x0;
 	// log(*((int *)f_addr));
 
-	Libc::with_libc([&]()
-					{
+	// Libc::with_libc([&]()
+	// 				{
 		log("--- Phantom init ---");
+		env.exec_static_constructors();
 
 		log("Waiting for continue");
 		// wait_for_continue();
@@ -139,17 +145,18 @@ void Libc::Component::construct(Libc::Env &env)
 
 		log("--- finished Phantom env test ---");
 
-		// env.exec_static_constructors(); <- This thing might break pthreads!
+		 	// env.exec_static_constructors(); <- This thing might break pthreads!
 
 		// Actual Phantom code
 
 		int p_argc = 1;
 		char **p_argv = nullptr;
 		char **p_envp = nullptr;
-		phantom_main_entry_point(p_argc, p_argv, p_envp); });
+		phantom_main_entry_point(p_argc, p_argv, p_envp); 
+	// });
 }
 
-int main()
-{
-	log("What are we doing here???");
-}
+// int main()
+// {
+// 	log("What are we doing here???");
+// }

@@ -33,7 +33,24 @@
 
 #else
 
+#ifdef PHANTOM_GENODE
+
+// TODO : Create a separate header!
+
+#define ARCH_N_TRAPS 32
+
+
+
+// Copied from amd64
+struct trap_state {
+    int state;
+};
+
+#else
+
 #error No arch?
+
+#endif
 
 #endif
 #endif
@@ -42,8 +59,9 @@
 
 #ifndef ASSEMBLER
 
+#ifndef PHANTOM_GENODE
 int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts);
-
+#endif
 
 //! This is what called from low-level asm trap code
 void phantom_kernel_trap( struct trap_state *ts );

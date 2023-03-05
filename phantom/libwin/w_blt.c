@@ -11,7 +11,7 @@
 **/
 
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 #include <event.h>
 
@@ -19,7 +19,7 @@
 #include <video/screen.h>
 
 // min/max
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 
 

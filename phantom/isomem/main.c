@@ -9,7 +9,8 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
+// #include <ph_malloc.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
 #include <kernel/boot.h>
@@ -20,7 +21,7 @@
 #include <hal.h>
 #include <multiboot.h>
 #include <elf.h>
-#include <unix/uuprocess.h>
+// #include <unix/uuprocess.h>
 
 
 
@@ -30,6 +31,21 @@
 
 
 #include <kernel/amap.h>
+
+#include <vm/alloc.h>
+#include <kernel/dpc.h>
+#include "svn_version.h"
+#include <video/internal.h>
+#include "vm_map.h"
+#include "pager.h"
+#include <kernel/snap_sync.h>
+#include <vm/root.h>
+
+#include <init_routines.h>
+
+#include <ph_malloc.h>
+#include <ph_io.h>
+#include <ph_os.h>
 
 static amap_t ram_map;
 
@@ -53,9 +69,34 @@ extern int pvm_video_init(); // We need it only here
 
 // Init functions
 
+
+void start_phantom();
+
+
 void
 phantom_multiboot_main()
 {
+    // TODO : REMOVE
+
+
+    char test_string[] = "hello there!"; 
+    char* a = (char*)ph_malloc(ph_strlen(test_string) + 1);
+    if (ph_memcpy(a, test_string, ph_strlen(test_string) + 1) != a){
+        ph_printf("memcpy returned not dest address!!!\n");
+    }
+    if (ph_memcmp(a, test_string, ph_strlen(test_string) + 1)){
+        ph_free(a);
+        ph_printf("not equal!!!\n");
+    }
+    
+    // ph_printf("a[]=%c\n", a[0]);
+    ph_printf("a[]=%c\n", a[1]);
+    ph_printf("a[]=%c\n", a[12]);
+    ph_printf("a[]=%c\n", a[13]);
+
+    ph_printf("a[]=%c\n", a[14]);
+    ph_free(a);
+
     // Assuming we don't really need arch and board init. If we need, enable and implement
     /*
         arch_init_early();
@@ -138,14 +179,14 @@ phantom_multiboot_main()
 
 int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
-    printf("Waiting...\n");
+    ph_printf("Waiting...\n");
     // wait_for_continue();
 
     // Running adapters tests
 
 	// if (!test_thread_creation())
 	// {
-	// 	printf("Test creation test failed!\n");
+	// 	ph_printf("Test creation test failed!\n");
 	// 	return;
 	// }
 
@@ -155,7 +196,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     (void) envp;
 
-    snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
+    ph_snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
 
     // Runs all functions defined with macro INIT_ME
     run_init_functions( INIT_LEVEL_PREPARE ); // OK
@@ -241,7 +282,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     {
         extern const char* SVN_Version;
         extern struct utsname phantom_uname;
-        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+        ph_strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
     //pressEnter("will run DPC");
@@ -249,7 +290,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options(); // OK. Let's keep it
 
 #if defined(ARCH_arm) && 0
@@ -360,7 +401,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     // If this is test run, switch to test code
     // -----------------------------------------------------------------------
 #if !defined(ARCH_arm)
-    if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
+    if( argc >= 3 && (0 == ph_strcmp( argv[1], "-test" )) )
     {
         SHOW_FLOW0( 0, "Sleep before tests to settle down boot activities" );
         hal_sleep_msec( 2000 );
@@ -368,7 +409,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
         run_test( argv[2], argv[3] );
 	// CI: this message is being watched by CI scripts (ci-runtest.sh)
         SHOW_FLOW0( 0, "Test done, reboot");
-        exit(0);
+
+        // XXX : Do proper exit!
+        // exit(0);
+        hal_sleep_msec(1000000);
     }
 #else
     {
@@ -385,8 +429,8 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     run_test( "all", "" );
 
 #ifdef PHANTOM_TESTS_ONLY 
-    printf("\n\n======================\n");
-    printf("Testing is done!\n");
+    ph_printf("\n\n======================\n");
+    ph_printf("Testing is done!\n");
     return 0;
 #endif
 
@@ -453,12 +497,12 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     //init_wins(u_int32_t ip_addr);
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
     {
         hal_sleep_msec(60000*13);
-        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        ph_printf("\nWILL CRASH ON PURPOSE\n\n" );
         hal_sleep_msec(20000);
         hal_cpu_reset_real();
     }
@@ -480,7 +524,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 void start_phantom()
 {
 
-    printf("DEBUG!!! STARTING PHANTOM\n");
+    ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");
     SHOW_FLOW0( 2, "Will init snap interlock... ");

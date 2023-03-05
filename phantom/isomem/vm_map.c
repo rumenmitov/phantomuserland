@@ -16,10 +16,10 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
-#include <sys/syslog.h>
+#include <ph_syslog.h>
 #include <kernel/debug_graphical.h>
 
-#include <assert.h>
+#include <phantom_assert.h>
 
 
 //---------------------------------------------------------------------------
@@ -34,8 +34,11 @@
 #include <kernel/snap_sync.h>
 #include <kernel/physalloc.h>
 #include <kernel/init.h>
+#include <kernel/trap.h>
 
 #include <threads.h>
+
+#include <init_routines.h>
 
 #ifdef ARCH_ia32
 #include <ia32/proc_reg.h>
@@ -46,8 +49,10 @@
 #include <arch/arch_vmem_util.h>
 #endif
 
-#include <time.h>
+#include <ph_time.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 
 #include "vm_map.h"
@@ -177,7 +182,7 @@ static void page_touch_history(vm_page *p)
     void **ebp;
     asm volatile ("movl %%ebp,%0" : "=r" (ebp));
 
-    memmove(p->touch_history + 1, p->touch_history, sizeof(p->touch_history) - sizeof(void*));
+    ph_memmove(p->touch_history + 1, p->touch_history, sizeof(p->touch_history) - sizeof(void*));
     p->touch_history[0] = ebp[1];
 }
 
@@ -186,7 +191,7 @@ static void page_touch_history_arg(vm_page *p, int arg)
     void **ebp;
     asm volatile ("movl %%ebp,%0" : "=r" (ebp));
 
-    memmove(p->touch_history + 2, p->touch_history, sizeof(p->touch_history) - 2 * sizeof(void*));
+    ph_memmove(p->touch_history + 2, p->touch_history, sizeof(p->touch_history) - 2 * sizeof(void*));
     p->touch_history[0] = ebp[1];
     p->touch_history[1] = (void*)arg;
 }
@@ -219,7 +224,7 @@ static vm_page *addr_to_vm_page(unsigned long addr, struct trap_state *ts)
 
     int pageno = addr / __MEM_PAGE;
 
-    if(FAULT_DEBUG) syslog( 0, "fault 0x%lX pgno %d\n", addr, pageno );
+    if(FAULT_DEBUG) ph_syslog( 0, "fault 0x%lX pgno %d\n", addr, pageno );
 
     return vm_map_map + pageno;
 }
@@ -258,7 +263,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 
     vm_page *vmp = vm_map_map + pageno;
 
-    if(FAULT_DEBUG) syslog( 0, "fault 0x%X pgno %d\n", addr, pageno );
+    if(FAULT_DEBUG) ph_syslog( 0, "fault 0x%X pgno %d\n", addr, pageno );
 
 #endif
 
@@ -369,7 +374,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 // vm_map_init is not called for tests, so we leave there just real vm_map init code
 // and general init is here
 
-static void vm_map_pre_init(void)
+void vm_map_pre_init(void)
 {
     page_clear_engine_init();
 
@@ -405,13 +410,13 @@ vm_map_init(unsigned long page_count)
 
     int mapsize = vm_map_vm_page_count*sizeof(vm_page);
 
-    vm_map_map = (vm_page *)malloc( mapsize );
-    memset( vm_map_map, 0, mapsize );
+    vm_map_map = (vm_page *)ph_malloc( mapsize );
+    ph_memset( vm_map_map, 0, mapsize );
     /*
     unsigned int i;
     for( i = 0; i < page_count; i++ )
     {
-        memset( vm_map_map+i, 0, sizeof(vm_page) );
+        ph_memset( vm_map_map+i, 0, sizeof(vm_page) );
     }*/
 
     vm_map_map_end = vm_map_map + page_count;
@@ -466,7 +471,7 @@ vm_map_init(unsigned long page_count)
         {
             if( !pagelist_read_seq(&loader, &vm_map_map[np].prev_page) )
             {
-                printf("\n!!! Incomplete pagelist !!!\n");
+                ph_printf("\n!!! Incomplete pagelist !!!\n");
                 //panic("Incomplete pagelist\n");
                 break;
             }
@@ -527,7 +532,7 @@ void vm_map_finish(void)
 void
 vm_page_init( vm_page *me, void *my_vaddr)
 {
-    memset( me, 0, sizeof(vm_page) );
+    ph_memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
@@ -1206,7 +1211,7 @@ page_fault( vm_page *p, int  is_writing )
     {
         p->max_latency = (int)(end - start);
         if (p->max_latency > 100000)
-            printf("page va %p, max latency: %d, %s\n",
+            ph_printf("page va %p, max latency: %d, %s\n",
                     p->virt_addr, p->max_latency, is_writing ? "w" : "r");
     }
 #endif
@@ -1412,7 +1417,7 @@ void do_snapshot(void)
 {
     int			  enabled; // interrupts
 
-    syslog( 0, "snap: started");
+    ph_syslog( 0, "snap: started");
     // prerequisites
     //
     // - no pages with flag_have_make can exist! check that?
@@ -1429,7 +1434,7 @@ void do_snapshot(void)
 
 
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: wait 4 pgout to settle");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: wait 4 pgout to settle");
 
     // Back to orig prio
     t_current_set_priority( prio );
@@ -1437,13 +1442,13 @@ void do_snapshot(void)
     // commented out to stress the pager
     //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: stop world");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: stop world");
 
 
     // MUST BE BEFORE hal_mutex_lock!
     phantom_snapper_wait_4_threads();
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: threads stopped");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: threads stopped");
 
     enabled = hal_save_cli();
 
@@ -1459,7 +1464,7 @@ void do_snapshot(void)
 
     // !!!! SnapShot !!!!
 
-    syslog( 0, "snap: hold still, say 'cheese!'...");
+    ph_syslog( 0, "snap: hold still, say 'cheese!'...");
 
     // TODO: we have top do more. such as stop oher CPUS, force VMs into the
     // special snap-friendly state, etc
@@ -1468,7 +1473,7 @@ void do_snapshot(void)
     vm_map_for_all_locked( mark_for_snap );
     t_smp_enable(1);
 
-    syslog( 0, "snap: thank you ladies");
+    ph_syslog( 0, "snap: thank you ladies");
 
     if(enabled) hal_sti();
 
@@ -1484,13 +1489,13 @@ void do_snapshot(void)
     // write in a short time.
 
     // This pageout request is needed - if I skip it, snaps are incomplete
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: pgout");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: pgout");
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
 
-    //if(SNAP_STEPS_DEBUG) syslog( 0, "snap: go kick ass those lazy pages");
+    //if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: go kick ass those lazy pages");
     //if(SNAP_DEBUG) getchar();
 
-    syslog( 0, "snap: will finalize_snap");
+    ph_syslog( 0, "snap: will finalize_snap");
     // scan nonsnapped pages, snap them manually (or just access to cause
     // page fault?)
     vm_map_for_all( finalize_snap );
@@ -1509,11 +1514,11 @@ void do_snapshot(void)
     disk_page_no_t new_snap_head = 0;
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating primary pagelist root");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating primary pagelist root");
     if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating pagelist...");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist...");
     //if(SNAP_DEBUG) getchar();
 
     {
@@ -1528,7 +1533,7 @@ void do_snapshot(void)
         pagelist_finish(&saver);
     }
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: waiting for all pages to be flushed...");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: waiting for all pages to be flushed...");
     // make sure page data has been written
     vm_map_for_all( wait_commit_snap );
 
@@ -1567,7 +1572,7 @@ void do_snapshot(void)
     pager_fence();
 
     // DONE!
-    syslog( 0, "Snapshot done!");
+    ph_syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
 
@@ -1576,7 +1581,7 @@ void do_snapshot(void)
 #endif
 
     hal_sleep_msec(20000);
-    syslog( 0, "snap: wait for 10 sec more");
+    ph_syslog( 0, "snap: wait for 10 sec more");
     hal_sleep_msec(10000);
 
 }
@@ -1804,8 +1809,8 @@ static void page_clear_engine_clear_page(physaddr_t p)
     hal_page_control( p, page_clear_vaddr, page_map, page_rw );
 
     // TODO use MMX clear code
-    //memset( page_clear_vaddr, '#', __MEM_PAGE );
-    memset( page_clear_vaddr, 0, __MEM_PAGE );
+    //ph_memset( page_clear_vaddr, '#', __MEM_PAGE );
+    ph_memset( page_clear_vaddr, 0, __MEM_PAGE );
 
     // TODO Broken!
     //fast_clear_page( page_clear_vaddr );
@@ -1850,7 +1855,7 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
 
     if (current < page_offset && page_offset - current < sizeof(hdr))
     {
-        memcpy(((void*)&hdr) + (page_offset - current), data,
+        ph_memcpy(((void*)&hdr) + (page_offset - current), data,
                 sizeof(hdr) - (page_offset - current));
         current += vm_verify_object(&hdr);
     }
@@ -1860,7 +1865,7 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
             current += vm_verify_object(data + (current - page_offset));
         else
         {
-            memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
+            ph_memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
             break;
         }
     }
@@ -1909,7 +1914,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (!head)
         return;
 
-    if (SNAP_STEPS_DEBUG) syslog( 0, "snap: verification started...");
+    if (SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: verification started...");
 
 #if !USE_SYNC_IO
     disk_page_io page_io;
@@ -1939,7 +1944,7 @@ static void vm_verify_snap(disk_page_no_t head)
         }
         if (!pagelist_read_seq(&loader, &block))
         {
-            printf("Incomplete pagelist\n");
+            ph_printf("Incomplete pagelist\n");
             //panic("Incomplete pagelist\n");
             break;
         }
@@ -1954,7 +1959,7 @@ static void vm_verify_snap(disk_page_no_t head)
             errno_t rc = phantom_sync_read_block( pp, buf, block, 1 );
             if( rc )
             {
-                syslog( 0, "snap: verification read err %d", rc );
+                ph_syslog( 0, "snap: verification read err %d", rc );
                 return;
             }
 
@@ -1975,7 +1980,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (SNAP_STEPS_DEBUG)
     {
 	hal_printf("\n");
-	syslog( 0, "snap: verification completed");
+	ph_syslog( 0, "snap: verification completed");
     }
 }
 
@@ -2059,7 +2064,7 @@ void unwire_page_for_addr( void *addr, size_t count )
 void vm_map_page_mark_unused( addr_t page_start )
 {
 #if VM_UNMAP_UNUSED_OBJECTS
-    //printf("asked to mark page %p unused\n", page_start);
+    //ph_printf("asked to mark page %p unused\n", page_start);
     vm_page *vmp = addr_to_vm_page( page_start, 0 );
 
     hal_mutex_lock(&vmp->lock);

@@ -15,8 +15,8 @@
 
 #include <phantom_libc.h>
 
-#include <string.h>
-#include <assert.h>
+#include <ph_string.h>
+#include <phantom_assert.h>
 
 #include <video/screen.h>
 #include <video/internal.h>
@@ -69,7 +69,7 @@ void    pvm_win_window_thread()
     if(win_scr_setup_window())
     {
         init_err = 1;
-        printf("pvm_win_setup_window failed\n");
+        ph_printf("pvm_win_setup_window failed\n");
         return;
     }
 
@@ -114,7 +114,7 @@ void    pvm_win_window_thread()
         eventTrack.dwHoverTime = 5;
 
         if(0 == TrackMouseEvent(&eventTrack))
-            printf("Track error\n");
+            ph_printf("Track error\n");
     }
 #endif
 
@@ -139,7 +139,7 @@ void win_scr_mk_mouse_event(int wParam, int xPos, int yPos )
     e.abs_y = yPos; //VSCREEN_HEIGHT - yPos - 1;
 
     ev_q_put_any( &e );
-    //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
+    //ph_printf("-ms-");            ph_printf("%d,%d\n", xPos, yPos );
 }
 
 
@@ -149,7 +149,7 @@ int pvm_video_init()
 
     drv_video_win32.screen = 0; // Not ready yet
 
-    printf("Starting windows graphics 'driver'\n" );
+    ph_printf("Starting windows graphics 'driver'\n" );
 
 
     if( win_src_make_thread((void *)&pvm_win_window_thread) )

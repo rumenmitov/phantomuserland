@@ -31,6 +31,8 @@
 #include <hal.h>
 #include <kernel/timedcall.h>
 
+#include <ph_random.h>
+
 #define TEST_CHATTY 0
 #define TEST_SOFTIRQ 0
 
@@ -52,7 +54,7 @@ static hal_sem_t s;
 
 static void pressEnter(char *text)
 {
-    if(TEST_CHATTY) printf("%s\n", text);
+    if(TEST_CHATTY) ph_printf("%s\n", text);
 }
 
 static int inmutex = 0;
@@ -103,7 +105,7 @@ static void t_empty(void *a)
 
     ref_inc_p(&p);
 
-    hal_sleep_msec( random() % 6000 );
+    hal_sleep_msec( ph_random() % 6000 );
     // TODO do some random things, such as sleep, set timer, etc
 
     ref_inc_p(&p);
@@ -128,7 +130,7 @@ static void t_wait(void *a)
     {
         thread_activity_counter++;
 
-        if(TEST_CHATTY) printf("--- thread %s will wait 4 cond ---\n", name);
+        if(TEST_CHATTY) ph_printf("--- thread %s will wait 4 cond ---\n", name);
 
         hal_mutex_lock(&m);
         checkEnterMutex();
@@ -138,7 +140,7 @@ static void t_wait(void *a)
         checkLeaveMutex();
         hal_mutex_unlock(&m);
 
-        if(TEST_CHATTY) printf("--- thread %s runs ---\n", name);
+        if(TEST_CHATTY) ph_printf("--- thread %s runs ---\n", name);
         //pressEnter("--- thread a runs ---\n");
         YIELD();
     }
@@ -154,29 +156,29 @@ static void thread1(void *a)
     {
         thread_activity_counter++;
 
-        if(TEST_CHATTY) printf("--- thread %s runs ---\n", name);
+        if(TEST_CHATTY) ph_printf("--- thread %s runs ---\n", name);
         pressEnter("");
 
-        if(TEST_CHATTY) printf("Will lock mutex\n");
+        if(TEST_CHATTY) ph_printf("Will lock mutex\n");
         hal_mutex_lock(&m);
-        if(TEST_CHATTY) printf("locked mutex\n");
+        if(TEST_CHATTY) ph_printf("locked mutex\n");
         checkEnterMutex();
         YIELD();
-        if(TEST_CHATTY) printf("Will unlock mutex\n");
+        if(TEST_CHATTY) ph_printf("Will unlock mutex\n");
         checkLeaveMutex();
         hal_mutex_unlock(&m);
-        if(TEST_CHATTY) printf("unlocked mutex\n");
+        if(TEST_CHATTY) ph_printf("unlocked mutex\n");
 
-        if( random() & 1 )
+        if( ph_random() & 1 )
             hal_sem_acquire( &s );
 
         counter++;
         if(counter >7)
         {
             counter = 0;
-            if(TEST_CHATTY) printf("Will signal cond\n");
+            if(TEST_CHATTY) ph_printf("Will signal cond\n");
             hal_cond_signal(&c);
-            if(TEST_CHATTY) printf("Signalled cond\n");
+            if(TEST_CHATTY) ph_printf("Signalled cond\n");
         }
         YIELD();
 
@@ -222,7 +224,7 @@ static errno_t threads_test()
         if(TEST_CHATTY) pressEnter("will yield");
         YIELD();
 
-        if(TEST_CHATTY) printf("!! back in main\n");
+        if(TEST_CHATTY) ph_printf("!! back in main\n");
     }
 
     t_kill_thread( tid );
@@ -283,15 +285,15 @@ static int              rc = -1;
 static void sem_rel(void *a)
 {
     (void) a;
-    // printf("sema pre-release 1 (direct)\n");
+    // ph_printf("sema pre-release 1 (direct)\n");
     hal_sleep_msec( 300 );
-    // printf("sema release 1 (direct)\n");
+    // ph_printf("sema release 1 (direct)\n");
     sem_released = 1;
     hal_sem_release( &test_sem_0 );
 
 #if TEST_SOFTIRQ
     hal_sleep_msec( 300 );
-    printf("sema release 2 (softirq %d)\n", softirq );
+    ph_printf("sema release 2 (softirq %d)\n", softirq );
     sem_released = 1;
     hal_request_softirq( softirq );
 #endif
@@ -317,7 +319,7 @@ static void sem_softirq(void *a)
 {
     (void) a;
     // can't print from irq
-    //printf("sema softirq\n");
+    //ph_printf("sema softirq\n");
     //hal_sleep_msec( 10 );
     sem_released = 1;
     hal_sem_release( &test_sem_0 );
@@ -334,7 +336,7 @@ static void sem_test_fail( void *arg )
 int do_test_sem(const char *test_parm)
 {
     (void) test_parm;
-    printf("Testing semaphores\n");
+    ph_printf("Testing semaphores\n");
 
     hal_sem_init( &test_sem_0, "semTest");
     on_fail_call( sem_test_fail, 0 );
@@ -352,7 +354,7 @@ int do_test_sem(const char *test_parm)
     //int tid =
     hal_start_kernel_thread_arg( sem_rel, 0 );
 
-    printf("sema wait 1\n");
+    ph_printf("sema wait 1\n");
 
     // Direct
 
@@ -366,7 +368,7 @@ int do_test_sem(const char *test_parm)
 
     hal_sleep_msec( 100 );
 
-    printf("sema wait 2\n");
+    ph_printf("sema wait 2\n");
 
 #if TEST_SOFTIRQ
     // Softirq
@@ -378,7 +380,7 @@ int do_test_sem(const char *test_parm)
     hal_sleep_msec( 100 );
 
 
-    // printf("sema timeout\n");
+    // ph_printf("sema timeout\n");
     // sem_released = 0;
     // hal_start_kernel_thread_arg( sem_etc, 0 );
     // hal_sleep_msec( 100 );
@@ -392,7 +394,7 @@ int do_test_sem(const char *test_parm)
 
     stop_sem_test = 1;
 
-    printf("Done testing semaphores\n");
+    ph_printf("Done testing semaphores\n");
 
     hal_sem_destroy( &test_sem_0 );
     return 0;
@@ -492,12 +494,12 @@ static void thread_zeroes(void *a)
 int do_test_01_threads(const char *test_parm)
 {
     (void) test_parm;
-    printf("Testing thread state integrity\n");
+    ph_printf("Testing thread state integrity\n");
 
     hal_start_kernel_thread_arg( thread_ones, 0 );
     hal_start_kernel_thread_arg( thread_zeroes, 0 );
 
-    printf("Wait for 01 threads to finish\n");
+    ph_printf("Wait for 01 threads to finish\n");
 
     while(zo_run)
         hal_sleep_msec(100);
@@ -529,10 +531,10 @@ static void simple_thread(void *a)
     static int tc = 0;
     tc++;
     char tn[100];
-    snprintf( tn, sizeof(tn), "test t %d", tc );
+    ph_snprintf( tn, sizeof(tn), "test t %d", tc );
     t_current_set_name(tn);
 
-    hal_sleep_msec( (random() % 100) + 2000 );
+    hal_sleep_msec( (ph_random() % 100) + 2000 );
     still_have_threads--;
 }
 
@@ -546,15 +548,15 @@ int do_test_many_threads(const char *test_parm)
     {
         still_have_threads++;
         hal_start_kernel_thread_arg( simple_thread, 0 );
-        printf("Have %d threads run\n",still_have_threads);
+        ph_printf("Have %d threads run\n",still_have_threads);
     }
 
-    printf("Wait for threads to finish\n");
+    ph_printf("Wait for threads to finish\n");
 
     while(still_have_threads > 0)
     {
         hal_sleep_msec(1000);
-        printf("Still have %d threads run\n",still_have_threads);
+        ph_printf("Still have %d threads run\n",still_have_threads);
     }
 
     return 0;

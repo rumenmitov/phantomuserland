@@ -15,7 +15,7 @@
 #define debug_level_error 10
 #define debug_level_info 0
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 #include <event.h>
 //#include <spinlock.h>
@@ -34,7 +34,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
     assert(w->w_owner);
     drv_video_window_t *mainw = w->w_owner;
 
-    //printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
+    //ph_printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
 
     switch(e->w.info)
     {
@@ -68,7 +68,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON_ON: //printf("title button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON_ON: //ph_printf("title button %x\n", e->extra );
     {
         switch(e->extra)
         {
@@ -83,14 +83,14 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         case WBUTTON_SYS_ROLLUP:
             if( mainw->state & WSTATE_WIN_ROLLEDUP )
             {
-                //printf("roll down\n" );
+                //ph_printf("roll down\n" );
                 mainw->state &= ~WSTATE_WIN_ROLLEDUP;
                 if(mainw->w_decor) mainw->w_decor->state &= ~WSTATE_WIN_ROLLEDUP;
                 goto redecorate;
             }
             else
             {
-                //printf("roll up\n" );
+                //ph_printf("roll up\n" );
                 mainw->state |= WSTATE_WIN_ROLLEDUP;
                 if(mainw->w_decor) mainw->w_decor->state |= WSTATE_WIN_ROLLEDUP;
                 if( mainw->w_decor )
@@ -113,7 +113,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 static int titleMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    //printf("titleMouseEventProcessor buttons %x, %d-%d", e->m.buttons, e->abs_x, e->abs_y);
+    //ph_printf("titleMouseEventProcessor buttons %x, %d-%d", e->m.buttons, e->abs_x, e->abs_y);
 
     if( e->m.buttons == 0 )
     {
@@ -151,7 +151,7 @@ static int titleMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 int w_titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    //printf("!! titleWindowEventProcessor e=%p, e.w=%p, w=%p\r", e, e->focus, w);
+    //ph_printf("!! titleWindowEventProcessor e=%p, e.w=%p, w=%p\r", e, e->focus, w);
 
     switch(e->type)
     {

@@ -12,6 +12,8 @@
 
 #if CONF_TRUETYPE
 
+#include <ph_malloc.h>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -211,7 +213,7 @@ static void w_tt_paint_char(window_handle_t win, const struct ttf_symbol *symb, 
 
             if (0 == c)
             {
-                //putchar('-');
+                //ph_putchar('-');
                 continue;
             }
 
@@ -260,7 +262,7 @@ void w_ttfont_draw_char(
 
     FT_Face ftFace = pe->face;;
 
-    const size_t strLen = strlen(str);
+    const size_t strLen = ph_strlen(str);
 
     struct ttf_symbol symbol;
 
@@ -314,7 +316,7 @@ void w_ttfont_draw_string(
                           const char *str, const rgba_t color,
                           int win_x, int win_y )
 {
-    size_t strLen = strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
+    size_t strLen = ph_strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
     w_ttfont_draw_string_ext( win, font,
                           str, strLen,
                           color,
@@ -413,7 +415,7 @@ void w_ttfont_draw_string_ext(
         symbols[i].posX -= left;
     }
 
-    //printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
+    //ph_printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
 
     //const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
@@ -872,8 +874,8 @@ static void  	do_ttf_destroy(void *arg)
     FT_Done_Face( cur->face );
     hal_mutex_unlock( &faces_mutex );
 
-    free((void *)cur->font_name);
-    free( arg );
+    ph_free((void *)cur->font_name);
+    ph_free( arg );
 }
 
 
@@ -883,7 +885,7 @@ static errno_t tt_lookup(pool_t *pool, void *el, font_handle_t handle, void *arg
     struct ttf_pool_el *req = arg;
     struct ttf_pool_el *cur = el;
 
-    if( (req->font_type == cur->font_type) && (req->font_size == cur->font_size) && (0 == strcmp( req->font_name, cur->font_name )) )
+    if( (req->font_type == cur->font_type) && (req->font_size == cur->font_size) && (0 == ph_strcmp( req->font_name, cur->font_name )) )
     {
         req->face = cur->face;
         req->fhandle = handle;
@@ -931,7 +933,7 @@ font_handle_t w_get_tt_font_file( const char *file_name, int size )
 static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
 {
 
-    struct ttf_pool_el *newel = calloc( sizeof(struct ttf_pool_el), 1 );
+    struct ttf_pool_el *newel = ph_calloc( sizeof(struct ttf_pool_el), 1 );
     if( 0 == newel )
     {
         lprintf("\nout of mem loading font %s\n", req->font_name );
@@ -939,11 +941,11 @@ static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
     }
 
     *newel = *req;
-    newel->font_name = strdup(req->font_name);
+    newel->font_name = ph_strdup(req->font_name);
     if( 0 == newel->font_name )
     {
         lprintf("\nout of mem strdup loading font %s\n", req->font_name );
-        free(newel);
+        ph_free(newel);
         return INVALID_POOL_HANDLE;
     }
 
@@ -952,8 +954,8 @@ static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
     if( newh == INVALID_POOL_HANDLE )
     {
         lprintf("\npool_create_el failed loading font %s\n", req->font_name );
-        free( (void *)newel->font_name );
-        free( newel );
+        ph_free( (void *)newel->font_name );
+        ph_free( newel );
     }
 
     return newh;
@@ -971,7 +973,7 @@ static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name )
    // tmp run in FS? user mode?
 
     char buf[1024];
-    snprintf( buf, sizeof(buf)-1, "P:/phantomuserland/plib/resources/ttfonts/opensans/%s", file_name );
+    ph_snprintf( buf, sizeof(buf)-1, "P:/phantomuserland/plib/resources/ttfonts/opensans/%s", file_name );
 
     hal_mutex_lock( &faces_mutex );
     int rc = FT_New_Face(ftLibrary, buf, 0, ftFace);
@@ -990,7 +992,7 @@ static int w_load_tt_from_mem( FT_Face *ftFace, void *mem_font, size_t mem_font_
 {
     FT_Open_Args args;
 
-    memset( &args, 0, sizeof(args) );
+    ph_memset( &args, 0, sizeof(args) );
 
     args.flags = FT_OPEN_MEMORY;
     args.memory_base = mem_font;
@@ -1015,18 +1017,18 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 {
     FT_Face ftFace;
 
-    //printf( "w_get_tt_font_mem '%s' %d\n", diag_font_name, font_size );
+    //ph_printf( "w_get_tt_font_mem '%s' %d\n", diag_font_name, font_size );
 
     int rc = w_load_tt_from_mem( &ftFace, mem_font, mem_font_size, diag_font_name );
     if( rc )
     {
-        printf( "w_get_tt_font_mem FAILED '%s' %d\n", diag_font_name, font_size );
+        ph_printf( "w_get_tt_font_mem FAILED '%s' %d\n", diag_font_name, font_size );
         return INVALID_POOL_HANDLE;
     }
 
     struct ttf_pool_el req;
 
-    memset( &req, 0, sizeof(req) );
+    ph_memset( &req, 0, sizeof(req) );
 
     req.font_name = diag_font_name;
     req.font_size = font_size;
@@ -1099,10 +1101,10 @@ static void dump_face( FT_Face ftFace )
     //    FT_FaceRec *fr = (FT_FaceRec *)ftFace;
     FT_Face fr = ftFace;
 
-    printf( "Face:\n" );
+    ph_printf( "Face:\n" );
 
-    printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
-    printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
+    ph_printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
+    ph_printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
 }*/
 
 

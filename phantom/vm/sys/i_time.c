@@ -154,7 +154,7 @@ void pvm_restart_time( pvm_object_t o )
     //da->connected = 0;
     //if( da->connected )
     {
-        printf("restarting TIME - unimpl!");
+        ph_printf("restarting TIME - unimpl!");
     }
 
 }

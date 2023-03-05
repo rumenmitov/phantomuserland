@@ -143,7 +143,7 @@ errno_t cn_stats_init( struct data_area_4_connection *c, struct data_area_4_thre
 
     c->blocking_syscall_worker = cn_stats_blocking_syscall_worker;
 
-    //printf("Init stats");
+    //ph_printf("Init stats");
     return 0;
 }
 

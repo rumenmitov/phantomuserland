@@ -23,10 +23,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
-#include <assert.h>
+// #include <stdio.h>
+#include <ph_malloc.h>
+#include <ph_string.h>
+#include <phantom_assert.h>
 
 #include <multiboot.h>
 
@@ -79,7 +79,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
         return ENOENT;
     }
 
-    unsigned char *code = (unsigned char *)malloc(fsize);
+    unsigned char *code = (unsigned char *)ph_malloc(fsize);
     if( code == 0 )
     {
         SHOW_ERROR( 0, "can't alloc %d", fsize );
@@ -91,7 +91,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     if( ret || (fsize != nread) )
     {
         SHOW_ERROR( 0, "Can't read code: ret = %d", ret );
-        free( code );
+        ph_free( code );
         return EIO;
     }
 
@@ -110,7 +110,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
 // Boot module classloader support
 // -----------------------------------------------------------------------
 
-
+#ifndef PHANTOM_GENODE
 
 static void *bulk_code;
 static unsigned int bulk_size = 0;
@@ -132,7 +132,7 @@ int bulk_read_f( int count, void *data )
     if( count > left )
         count = left;
 
-    memcpy( data, bulk_read_pos, count );
+    ph_memcpy( data, bulk_read_pos, count );
 
     bulk_read_pos += count;
 
@@ -165,4 +165,5 @@ void load_classes_module()
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 }
 
+#endif
 

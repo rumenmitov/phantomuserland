@@ -207,7 +207,7 @@ void glopTexImage2D(GLContext *c,GLParam *p)
 #if TGL_FEATURE_RENDER_BITS == 24
     im->pixmap=gl_malloc(width*height*3);
     if(im->pixmap) {
-        memcpy(im->pixmap,pixels1,width*height*3);
+        ph_memcpy(im->pixmap,pixels1,width*height*3);
     }
 #elif TGL_FEATURE_RENDER_BITS == 32
     im->pixmap=gl_malloc(width*height*4);

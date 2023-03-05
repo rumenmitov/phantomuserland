@@ -14,6 +14,8 @@
 #include <hal.h>
 #include <kernel/khash.h>
 
+#include <ph_malloc.h>
+#include <ph_io.h>
 
 #define VERIFY_TABLE 0
 
@@ -86,12 +88,12 @@ void *hash_init(unsigned int table_size, int next_ptr_offset,
 	struct hash_table *t;
 	unsigned int i;
 
-	t = (struct hash_table *)malloc(sizeof(struct hash_table));
+	t = (struct hash_table *)ph_malloc(sizeof(struct hash_table));
 	if(t == NULL) {
 		return NULL;
 	}
 
-	t->table = (struct hash_elem **)malloc(sizeof(void *) * table_size);
+	t->table = (struct hash_elem **)ph_malloc(sizeof(void *) * table_size);
 	for(i = 0; i<table_size; i++)
 		t->table[i] = NULL;
 	t->table_size = table_size;
@@ -117,8 +119,8 @@ int hash_uninit(void *_hash_table)
 	}
 #endif
 
-	free(t->table);
-	free(t);
+	ph_free(t->table);
+	ph_free(t);
 
 	return 0;
 }
@@ -213,7 +215,7 @@ struct hash_iterator *hash_open(void *_hash_table, struct hash_iterator *i)
 	struct hash_table *t = _hash_table;
 
 	if(i == NULL) {
-		i = (struct hash_iterator *)malloc(sizeof(struct hash_iterator));
+		i = (struct hash_iterator *)ph_malloc(sizeof(struct hash_iterator));
 		if(i == NULL)
 			return NULL;
 	}
@@ -227,7 +229,7 @@ void hash_close(void *_hash_table, struct hash_iterator *i, bool free_iterator)
 {
     (void) _hash_table;
     if(free_iterator)
-        free(i);
+        ph_free(i);
 }
 
 void hash_rewind(void *_hash_table, struct hash_iterator *i)
@@ -282,15 +284,15 @@ void hash_dump(void *_hash_table)
 	struct hash_table *t = _hash_table;
 	unsigned int i;
 
-	dprintf("hash table dump of table at %p\n", t);
-	dprintf("\tnext_ptr_offset %d\n", t->next_ptr_offset);
-	dprintf("\ttable_size %d\n", t->table_size);
-	dprintf("\tnum_elems %d\n", t->num_elems);
-	dprintf("\tflags 0x%x\n", t->flags);
-	dprintf("\tcompare %p hash %p\n", t->compare_func, t->hash_func);
-	dprintf("\ttable %p:\n", t->table);
+	ph_printf("hash table dump of table at %p\n", t);
+	ph_printf("\tnext_ptr_offset %d\n", t->next_ptr_offset);
+	ph_printf("\ttable_size %d\n", t->table_size);
+	ph_printf("\tnum_elems %d\n", t->num_elems);
+	ph_printf("\tflags 0x%x\n", t->flags);
+	ph_printf("\tcompare %p hash %p\n", t->compare_func, t->hash_func);
+	ph_printf("\ttable %p:\n", t->table);
 	for(i = 0; i < t->table_size; i++) {
-		dprintf("\t\t%p\n", t->table[i]);
+		ph_printf("\t\t%p\n", t->table[i]);
 	}
 }
 

@@ -1,4 +1,4 @@
-#include <stdio.h>
+// #include <stdio.h>
 
 // made to reverse Kolibri fonts right to left :)
 

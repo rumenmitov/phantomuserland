@@ -24,6 +24,8 @@
   /*                                                                       */
   /*************************************************************************/
 
+#include <ph_malloc.h>
+#include <ph_io.h>
 
 #include <ft2build.h>
 #include FT_CONFIG_CONFIG_H
@@ -32,8 +34,8 @@
 #include FT_ERRORS_H
 #include FT_TYPES_H
 
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 
 
   /*************************************************************************/
@@ -73,7 +75,7 @@
   {
     FT_UNUSED( memory );
 
-    return malloc( size );
+    return ph_malloc( size );
   }
 
 
@@ -106,7 +108,7 @@
     FT_UNUSED( memory );
     FT_UNUSED( cur_size );
 
-    return realloc( block, new_size );
+    return ph_realloc( block, new_size );
   }
 
 
@@ -129,7 +131,7 @@
   {
     FT_UNUSED( memory );
 
-    free( block );
+    ph_free( block );
   }
 
 
@@ -401,7 +403,7 @@
     FT_Memory  memory;
 
 
-    memory = (FT_Memory)malloc( sizeof ( *memory ) );
+    memory = (FT_Memory)ph_malloc( sizeof ( *memory ) );
     if ( memory )
     {
       memory->user    = 0;

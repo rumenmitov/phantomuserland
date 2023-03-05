@@ -21,8 +21,10 @@
 #include <kernel/config.h>
 #include <phantom_libc.h>
 #include <errno.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include "test.h"
+
+#include <ph_string.h>
 
 // includes needed for stuff we test come after
 
@@ -40,9 +42,9 @@ int do_test_misc(const char *test_parm)
 
         char buf[1024];
 
-        snprintf( buf, sizeof(buf), fmt, "s", 1, 'a', 50000000l );
+        ph_snprintf( buf, sizeof(buf), fmt, "s", 1, 'a', 50000000l );
 
-        test_check_false( strcmp( out, buf ) );
+        test_check_false( ph_strcmp( out, buf ) );
         
     }
 
