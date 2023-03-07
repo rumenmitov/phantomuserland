@@ -39,6 +39,8 @@ private:
     Signal_handler<Local_fault_handler> _handler;
     size_t _page_size;
 
+    const bool _debug = false;
+
     // Handler set by Phantom init routine
     int (*_pf_handler)(void *address, int write, int ip, struct trap_state *ts) = nullptr;
 
@@ -57,17 +59,19 @@ private:
 
     void _handle_fault()
     {
-        log("Reached fault handler");
+        if (_debug)
+            log("Reached fault handler");
 
         Region_map::State state = _region_map.state();
 
         _fault_cnt++;
 
-        log("region-map state is ",
-            state.type == Region_map::State::READ_FAULT ? "READ_FAULT" : state.type == Region_map::State::WRITE_FAULT ? "WRITE_FAULT"
-                                                                     : state.type == Region_map::State::EXEC_FAULT    ? "EXEC_FAULT"
-                                                                                                                      : "READY",
-            ", pf_addr=", Hex(state.addr, Hex::PREFIX));
+        if (_debug)
+            log("region-map state is ",
+                state.type == Region_map::State::READ_FAULT ? "READ_FAULT" : state.type == Region_map::State::WRITE_FAULT ? "WRITE_FAULT"
+                                                                         : state.type == Region_map::State::EXEC_FAULT    ? "EXEC_FAULT"
+                                                                                                                          : "READY",
+                ", pf_addr=", Hex(state.addr, Hex::PREFIX));
 
         struct trap_state ts_stub;
         ts_stub.state = 0;
@@ -85,7 +89,8 @@ private:
             test_pf_handler((void *)state.addr, state.type == state.WRITE_FAULT ? 1 : 0, -1, &ts_stub);
         }
 
-        log("returning from handle_fault");
+        if (_debug)
+            log("returning from handle_fault");
     }
 
 public:
@@ -99,7 +104,8 @@ public:
     {
         region_map.fault_handler(_handler);
 
-        log("fault handler: waiting for fault signal");
+        if (_debug)
+            log("fault handler: waiting for fault signal");
     }
 
     // Have to intialize it dynamically since Phantom registers page fault handler after intialization of object space
@@ -153,6 +159,7 @@ typedef Registered<Phys_region> Phys_region_handle;
 
 struct Phantom::Vmem_adapter
 {
+    const bool _debug = false;
 
     const addr_t OBJECT_SPACE_START = 0x80000000;
     const addr_t OBJECT_SPACE_SIZE = 0x40000000;
@@ -204,7 +211,8 @@ struct Phantom::Vmem_adapter
 
     void map_page(addr_t phys_addr, addr_t virt_addr, bool writeable)
     {
-        log("Mapping phys ", Hex(phys_addr), " to virt ", Hex(virt_addr));
+        if (_debug)
+            log("Mapping phys ", Hex(phys_addr), " to virt ", Hex(virt_addr));
 
         // Getting the region
         Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
@@ -243,7 +251,8 @@ struct Phantom::Vmem_adapter
                       Hex((addr_t)laddr), " expected ", Hex(virt_addr - OBJECT_SPACE_START));
             }
 
-            log("Map returned laddr=", Hex((addr_t)laddr));
+            if (_debug)
+                log("Map returned laddr=", Hex((addr_t)laddr));
         }
         else
         {
@@ -265,7 +274,8 @@ struct Phantom::Vmem_adapter
                       Hex((addr_t)laddr), " expected ", Hex(virt_addr));
             }
 
-            log("Map returned laddr=", Hex((addr_t)laddr));
+            if (_debug)
+                log("Map returned laddr=", Hex((addr_t)laddr));
         }
     }
 
@@ -274,7 +284,8 @@ struct Phantom::Vmem_adapter
         // Getting the region
         Phys_region_handle *region = get_pseudo_phys_region(phys_addr);
 
-        log("Mapping phys ", Hex(phys_addr), " to some virt ");
+        if (_debug)
+            log("Mapping phys ", Hex(phys_addr), " to some virt ");
 
         if (region == nullptr)
         {
@@ -300,7 +311,8 @@ struct Phantom::Vmem_adapter
             false,
             writeable);
 
-        log("Map returned laddr=", Hex((addr_t)laddr));
+        if (_debug)
+            log("Map returned laddr=", Hex((addr_t)laddr));
 
         return laddr;
     }
@@ -311,14 +323,16 @@ struct Phantom::Vmem_adapter
 
         if (virt_addr >= OBJECT_SPACE_START && virt_addr < OBJECT_SPACE_START + OBJECT_SPACE_SIZE)
         {
-            log("unmapping virt ", Hex(virt_addr), " obj_space_addr=", virt_addr - OBJECT_SPACE_START);
+            if (_debug)
+                log("unmapping virt ", Hex(virt_addr), " obj_space_addr=", virt_addr - OBJECT_SPACE_START);
 
             // TODO : Error handling
             _obj_space.detach(virt_addr - OBJECT_SPACE_START);
         }
         else
         {
-            log("unmapping virt ", Hex(virt_addr));
+            if (_debug)
+                log("unmapping virt ", Hex(virt_addr));
             _env.rm().detach(virt_addr);
         }
     }

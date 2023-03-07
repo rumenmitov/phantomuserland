@@ -18,6 +18,8 @@
 #include <ph_string.h>
 #include <ph_io.h>
 
+#include "genode_misc.h"
+
 static int seq_number = 0;
 static genode_disk_dev_t vdev;
 static char vdev_name[32] = "GenodeDisk0";
@@ -35,6 +37,32 @@ phantom_device_t *driver_genode_disk_probe()
     dev->drv_private = &vdev;
 
     return dev;
+}
+
+static errno_t genode_disk_asyncIo(struct phantom_disk_partition *p, pager_io_request *rq)
+{
+    _stub_print();
+    return 0;
+}
+static errno_t genode_disk_dequeue(struct phantom_disk_partition *p, pager_io_request *rq)
+{
+    _stub_print();
+    return 0;
+}
+static errno_t genode_disk_raise(struct phantom_disk_partition *p, pager_io_request *rq)
+{
+    _stub_print();
+    return 0;
+}
+static errno_t genode_disk_fence(struct phantom_disk_partition *p)
+{
+    _stub_print();
+    return 0;
+}
+static errno_t genode_disk_trim(struct phantom_disk_partition *p, pager_io_request *rq)
+{
+    _stub_print();
+    return 0;
 }
 
 static phantom_disk_partition_t *phantom_create_genode_partition_struct(long size, genode_disk_dev_t *vd)
@@ -56,10 +84,10 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
 
     ret->block_size = vd->block_size;
 
-    // ret->dequeue = vioDequeue;
-    // ret->raise = vioRaise;
-    // ret->fence = vioFence;
-    // ret->trim = vioTrim;
+    ret->dequeue = genode_disk_dequeue;
+    ret->raise = genode_disk_raise;
+    ret->fence = genode_disk_fence;
+    ret->trim = genode_disk_trim;
 
     // ph_strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );
     ph_strlcpy(ret->name, vd->name, PARTITION_NAME_LEN);
@@ -123,14 +151,14 @@ void driver_genode_disk_init()
 //     void *temp_mapping = NULL;
 
 //     SHOW_FLOW(3, "genode_asyncIO: [%c] pa=0x%x blockNo=0x%x nSect=%d size=0x%x len=%d len_in_pages=%d",
-//         rq->flag_pagein ? 'r' : 'w', 
-//         pa, 
-//         rq->blockNo, 
-//         rq->nSect, 
-//         block_size, 
-//         length_in_bytes, 
+//         rq->flag_pagein ? 'r' : 'w',
+//         pa,
+//         rq->blockNo,
+//         rq->nSect,
+//         block_size,
+//         length_in_bytes,
 //         length_in_pages);
-    
+
 //     if (length_in_bytes % block_size != 0){
 //         SHOW_ERROR(0, "nSect is not block aligned! (blockNo=%d nSect=%d)", blockNo, nSect);
 //     }
@@ -140,7 +168,6 @@ void driver_genode_disk_init()
 
 //     hal_alloc_vaddress(&temp_mapping, length_in_pages );
 //     hal_pages_control(pa, temp_mapping, length_in_pages, page_map, rq->flag_pagein ? page_rw : page_ro);
-
 
 //     // Now we can perform IO
 //     if (rq->flag_pageout)
@@ -152,9 +179,8 @@ void driver_genode_disk_init()
 //     hal_pages_control(0, temp_mapping, length_in_pages, page_unmap, page_rw);
 //     hal_free_vaddress(temp_mapping, length_in_pages);
 
-
 //     // XXX : pager_io_request requires some finishing operations
-//     //       But not sure what is required. One of the ideas is to use    
+//     //       But not sure what is required. One of the ideas is to use
 //     //       pager_io_request_done( rq );
 //     //       But it is almost not used anywhere
 //     // XXX : It is very controversial thing though. What will happen if we would like to check what operation it was?

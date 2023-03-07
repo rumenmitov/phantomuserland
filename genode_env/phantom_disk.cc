@@ -58,7 +58,7 @@ extern "C"
     {
         const int sector_size = 512;
 
-        Genode::log("!!! : received blockNo ", rq->blockNo);
+        // Genode::log("!!! : received blockNo ", rq->blockNo);
 
         // Getting data from rq
         u_int64_t blockNo = rq->blockNo;
@@ -76,7 +76,7 @@ extern "C"
         // Calculating size
         int length_in_bytes = nSect * sector_size;
         int length_in_blocks = length_in_bytes / part->block_size + ((length_in_bytes % part->block_size) ? 1 : 0);
-        Genode::log("!!! Calcs:", blockNo , ", ", length_in_bytes / part->block_size, " (", length_in_bytes % part->block_size, ")" );
+        // Genode::log("!!! Calcs:", blockNo , ", ", length_in_bytes / part->block_size, " (", length_in_bytes % part->block_size, ")" );
 
         // XXX : Seems to be not used
         rq->parts = nSect;

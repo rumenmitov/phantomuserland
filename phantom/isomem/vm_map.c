@@ -212,6 +212,9 @@ static void    page_fault( vm_page *p, int  is_writing );
 
 static vm_page *addr_to_vm_page(unsigned long addr, struct trap_state *ts)
 {
+    // ph_printf("addr_raw=%X\n", addr);
+    // ph_printf("start==%X\n", vm_map_start_of_virtual_address_space);
+    // ph_printf("limit=%X\n", (((unsigned long)vm_map_vm_page_count) * __MEM_PAGE));
     addr -= (addr_t)vm_map_start_of_virtual_address_space;
 
 
@@ -506,7 +509,15 @@ vm_map_init(unsigned long page_count)
 #endif
 
 #ifdef PHANTOM_GENODE
-    genode_register_page_fault_handler(vm_map_page_fault_handler);
+
+void
+genode_pf_handler_wrapper( void *address, int  write, int ip, struct trap_state *ts )
+{
+    char* orig_addr = ((char*)address) + 0x80000000;
+    vm_map_page_fault_handler((void*)orig_addr, write, ip, ts);
+}
+
+    genode_register_page_fault_handler(genode_pf_handler_wrapper);
 #endif
 
 #ifndef HAVE_PGFAULT_HANDLER

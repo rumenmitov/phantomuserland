@@ -27,7 +27,7 @@
 #include <vm/spin.h>
 //#include <spinlock.h>
 
-#define debug_print 0
+#define debug_print 1
 
 
 // TODO very long spin lock

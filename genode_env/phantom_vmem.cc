@@ -123,6 +123,7 @@ extern "C"
         // Phantom::main_obj->_vme
         if (mapped == page_map)
         {
+            Phantom::main_obj->_vmem_adapter.unmap_page((addr_t)page_start_addr);
             Phantom::main_obj->_vmem_adapter.map_page(p, (addr_t)page_start_addr, writeable);
         }
         else if (mapped == page_unmap)
@@ -186,7 +187,7 @@ extern "C"
 
             *result = (physaddr_t)temp_res;
 
-            Genode::log("Phys alloc: numpages= : ", npages, " addr=", Hex((physaddr_t)temp_res));
+            // Genode::log("Phys alloc: numpages= : ", npages, " addr=", Hex((physaddr_t)temp_res));
 
             return 0;
         }
@@ -259,35 +260,35 @@ extern "C"
         // if (hal_alloc_vaddress(&addr, 1))
         //     panic("out of vaddresses");
 
-        #if 1 // panics, need test
-                if (!PAGE_ALIGNED(to))
-                {
-                    // Process partial page
+#if 1 // panics, need test
+        if (!PAGE_ALIGNED(to))
+        {
+            // Process partial page
 
-                    physaddr_t page = PREV_PAGE_ALIGN(to);
-                    int shift = to - page;
-                    size_t part = PAGE_SIZE - shift;
+            physaddr_t page = PREV_PAGE_ALIGN(to);
+            int shift = to - page;
+            size_t part = PAGE_SIZE - shift;
 
-                    if (part > size)
-                        part = size;
+            if (part > size)
+                part = size;
 
-                    assert(shift < PAGE_SIZE);
-                    assert(shift > 0);
+            assert(shift < PAGE_SIZE);
+            assert(shift > 0);
 
-                    // hal_page_control(page, addr, page_map, page_rw);
-                    addr = main_obj->_vmem_adapter.map_somewhere(page, true, 1);
+            // hal_page_control(page, addr, page_map, page_rw);
+            addr = main_obj->_vmem_adapter.map_somewhere(page, true, 1);
 
-                    ph_memcpy(addr + shift, from, part);
+            ph_memcpy(addr + shift, from, part);
 
-                    // hal_page_control(page, addr, page_unmap, page_noaccess);
-                    main_obj->_vmem_adapter.unmap_page((addr_t)addr);
-                    addr = nullptr;
+            // hal_page_control(page, addr, page_unmap, page_noaccess);
+            main_obj->_vmem_adapter.unmap_page((addr_t)addr);
+            addr = nullptr;
 
-                    to += part;
-                    from += part;
-                    size -= part;
-                }
-        #endif
+            to += part;
+            from += part;
+            size -= part;
+        }
+#endif
 
         if (size > 0)
             assert(PAGE_ALIGNED(to));
@@ -301,7 +302,7 @@ extern "C"
             addr = main_obj->_vmem_adapter.map_somewhere((addr_t)to, true, 1);
 
             ph_memcpy(addr, from, stepSize);
-            Genode::log("V2P: ", Hex((addr_t)addr), " ", Hex((addr_t)from), " ", stepSize);
+            // Genode::log("V2P: ", Hex((addr_t)addr), " ", Hex((addr_t)from), " ", stepSize);
 
             // hal_page_control(to, addr, page_unmap, page_noaccess);
             main_obj->_vmem_adapter.unmap_page((addr_t)addr);
