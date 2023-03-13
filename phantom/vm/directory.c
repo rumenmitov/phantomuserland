@@ -117,6 +117,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     if( pvm_is_null( okey ) )
     {
     not_found:
+        if(debug_print) lprintf("hdir not found '%.*s' %d %d cap=%d\n", i_key_len, ikey, keypos, kasize, dir->capacity );
         UNLOCK_DIR(dir);
         return ENOENT;
     }
@@ -393,6 +394,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
     dir->keys = pvm_create_array_object();
     dir->values = pvm_create_array_object();
     dir->flags = ph_calloc( sizeof(u_int8_t), initial_size );
+    ph_memset(dir->flags, 0x0, sizeof(u_int8_t) * initial_size);
 
     //hexdump( dir->flags, dir->capacity, "hdir flags", 0 );
 
