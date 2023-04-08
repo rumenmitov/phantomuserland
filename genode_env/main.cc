@@ -22,6 +22,12 @@
 #include "tests_hal.h"
 #include "tests_adapters.h"
 
+#include <base/quota_guard.h>
+
+namespace Genode {
+	bool phantom_quota_go = false;
+}
+
 Phantom::Main *Phantom::main_obj = nullptr;
 
 void setup_adapters(Env &env)
@@ -116,7 +122,25 @@ void Component::construct(Env &env)
 	// Libc::with_libc([&]()
 	// 				{
 		log("--- Phantom init ---");
+		log("short size: ", sizeof(short));
+		log("int size: ", sizeof(int));
+		log("long size: ", sizeof(long));
+		log("long long size: ", sizeof(long long));
+
 		env.exec_static_constructors();
+
+		
+		// Ram_dataspace_capability test_ds = env.ram().alloc(20 * 1024 * 4096);
+    	// Genode::Region_map_client _obj_space{_rm.create(OBJECT_SPACE_SIZE)};
+		
+		// for (unsigned long i=0;i<2000;i++){
+		// 	Genode::log("Attaching (root) ", i);
+		// 	// env.rm().attach_at(test_ds, 0x8000000 + i*4096, 4096, i*4096);
+		// 	env.rm().attach(test_ds, 4096);
+		// }
+
+
+
 
 		log("Waiting for continue");
 		// wait_for_continue();
@@ -138,6 +162,28 @@ void Component::construct(Env &env)
 			}
 		}
 
+		log("--- TESTING LOTS OF ATTACH ---");
+
+		Dataspace_capability test_ds_2 = env.ram().alloc(20 * 1024 * 4096);
+		for (unsigned long i=0;i<300;i++){
+			Genode::log("Attaching ", i);
+            if (i == 244){
+                Genode::log("Should fail here");
+            }
+			// main_obj->_vmem _obj_space.attach_at(_ram_ds, i*4096, 4096, i*4096);
+			// if (i < 50) {
+			// main_obj->_vmem_adapter._obj_space.attach_at(
+			// 	main_obj->_vmem_adapter._ram_ds, i*4096, 4096, i*4096);
+			// } else {
+			main_obj->_vmem_adapter._obj_space.attach_at(
+				test_ds_2, i*4096, 4096, i*4096);
+
+			// }
+			// env.rm().attach(test_ds, 4096);
+		}
+
+
+
 		log("--- Testing adapters ---");
 		test_adapters();
 
@@ -153,6 +199,9 @@ void Component::construct(Env &env)
 		int p_argc = 1;
 		char **p_argv = nullptr;
 		char **p_envp = nullptr;
+
+		Genode::phantom_quota_go = true;
+
 		phantom_main_entry_point(p_argc, p_argv, p_envp); 
 	// });
 }

@@ -84,7 +84,7 @@ static int SNAP_DEBUG = 0;
 static int SNAP_STEPS_DEBUG = 1;
 static int SNAP_LISTS_DEBUG = 0;
 static int FAULT_DEBUG = 0;
-static int PAGING_DEBUG = 0;
+static int PAGING_DEBUG = 1;
 static int COW_DEBUG = 0;
 static int PAGEOUT_DEBUG = 0;
 
@@ -402,6 +402,16 @@ INIT_ME(0,vm_map_pre_init,0)
 
 
 
+#ifdef PHANTOM_GENODE
+// XXX : not sure why int is returned
+static int
+genode_pf_handler_wrapper( void *address, int  write, int ip, struct trap_state *ts )
+{
+    char* orig_addr = ((char*)address) + 0x80000000;
+    vm_map_page_fault_handler((void*)orig_addr, write, ip, ts);
+    return 0;
+}
+#endif
 
 void
 vm_map_init(unsigned long page_count)
@@ -495,7 +505,7 @@ vm_map_init(unsigned long page_count)
 
 #if 1
     hal_start_kernel_thread(vm_map_deferred_disk_alloc_thread);
-    hal_start_kernel_thread(vm_map_lazy_pageout_thread);
+    // hal_start_kernel_thread(vm_map_lazy_pageout_thread);
     hal_start_kernel_thread(vm_map_snapshot_thread);
 #endif
 
@@ -510,13 +520,6 @@ vm_map_init(unsigned long page_count)
 
 #ifdef PHANTOM_GENODE
 
-void
-genode_pf_handler_wrapper( void *address, int  write, int ip, struct trap_state *ts )
-{
-    char* orig_addr = ((char*)address) + 0x80000000;
-    vm_map_page_fault_handler((void*)orig_addr, write, ip, ts);
-}
-
     genode_register_page_fault_handler(genode_pf_handler_wrapper);
 #endif
 
@@ -524,6 +527,31 @@ genode_pf_handler_wrapper( void *address, int  write, int ip, struct trap_state 
 #  warning no page fault trap handler set
 #endif
 
+    // TODO : Move to a separate test
+    // Calling page faults on first 200 pages
+    hal_printf("-- Initializing first 200 pages (test)\n");
+
+    for (unsigned long i = 0 ; i < 20000 ; i++){
+        hal_printf("-- Calling pf handler %d (test)\n", i);
+
+        if (i==243){
+            hal_printf("Supposed to fail\n");
+        }
+
+        struct trap_state ts_stub;
+        ts_stub.state = 0;
+        genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
+        
+        hal_printf("-- Checking access (test)\n");
+        for (unsigned long j = 0; j <= i; j++){
+            char* test_addr = (char*)vm_map_start_of_virtual_address_space + j * PAGE_SIZE;
+            // hal_printf("testing page %p\n", test_addr);
+            *test_addr = 0x0;
+        }
+    }
+
+
+    
 
 }
 
@@ -1162,8 +1190,10 @@ page_fault_write( vm_page *p )
         // Just clear page here as it is new
         page_clear_engine_clear_page(p->phys_addr);
         hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
+        if(FAULT_DEBUG) hal_printf("!!!! : 1\n");
         p->flag_phys_dirty = 1;
         put_on_dirty_q(p);
+        if(FAULT_DEBUG) hal_printf("!!!! : 2\n");
         return;
     }
 

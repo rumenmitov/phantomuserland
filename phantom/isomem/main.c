@@ -468,6 +468,16 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 #endif
 
 
+    // SHOW_FLOW0( 2, "Initializing first 200 pages with write faults");
+    // // for (int i=0; i< 200;i++){
+    // //     char* obj_addr = hal_object_space_address() + i * PAGE_SIZE;
+    // //     *obj_addr = 0x0;
+    // // }
+    // for (int i=0; i< 200;i++){
+    //     char* obj_addr = hal_object_space_address() + i * PAGE_SIZE;
+        
+    //     *obj_addr = 0x0;
+    // }
 
 
     SHOW_FLOW0( 2, "Will init phantom root... ");
