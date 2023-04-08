@@ -39,7 +39,7 @@ private:
     Signal_handler<Local_fault_handler> _handler;
     size_t _page_size;
 
-    const bool _debug = true;
+    const bool _debug = false;
 
     // Handler set by Phantom init routine
     int (*_pf_handler)(void *address, int write, int ip, struct trap_state *ts) = nullptr;
@@ -188,7 +188,7 @@ struct Phantom::Vmem_adapter
     unsigned long long total_allocated = 0;
 
     // Allocated phys region
-    Ram_dataspace_capability _ram_ds{_env.ram().alloc(4096 * 1024 * 16 )};
+    Ram_dataspace_capability _ram_ds{_env.ram().alloc(4096 * 1024 * 16)};
 
     Vmem_adapter(Env &env) : _env(env)
     {
@@ -210,9 +210,6 @@ struct Phantom::Vmem_adapter
         // XXX : Commented out since Genode on Linux doesn't give a real capability to dataspace
         // log(" region obj.space        ",
         //     Hex_range<addr_t>(addr_obj, rm_obj_client.size()));
-
-
-
     }
 
     ~Vmem_adapter() {}
@@ -237,7 +234,8 @@ struct Phantom::Vmem_adapter
 
         addr_t offset = phys_addr;
 
-        if (offset % PAGE_SIZE > 0){
+        if (offset % PAGE_SIZE > 0)
+        {
             Genode::warning("Phys addr (offset) not page alligned");
         }
 
@@ -259,14 +257,33 @@ struct Phantom::Vmem_adapter
             //     false,
             //     writeable);
 
-            Region_map::Local_addr laddr = _obj_space.attach(
-                _ram_ds,
-                PAGE_SIZE,
-                offset,
-                true,
-                virt_addr - OBJECT_SPACE_START,
-                false,
-                writeable);
+            // _obj_spacea
+            Region_map::Local_addr laddr = 0x0;
+            Genode::retry<Genode::Out_of_ram>(
+                [&]()
+                {
+                    Genode::retry<Genode::Out_of_caps>(
+                        [&]()
+                        { 
+                    // Genode::log("attach attempt");
+                    laddr = _obj_space.attach(
+                      _ram_ds,
+                      PAGE_SIZE,
+                      offset,
+                      true,
+                      virt_addr - OBJECT_SPACE_START,
+                      false,
+                      writeable); },
+                        [&]()
+                        {
+                            _rm.upgrade_caps(10);
+                        },
+                        16U);
+                },
+                [&]()
+                {
+                    _rm.upgrade_ram(8 * 1024);
+                });
 
             if ((addr_t)laddr != virt_addr - OBJECT_SPACE_START)
             {
@@ -390,7 +407,7 @@ struct Phantom::Vmem_adapter
         //     _env.ram(),
         //     _pseudo_phys_addr_allocator,
         //     num_pages);
-        
+
         // total_allocated++;
 
         // Genode::log("Pseudo-phys total=", total_allocated);

@@ -529,26 +529,26 @@ vm_map_init(unsigned long page_count)
 
     // TODO : Move to a separate test
     // Calling page faults on first 200 pages
-    hal_printf("-- Initializing first 200 pages (test)\n");
+    // hal_printf("-- Initializing first 200 pages (test)\n");
 
-    for (unsigned long i = 0 ; i < 20000 ; i++){
-        hal_printf("-- Calling pf handler %d (test)\n", i);
+    // for (unsigned long i = 0 ; i < 200 ; i++){
+    //     hal_printf("-- Calling pf handler %d (test)\n", i);
 
-        if (i==243){
-            hal_printf("Supposed to fail\n");
-        }
+    //     if (i==243){
+    //         hal_printf("Supposed to fail\n");
+    //     }
 
-        struct trap_state ts_stub;
-        ts_stub.state = 0;
-        genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
+    //     struct trap_state ts_stub;
+    //     ts_stub.state = 0;
+    //     genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
         
-        hal_printf("-- Checking access (test)\n");
-        for (unsigned long j = 0; j <= i; j++){
-            char* test_addr = (char*)vm_map_start_of_virtual_address_space + j * PAGE_SIZE;
-            // hal_printf("testing page %p\n", test_addr);
-            *test_addr = 0x0;
-        }
-    }
+    //     hal_printf("-- Checking access (test)\n");
+    //     for (unsigned long j = 0; j <= i; j++){
+    //         char* test_addr = (char*)vm_map_start_of_virtual_address_space + j * PAGE_SIZE;
+    //         // hal_printf("testing page %p\n", test_addr);
+    //         *test_addr = 0x0;
+    //     }
+    // }
 
 
     

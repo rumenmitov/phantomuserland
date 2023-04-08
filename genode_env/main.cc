@@ -162,25 +162,25 @@ void Component::construct(Env &env)
 			}
 		}
 
-		log("--- TESTING LOTS OF ATTACH ---");
+		// log("--- TESTING LOTS OF ATTACH ---");
 
-		Dataspace_capability test_ds_2 = env.ram().alloc(20 * 1024 * 4096);
-		for (unsigned long i=0;i<300;i++){
-			Genode::log("Attaching ", i);
-            if (i == 244){
-                Genode::log("Should fail here");
-            }
-			// main_obj->_vmem _obj_space.attach_at(_ram_ds, i*4096, 4096, i*4096);
-			// if (i < 50) {
-			// main_obj->_vmem_adapter._obj_space.attach_at(
-			// 	main_obj->_vmem_adapter._ram_ds, i*4096, 4096, i*4096);
-			// } else {
-			main_obj->_vmem_adapter._obj_space.attach_at(
-				test_ds_2, i*4096, 4096, i*4096);
+		// Dataspace_capability test_ds_2 = env.ram().alloc(20 * 1024 * 4096);
+		// for (unsigned long i=0;i<300;i++){
+		// 	Genode::log("Attaching ", i);
+        //     if (i == 244){
+        //         Genode::log("Should fail here");
+        //     }
+		// 	// main_obj->_vmem _obj_space.attach_at(_ram_ds, i*4096, 4096, i*4096);
+		// 	// if (i < 50) {
+		// 	// main_obj->_vmem_adapter._obj_space.attach_at(
+		// 	// 	main_obj->_vmem_adapter._ram_ds, i*4096, 4096, i*4096);
+		// 	// } else {
+		// 	main_obj->_vmem_adapter._obj_space.attach_at(
+		// 		test_ds_2, i*4096, 4096, i*4096);
 
-			// }
-			// env.rm().attach(test_ds, 4096);
-		}
+		// 	// }
+		// 	// env.rm().attach(test_ds, 4096);
+		// }
 
 
 
