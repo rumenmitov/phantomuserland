@@ -6,7 +6,7 @@
 #include "pager.h"
 #include <hal.h>
 
-static int _DEBUG = 0;
+static int _DEBUG = 1;
 
 //---------------------------------------------------------------------------
 
@@ -97,20 +97,20 @@ void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magi
 {
     errno_t rc;
 
-    if(_DEBUG) hal_printf("pagelist init... ");
+    if(_DEBUG) hal_printf("pagelist init... \n");
     me->root_page = root_page;
     me->magic = magic;
 
-    if(_DEBUG) hal_printf("disk_page_cache_init... ");
+    if(_DEBUG) hal_printf("disk_page_cache_init... \n");
     disk_page_cache_init(&me->curr_p);
-    if(_DEBUG) hal_printf("disk_page_cache_init OK... ");
+    if(_DEBUG) hal_printf("disk_page_cache_init OK... \n");
 
     //if( _init ) init();
     if(_init)
     {
         disk_page_io            head_p;
 
-        if(_DEBUG) hal_printf("pagelist: create empty... ");
+        if(_DEBUG) hal_printf("pagelist: create empty... \n");
         disk_page_io_init(&head_p);
 
         struct phantom_disk_blocklist* head = (struct phantom_disk_blocklist *)disk_page_io_data(&head_p);
@@ -123,15 +123,15 @@ void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magi
         // to maker sure compiler will barf if field will be renamed
         head->head._reserved = 0;
 
-        if(_DEBUG) hal_printf("pagelist saving head... ");
+        if(_DEBUG) hal_printf("pagelist saving head... \n");
         rc = disk_page_io_save_sync(&head_p,root_page);
         if(rc) panic("IO error in pagelist_init");
-        if(_DEBUG) hal_printf("pagelist releasing io... ");
+        if(_DEBUG) hal_printf("pagelist releasing io... \n");
         disk_page_io_release(&head_p);
-        if(_DEBUG) hal_printf("pagelist create done... ");
+        if(_DEBUG) hal_printf("pagelist create done... \n");
     }
 
-    if(_DEBUG) hal_printf("pagelist load head... ");
+    if(_DEBUG) hal_printf("pagelist load head... \n");
     disk_page_cache_seek_async( &me->curr_p, me->root_page ); //load_head();
     me->curr_displ = 0;
 

@@ -51,7 +51,7 @@ static errno_t genode_disk_dequeue(struct phantom_disk_partition *p, pager_io_re
 }
 static errno_t genode_disk_raise(struct phantom_disk_partition *p, pager_io_request *rq)
 {
-    _stub_print();
+    // _stub_print();
     return 0;
 }
 static errno_t genode_disk_fence(struct phantom_disk_partition *p)

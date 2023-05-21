@@ -111,7 +111,7 @@ hal_init_object_vmem(void *start_of_virtual_address_space)
 int
 hal_addr_is_in_object_vmem( void *test )
 {
-    ph_printf("!!! : %p <= %p < %p\n", ((addr_t)hal.object_vspace), test, ((addr_t)hal.object_vspace)+hal.object_vsize);
+    // ph_printf("!!! : %p <= %p < %p\n", ((addr_t)hal.object_vspace), test, ((addr_t)hal.object_vspace)+hal.object_vsize);
     return ((addr_t)test) >= ((addr_t)hal.object_vspace) && ((addr_t)test) < ((addr_t)hal.object_vspace)+hal.object_vsize;
 }
 

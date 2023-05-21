@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 12
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -133,7 +133,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     rq.sleep_tid = GET_CURRENT_THREAD()->tid;
 
     SHOW_FLOW0( 3, "start io" );
-    hal_printf("!!! blockNo : %d\n", rq.blockNo);
+    // hal_printf("!!! blockNo : %d\n", rq.blockNo);
     if( (ret = p->asyncIo( p, &rq )) )
     {
         SHOW_FLOW0( 3, "failed asyncIo" );

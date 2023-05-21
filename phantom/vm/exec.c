@@ -1889,6 +1889,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 LISTI("summon by name");
                 pvm_object_t name = pvm_code_get_string(&(da->code));
                 pvm_object_t cl = pvm_exec_lookup_class_by_name( name );
+                // ph_printf("summon class '"); pvm_object_print(name);
                 // TODO: Need throw here?
                 if( pvm_is_null( cl ) ) 
                 {
