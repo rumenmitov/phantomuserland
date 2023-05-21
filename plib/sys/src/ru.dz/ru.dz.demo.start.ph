@@ -23,7 +23,7 @@ attribute const * ->!;
 class start
 {
         var wv : .ru.dz.demo.weather;
-        var cv : .ru.dz.demo.chart;
+        // var cv : .ru.dz.demo.chart;
 
     void run(var console : .internal.io.tty)
     {
