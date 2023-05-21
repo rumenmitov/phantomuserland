@@ -123,8 +123,11 @@ extern "C"
         // Phantom::main_obj->_vme
         if (mapped == page_map)
         {
+            // Genode::log("Remapping addr, step 1 ", page_start_addr);
             Phantom::main_obj->_vmem_adapter.unmap_page((addr_t)page_start_addr);
+            // Genode::log("Remapping addr, step 2 ", page_start_addr);
             Phantom::main_obj->_vmem_adapter.map_page(p, (addr_t)page_start_addr, writeable);
+            // Genode::log("Remapped addr ", page_start_addr);
         }
         else if (mapped == page_unmap)
         {
@@ -357,7 +360,7 @@ extern "C"
         // if (hal_alloc_vaddress(&addr, 1))
         //     panic("out of vaddresses");
         // hal_page_control(to, addr, page_map, page_rw);
-        addr = main_obj->_vmem_adapter.map_somewhere((addr_t)from, true, 1);
+        addr = main_obj->_vmem_adapter.map_somewhere((addr_t)to, true, 1);
 
         ph_memcpy(addr, from, hal_mem_pagesize());
 
