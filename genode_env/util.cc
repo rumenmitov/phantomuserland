@@ -176,6 +176,7 @@ extern "C"
 
         va_start(ap, fmt);
         ph_vprintf(fmt, ap);
+        ph_printf("\n");
         va_end(ap);
     }
 
