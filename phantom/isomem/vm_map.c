@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -60,6 +60,10 @@
 
 #include <machdep.h>
 
+
+// header used only for testing
+#include "snap_internal.h"
+
 //#include <kernel/ia32/cpu.h>
 //#include <kernel/ia32/mmx.h>
 // #include <kernel/trap.h>
@@ -80,11 +84,11 @@ static void signal_snap_done_passed( void );
 
 
 static int DEBUG_MARK = 0;
-static int SNAP_DEBUG = 0;
+static int SNAP_DEBUG = 1;
 static int SNAP_STEPS_DEBUG = 1;
 static int SNAP_LISTS_DEBUG = 0;
 static int FAULT_DEBUG = 0;
-static int PAGING_DEBUG = 1;
+static int PAGING_DEBUG = 0;
 static int COW_DEBUG = 0;
 static int PAGEOUT_DEBUG = 0;
 
@@ -404,7 +408,7 @@ INIT_ME(0,vm_map_pre_init,0)
 
 #ifdef PHANTOM_GENODE
 // XXX : not sure why int is returned
-static int
+int
 genode_pf_handler_wrapper( void *address, int  write, int ip, struct trap_state *ts )
 {
     char* orig_addr = ((char*)address) + 0x80000000;
@@ -525,33 +529,7 @@ vm_map_init(unsigned long page_count)
 
 #ifndef HAVE_PGFAULT_HANDLER
 #  warning no page fault trap handler set
-#endif
-
-    // TODO : Move to a separate test
-    // Calling page faults on first 200 pages
-    // hal_printf("-- Initializing first 200 pages (test)\n");
-
-    // for (unsigned long i = 0 ; i < 200 ; i++){
-    //     hal_printf("-- Calling pf handler %d (test)\n", i);
-
-    //     if (i==243){
-    //         hal_printf("Supposed to fail\n");
-    //     }
-
-    //     struct trap_state ts_stub;
-    //     ts_stub.state = 0;
-    //     genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
-        
-    //     hal_printf("-- Checking access (test)\n");
-    //     for (unsigned long j = 0; j <= i; j++){
-    //         char* test_addr = (char*)vm_map_start_of_virtual_address_space + j * PAGE_SIZE;
-    //         // hal_printf("testing page %p\n", test_addr);
-    //         *test_addr = 0x0;
-    //     }
-    // }
-
-
-    
+#endif    
 
 }
 
@@ -759,6 +737,8 @@ vm_page_req_pageout(vm_page *me)
 
     remove_from_dirty_q(me);
     page_touch_history(me);
+    // Unlocks since it is under the lock already by vm_map_do_for_all
+    // XXX : Do we need to unlock here at all?
     hal_mutex_unlock(&me->lock);
     if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("really req pageout\n" );
     pager_enqueue_for_pageout(&me->pager_io);
@@ -896,6 +876,10 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     // start pageout
     if(SNAP_DEBUG) hal_printf("req pageout fast");
     p->pager_io.disk_page = p->make_page;
+
+    // #ifdef PHANTOM_GENODE
+    // hal_page_control(p->phys_addr, p->virt_addr, page_unmap, page_rw );
+    // #endif
 
     hal_page_control(p->phys_addr, p->virt_addr, page_map, page_rw );
     p->flag_phys_protect = 0;
@@ -1333,6 +1317,9 @@ static void mark_for_snap(vm_page *p)
 
     if(DEBUG_MARK) hal_printf("set to ro\n");
     // ok, page is mapped, writeable: the real case.
+    #ifdef PHANTOM_GENODE
+    hal_page_control( p->phys_addr, p->virt_addr, page_unmap, page_ro );
+    #endif
     hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
     p->flag_phys_protect = 1;
 }
@@ -1429,8 +1416,9 @@ static void save_snap(vm_page *p)
     assert(p->flag_have_make);
 
     hal_mutex_unlock(&p->lock);
+    if(SNAP_LISTS_DEBUG) hal_printf("pg0 %d, ", p->make_page);
     pagelist_write_seq( snap_saver, p->make_page);
-    if(SNAP_LISTS_DEBUG) hal_printf("pg %d, ", p->make_page);
+    if(SNAP_LISTS_DEBUG) hal_printf("pg1 %d, ", p->make_page);
     hal_mutex_lock(&p->lock);
 
     page_touch_history(p);
@@ -1518,7 +1506,8 @@ void do_snapshot(void)
 
     if(enabled) hal_sti();
 
-    phantom_snapper_reenable_threads();
+    // TODO : Uncomment! It should be done here
+    // phantom_snapper_reenable_threads();
 #if USE_SNAP_WAIT
     signal_snap_snap_passed(); // or before enabling threads?
 #endif
@@ -1559,19 +1548,24 @@ void do_snapshot(void)
     if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
 
 
-    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist...");
+    if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 0...");
     //if(SNAP_DEBUG) getchar();
 
     {
         pagelist saver;
         pagelist_init( &saver, new_snap_head, 1, DISK_STRUCT_MAGIC_SNAP_LIST );
 
+        if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 1...");
         pagelist_clear(&saver);
+        if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 2...");
         snap_saver = &saver;
         vm_map_for_all( save_snap );
+        if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 3...");
         snap_saver = 0;
         pagelist_flush(&saver);
+        if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 4...");
         pagelist_finish(&saver);
+        if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 5 (fin)...");
     }
 
     if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: waiting for all pages to be flushed...");
@@ -1616,6 +1610,7 @@ void do_snapshot(void)
     ph_syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
+    phantom_snapper_reenable_threads();
 
 #if USE_SNAP_WAIT
     signal_snap_done_passed();
@@ -1730,7 +1725,7 @@ static void vm_map_lazy_pageout_thread(void)
     }
 }
 static int request_snap_flag = 0;
-static int seconds_between_snaps = 100;
+static int seconds_between_snaps = 10;
 
 static void vm_map_snapshot_thread(void)
 {
@@ -1739,6 +1734,9 @@ static void vm_map_snapshot_thread(void)
 
     while(1)
     {
+        SHOW_FLOW0( 1, "Snapshot loop");
+        SHOW_FLOW(0, "%d %d %d", stop_lazy_pageout_thread, vm_regular_snaps_enabled, request_snap_flag);
+        
         if( stop_lazy_pageout_thread )
         {
             do_snapshot();
@@ -1759,11 +1757,15 @@ static void vm_map_snapshot_thread(void)
         int i = 0;
         while( (!request_snap_flag) && (i++ < seconds_between_snaps) )
         {
+            SHOW_FLOW(0, "waiting before snap %d %d", request_snap_flag, seconds_between_snaps);
+            // TODO : Check if it hangs here
             hal_sleep_msec( 1000 );
         }
 
-        if( vm_regular_snaps_enabled || request_snap_flag )
+        if( vm_regular_snaps_enabled || request_snap_flag ){
+            SHOW_FLOW0(0, "about ot snap");
             do_snapshot();
+        }
 
         request_snap_flag = 0;
 
@@ -1904,12 +1906,15 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
     {
         ph_memcpy(((void*)&hdr) + (page_offset - current), data,
                 sizeof(hdr) - (page_offset - current));
+        // SHOW_FLOW(0, "verifying object (case 0) at %p", (void*)(current));
         current += vm_verify_object(&hdr);
     }
     while (current < sz && current - page_offset < PAGE_SIZE)
     {
-        if (current + sizeof(hdr) - page_offset <= PAGE_SIZE)
+        if (current + sizeof(hdr) - page_offset <= PAGE_SIZE){
+            // SHOW_FLOW(0, "verifying object (case 1) at %p", (void*)(current));
             current += vm_verify_object(data + (current - page_offset));
+        }
         else
         {
             ph_memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
@@ -2010,6 +2015,7 @@ static void vm_verify_snap(disk_page_no_t head)
                 return;
             }
 
+            // SHOW_FLOW(0, "verifying page %p, current=%p", (void*)page_offset, (void*)current);
             current = vm_verify_page(buf, page_offset, current, hal.object_vsize);
 #else
             page_io.req.disk_page = block;
