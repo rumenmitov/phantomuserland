@@ -34,6 +34,8 @@ namespace Phantom
 class Phantom::Disk_backend
 {
 protected:
+    bool _debug = false;
+
     Genode::Env &_env;
     Genode::Heap &_heap;
     Genode::Entrypoint _ep{_env, 2*1024*sizeof(long) , "disk_ep", Genode::Affinity::Location()};
@@ -55,7 +57,8 @@ protected:
 
     void _handle_block_io()
     {
-        Genode::log("Handling block io");
+        if (_debug)
+            Genode::log("Handling block io");
         // _triggered++;
         _block.update_jobs(*this);
     }
@@ -109,7 +112,8 @@ public:
      */
     void produce_write_content(DJob &job, Block::seek_off_t offset, char *dst, size_t length)
     {
-        Genode::log("Produce content req=", job._req);
+        if (_debug)
+            Genode::log("Produce content req=", job._req);
         // Producing content to write on the disk
         transferData(job._req->phys_page, (void *)dst, length, false);
     }
@@ -120,7 +124,8 @@ public:
     void consume_read_result(DJob &job, Block::seek_off_t offset,
                              char const *src, size_t length)
     {
-        Genode::log("Consuming result req=", job._req);
+        if (_debug)
+            Genode::log("Consuming result req=", job._req);
         // Consuming content read from the disk
         transferData(job._req->phys_page, (void *)src, length, true);
     }
@@ -130,7 +135,19 @@ public:
      */
     void completed(DJob &job, bool success)
     {
-        Genode::log("Completed req=", job._req);
+        if (_debug)
+            Genode::log("Completed req=", job._req);
+
+        if (!(job._req->flag_pageout ^ job._req->flag_pagein)){
+            Genode::error("Completed pager request, but strange flags received. pagein=", job._req->flag_pagein, " pageout=", job._req->flag_pageout);
+        }
+
+        // XXX : Maybe should be done after zeroing flags
+        // Calling pager callback
+        if (job._req->pager_callback != 0){
+            job._req->pager_callback(job._req, job._req->flag_pageout);
+        }
+
         // XXX : pager_io_request requires some finishing operations
         //       But not sure what is required. One of the ideas is to use
         //       pager_io_request_done( rq );
@@ -139,11 +156,6 @@ public:
         //       What will happen if we would like to check what operation it was?
         job._req->flag_pageout = 0;
         job._req->flag_pagein = 0;
-
-        // Calling pager callback
-        if (job._req->pager_callback != 0){
-            job._req->pager_callback(job._req, true);
-        }
 
         // TODO : error handling
 
@@ -155,6 +167,7 @@ public:
     Disk_backend(Genode::Env &env, Genode::Heap &heap) : _env(env), _heap(heap)
     {
         _block.sigh(_block_io_sigh);
+
         Genode::log("block device with block size ", _info.block_size, " block count ",
                     _info.block_count, " writeable=", _info.writeable);
         Genode::log("");
@@ -171,8 +184,10 @@ public:
 
     void startAsyncJob(Block::Operation op, pager_io_request *req)
     {
-        Genode::log("Starting async job req=", req);
-        Genode::log(op);
+        if (_debug){
+            Genode::log("Starting async job req=", req);
+            Genode::log(op);
+        }
         // Allocating DJob in the heap. Should be destroyed on completed() callback
         new (_heap) DJob(_block, op, req);
 
