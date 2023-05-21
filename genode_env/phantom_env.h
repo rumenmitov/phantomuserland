@@ -22,7 +22,7 @@ namespace Phantom
         Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
         Phantom::Disk_backend _disk{_env, _heap};
         // XXX : docs says that it "allows only one timeout at a time"
-        Timer::Connection _sleep_timer{_env, "phantom_sleep_timer"};
+        // Timer::Connection _sleep_timer{_env, "phantom_sleep_timer"};
 
         // ROM with bulk classes
         Rom_connection _bulk_class_rom{_env, "phantom_classes"};

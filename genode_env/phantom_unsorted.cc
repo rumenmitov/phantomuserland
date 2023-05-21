@@ -11,9 +11,8 @@ extern "C"
 
     void hal_sleep_msec(int miliseconds)
     {
-        // Genode::log("Start to sleep (", miliseconds, "): ", main_obj->_sleep_timer.elapsed_ms());
-        main_obj->_sleep_timer.msleep(miliseconds);
-        // Genode::log("Finish to sleep (", miliseconds, "): ", main_obj->_sleep_timer.elapsed_ms());
+        // main_obj->_sleep_timer.msleep(miliseconds);
+        main_obj->_timer_adapter.sleep_microseconds(miliseconds * 1000);
     }
 
     void hal_disable_preemption()
