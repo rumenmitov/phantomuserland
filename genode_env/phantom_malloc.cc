@@ -38,6 +38,10 @@ extern "C" void *ph_malloc(size_t size)
         return 0;
     }
 
+    // XXX : Used to avoid segfaults from Phantom's code waiting for 0 vals
+    // TODO : Fix issues and remove
+    ph_memset(original_addr, 0x0, total_size);
+
     // Writing the size
     *((size_t *)original_addr) = size;
 
