@@ -59,6 +59,9 @@ static amap_t ram_map;
 
 #include "genode_disk.h"
 
+#include "snap_internal.h"
+#include "kernel/trap.h"
+
 // Headless video driver
 
 struct drv_video_screen_t        *video_drv = 0;
@@ -181,6 +184,9 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
     ph_printf("Waiting...\n");
     // wait_for_continue();
+
+    // Test sleep
+    // hal_sleep_msec(100);
 
     // Running adapters tests
 
@@ -354,7 +360,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
         drv_video_init_windows();
         init_main_event_q();
-        init_new_windows();
+        // init_new_windows();
     }
 
     //SHOW_FLOW0( 0, "Will sleep" );
@@ -431,7 +437,6 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 #ifdef PHANTOM_TESTS_ONLY 
     ph_printf("\n\n======================\n");
     ph_printf("Testing is done!\n");
-    return 0;
 #endif
 
     // Probably not needed
@@ -448,6 +453,94 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     //pressEnter("will start phantom");
     start_phantom();
+
+
+    // If we are in test environment, start tests. Otherwise run VM
+
+    #ifdef PHANTOM_TESTS_ONLY
+    ph_printf("Starting persistent memory test\n");
+    {
+        // Trying to trigger page faults on certain pages
+
+        // TODO : Move to a separate test
+        // Calling page faults on first 200 pages
+        // hal_printf("-- Initializing first 200 pages (test)\n");
+
+        int write_data = 1;
+
+        for (unsigned long i = 0 ; i < 200 ; i++){
+            hal_printf("-- Calling pf handler %d (test)\n", i);
+
+            struct trap_state ts_stub;
+            ts_stub.state = 0;
+            genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
+
+            hal_printf("-- Checking access (test)\n");
+
+
+            if (i == 0){
+                // Firstly, check if we have something in a snapshot. If we have, then we just verify that it is fine
+                char test_string[] = "phantom snapshot test string is here";
+                char* addr_to_check = (char*)hal_object_space_address() + sizeof(struct pvm_object_storage);
+
+                if (ph_strncmp(addr_to_check, test_string, ph_strlen(test_string)) == 0){
+                    ph_printf("-- Detected test string in 0th page of obj.space. Will check if data is correct\n");
+                    write_data = 0;
+                } else {
+                    // to snapshot verification to work pages should contain only objects
+                    // so, let's declare a single object of large size
+
+                    // Write an object header at the very beginning of object space
+                    struct pvm_object_storage header = {0};
+                    header._ah.object_start_marker = PVM_OBJECT_START_MARKER;
+                    // let it be of the maximum possible size
+                    header._ah.exact_size = ~0;
+                    ph_memcpy((void*)hal_object_space_address(), &header, sizeof(struct pvm_object_storage));
+
+                    // Writing a test string
+
+                    ph_memcpy((void*)addr_to_check, test_string, ph_strlen(test_string));
+                }
+
+                // Skipping the rest
+                continue;
+            }
+            
+            
+            // for (unsigned long j = 1; j <= i; j++)
+            {
+                // char* test_addr = (char*)hal_object_space_address() + j * PAGE_SIZE;
+                char* test_addr = (char*)hal_object_space_address() + i * PAGE_SIZE;
+
+                if (write_data){
+                    // Write some test data
+                    for (size_t k = 0; k < 16; k++){
+                        *(test_addr + k) = 'T';
+                    }
+                    // Write a page number
+                    *((unsigned long*)(test_addr + 16)) = i;
+                }
+
+                // Check that we actually wrote what we want
+
+                for (size_t k = 0; k < 16; k++){
+                    assert(*(test_addr + k) == 'T');
+                }
+                assert(*((unsigned long*)(test_addr + 16)) == i);
+
+            }
+        }
+
+        // Performing a snapshot
+
+        do_snapshot();
+
+        ph_printf("Finishing the test\n");
+
+    }
+    return 0;
+    #endif
+
 
 #ifdef ARCH_ia32
     phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );

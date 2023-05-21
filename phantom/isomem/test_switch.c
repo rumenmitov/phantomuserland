@@ -244,7 +244,7 @@ void run_test( const char *test_name, const char *test_parm )
     // TEST(video);
 
 
-    //TEST(video);
+    // TEST(video);
 
     // XXX : Uses ports, and not much things using them. Therefore disabled
     //TEST(userland);
