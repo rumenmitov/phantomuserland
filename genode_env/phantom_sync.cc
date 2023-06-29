@@ -53,7 +53,7 @@ extern "C"
     int hal_mutex_is_locked(hal_mutex_t *m)
     {
         int res = m->impl->lock->isLocked() ? 1 : 0;
-        log("Getting mutex state: ", m->impl->name, "={", res, "}");
+        // log("Getting mutex state: ", m->impl->name, "={", res, "}");
         return res;
     }
 
@@ -75,14 +75,14 @@ extern "C"
 
     int hal_sem_acquire(hal_sem_t *s)
     {
-        log("Acquiring sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        // log("Acquiring sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
         s->impl->sem->down();
         return 0;
     }
 
     void hal_sem_release(hal_sem_t *s)
     {
-        log("Releasing sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
+        // log("Releasing sema '", s->impl->name, "' (", s->impl->sem->cnt(), ")");
         s->impl->sem->up();
     }
 

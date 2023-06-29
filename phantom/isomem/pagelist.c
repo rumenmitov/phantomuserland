@@ -6,7 +6,7 @@
 #include "pager.h"
 #include <hal.h>
 
-static int _DEBUG = 1;
+static int _DEBUG = 0;
 
 //---------------------------------------------------------------------------
 

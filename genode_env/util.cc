@@ -175,8 +175,9 @@ extern "C"
         va_list ap;
 
         va_start(ap, fmt);
+        ph_printf("\033[33m");
         ph_vprintf(fmt, ap);
-        ph_printf("\n");
+        ph_printf("\033[0m\n");
         va_end(ap);
     }
 
