@@ -940,6 +940,9 @@ pager_update_superblock()
     assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
 #endif
 
+    // TODO : REMOVE!!!
+    superblock.disk_page_count=0x50000;
+
     phantom_calc_sb_checksum( &superblock );
 
 #if USE_SYNC_IO
@@ -1101,6 +1104,10 @@ pager_put_to_free_list( disk_page_no_t free_page )
             superblock.free_list = free_page;
 
             hal_mutex_unlock(&pager_freelist_mutex);
+
+            // TODO : Added here to test if disk pages leak is fixed. Check if it is ok.
+            // pager_update_superblock();
+
             return;
         }
     else
@@ -1184,8 +1191,10 @@ pager_refill_free_reserve()
             free_reserve[free_reserve_n++] = list->list[--list->head.used];
         else
             {
-            if(list->head.next == 0 || list->head.next == superblock.free_list)
+            if(list->head.next == 0 || list->head.next == superblock.free_list){
+                SHOW_FLOW0( 10, "Using the last blocklist... ");
                 break; // that was last one, we will not kill freelist head
+            }
 
             free_reserve[free_reserve_n++] = superblock.free_list;
             superblock.free_list = list->head.next;
@@ -1217,12 +1226,17 @@ pager_refill_free_reserve()
                 break;
                 }
 
+            // TODO : Temporarily disabled superblock update here. Check if it is ok.
             pager_update_superblock();
             }
         }
 
     while( free_reserve_n < free_reserve_size && superblock.free_start < superblock.disk_page_count )
         free_reserve[free_reserve_n++] = superblock.free_start++;
+    
+    if (superblock.free_start >= superblock.disk_page_count - 100){
+        SHOW_ERROR(0, "Running out of free space! %x %x", superblock.free_start, superblock.disk_page_count);
+    }
 
         // BUG!
         // In fact, it is enough to have async save here.
