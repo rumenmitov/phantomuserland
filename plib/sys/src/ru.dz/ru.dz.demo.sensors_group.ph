@@ -11,7 +11,7 @@ class sensors_group
     void sensors_group()
     {
         var i : int;
-        size = 10000;
+        size = 30000;
         sensors = new int[]();
 
         i = 0;
@@ -48,6 +48,13 @@ class sensors_group
             i = i + 1;
         }
         return 1;
+    }
+
+    .internal.long sample()
+    {
+        var res : .internal.long;
+        res = sensors[0].getData();
+        return res;
     }
 
 };

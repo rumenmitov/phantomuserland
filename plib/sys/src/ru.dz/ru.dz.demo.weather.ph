@@ -49,9 +49,6 @@ class weather
 
 		console.putws("Initializing demo scenario\n");
 
-		// sleep = new .internal.connection();
-        // sleep.connect("tmr:");
-
         sg = new sensors_group();
 
 		console.putws("Started demo scenario\n");
@@ -68,14 +65,14 @@ class weather
 
             if (res) {
                 console.putws("Ok!\n");
+                console.putws("Current result: ");
+                var sample_res : .internal.long;
+                sample_res = sg.sample();
+                console.putws(sample_res.toString());
+                console.putws("\n");
             } else {
                 console.putws("Failed!\n");
             }
-
-            console.putws("Sleeping\n");
-
-            // sleep.block(null, 10);
-
         }
 
     }
