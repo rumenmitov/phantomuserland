@@ -84,7 +84,7 @@ static void signal_snap_done_passed( void );
 
 
 static int DEBUG_MARK = 0;
-static int SNAP_DEBUG = 1;
+static int SNAP_DEBUG = 0;
 static int SNAP_STEPS_DEBUG = 1;
 static int SNAP_LISTS_DEBUG = 0;
 static int FAULT_DEBUG = 0;
@@ -1507,7 +1507,7 @@ void do_snapshot(void)
     if(enabled) hal_sti();
 
     // TODO : Uncomment! It should be done here
-    // phantom_snapper_reenable_threads();
+    phantom_snapper_reenable_threads();
 #if USE_SNAP_WAIT
     signal_snap_snap_passed(); // or before enabling threads?
 #endif
@@ -1572,7 +1572,9 @@ void do_snapshot(void)
     // make sure page data has been written
     vm_map_for_all( wait_commit_snap );
 
-    vm_verify_snap(new_snap_head);
+    // XXX : Takes a lot of time
+    // TODO : Optimize if possible
+    // vm_verify_snap(new_snap_head);
 
     // ok, now we have current snap and previous one. come fix the
     // superblock
@@ -1610,15 +1612,17 @@ void do_snapshot(void)
     ph_syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
-    phantom_snapper_reenable_threads();
+
+    // phantom_snapper_reenable_threads();
 
 #if USE_SNAP_WAIT
     signal_snap_done_passed();
 #endif
 
-    hal_sleep_msec(20000);
-    ph_syslog( 0, "snap: wait for 10 sec more");
-    hal_sleep_msec(10000);
+    // XXX : Not sure why to wait here for so long
+    // hal_sleep_msec(20000);
+    // ph_syslog( 0, "snap: wait for 10 sec more");
+    // hal_sleep_msec(10000);
 
 }
 
@@ -1725,7 +1729,7 @@ static void vm_map_lazy_pageout_thread(void)
     }
 }
 static int request_snap_flag = 0;
-static int seconds_between_snaps = 10;
+static int seconds_between_snaps = 5;
 
 static void vm_map_snapshot_thread(void)
 {
