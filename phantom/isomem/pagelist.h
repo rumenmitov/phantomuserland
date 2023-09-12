@@ -5,7 +5,7 @@
 #define pagelistH
 
 #include <phantom_disk.h>
-#include <string.h>
+#include <ph_string.h>
 #include <errno.h>
 
 #include <pager_io_req.h>
@@ -40,7 +40,7 @@ void disk_page_io_callback(disk_page_io *me);
 
 static __inline__ void disk_page_io_init(disk_page_io *me) 
 { 
-    memset( me, 0, sizeof(disk_page_io) );
+    ph_memset( me, 0, sizeof(disk_page_io) );
     me->mem_allocated = 0;
     //me->req.pager_callback = (void *)disk_page_io_callback;
     pager_io_request_init(&me->req);

@@ -380,7 +380,7 @@ pvm_copy_object( pvm_object_t in_object )
             ref_inc_o( da_po_ptr((in_object)->da)[i] );
     }
 
-    memcpy( out->da, in_object->da, da_size );
+    ph_memcpy( out->da, in_object->da, da_size );
     // TODO: check for special cases - copy c'tor?
 
     return out;
@@ -410,7 +410,7 @@ void pvm_puts(pvm_object_t o )
 {
     if( pvm_is_null( o ) )
     {
-        printf( "(null)" );
+        ph_printf( "(null)" );
         return;
     }
 
@@ -422,18 +422,18 @@ void pvm_puts(pvm_object_t o )
         /* TODO BUG! From unicode! */
         while( len-- )
         {
-            putchar(*sp++);
+            ph_putchar(*sp++);
         }
     }
     else
-        printf( "?" );
+        ph_printf( "?" );
 }
 
 void pvm_object_print(pvm_object_t o )
 {
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
     {
-        printf( "%d", pvm_get_int( o ) );
+        ph_printf( "%d", pvm_get_int( o ) );
     }
     else if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
@@ -449,19 +449,19 @@ void pvm_object_print(pvm_object_t o )
 
 void print_object_flags(pvm_object_t o)
 {
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )       printf("FINALIZER ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )       printf("CHILDFREE ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD )          printf("THREAD ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     printf("STACK_FRAME ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME )      printf("CALL_FRAME ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )        printf("INTERNAL ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE )      printf("RESIZEABLE ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING )          printf("STRING ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT )             printf("INT ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE )   printf("DECOMPOSEABLE ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS )           printf("CLASS ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE )       printf("INTERFACE ");
-    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE )            printf("CODE ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )       ph_printf("FINALIZER ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )       ph_printf("CHILDFREE ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD )          ph_printf("THREAD ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     ph_printf("STACK_FRAME ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME )      ph_printf("CALL_FRAME ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )        ph_printf("INTERNAL ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE )      ph_printf("RESIZEABLE ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING )          ph_printf("STRING ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT )             ph_printf("INT ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE )   ph_printf("DECOMPOSEABLE ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS )           ph_printf("CLASS ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE )       ph_printf("INTERFACE ");
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE )            ph_printf("CODE ");
 }
 
 // For debugging - to call from GDB - arg is object storage!
@@ -472,54 +472,54 @@ void dumpo( addr_t addr )
 
     if( o == 0)
     {
-        printf("dumpo(0)\n");
+        ph_printf("dumpo(0)\n");
         return;
     }
 
-    printf("Flags: '");
+    ph_printf("Flags: '");
     print_object_flags(o);
-    printf("', ");
-    //printf("', da size: %ld, ", (long)(o->_da_size) );
+    ph_printf("', ");
+    //ph_printf("', da size: %ld, ", (long)(o->_da_size) );
 
 
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
-        printf("String: '");
+        ph_printf("String: '");
 
         struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);
         int len = da->length;
         unsigned const char *sp = da->data;
         while( len-- )
         {
-            putchar(*sp++);
+            ph_putchar(*sp++);
         }
-        printf("'");
+        ph_printf("'");
     }
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
         struct data_area_4_class *da = (struct data_area_4_class *)&(o->da);
-        printf("Is class: '"); pvm_object_print( da->class_name ); printf("' @%p", o);
+        ph_printf("Is class: '"); pvm_object_print( da->class_name ); ph_printf("' @%p", o);
         if(
             (!pvm_isnull(da->class_parent)) &&
             (pvm_get_null_class() != da->class_parent )
             )
         {
-            printf(" Parent: "); pvm_object_dump( da->class_parent ); 
-            //printf(" Parent: '"); pvm_object_print( da->class_parent ); 
-            //printf("' @%p", da->class_parent );
+            ph_printf(" Parent: "); pvm_object_dump( da->class_parent ); 
+            //ph_printf(" Parent: '"); pvm_object_print( da->class_parent ); 
+            //ph_printf("' @%p", da->class_parent );
         }
     }
     else
     {
         // Don't dump class class
-        //printf("Class: { "); dumpo( (addr_t)(o->_class) ); printf("}\n");
+        //ph_printf("Class: { "); dumpo( (addr_t)(o->_class) ); ph_printf("}\n");
         //pvm_object_print( o->_class );
         pvm_object_t cl = o->_class;
         struct data_area_4_class *cda = (struct data_area_4_class *)&(cl->da);
-        //printf("Class: '"); pvm_object_print( cda->class_name ); printf(" @%p'", o);
-        printf("Class: '"); pvm_object_print( cda->class_name ); printf("' o@%p class@%p", o, cl );
+        //ph_printf("Class: '"); pvm_object_print( cda->class_name ); ph_printf(" @%p'", o);
+        ph_printf("Class: '"); pvm_object_print( cda->class_name ); ph_printf("' o@%p class@%p", o, cl );
     }
-    printf("\n");
+    ph_printf("\n");
 }
 
 void pvm_object_dump(pvm_object_t o )

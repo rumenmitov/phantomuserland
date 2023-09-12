@@ -17,7 +17,10 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
+
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include <kernel/pool.h>
 
@@ -73,10 +76,10 @@ static control_handle_t control_to_pool( window_handle_t w, control_t *cc )
         w->controls = create_controls_pool();
 
     // Just add to pool
-    control_handle_t ch = pool_create_el( w->controls, calloc( 1, sizeof(control_ref_t) ) );
+    control_handle_t ch = pool_create_el( w->controls, ph_calloc( 1, sizeof(control_ref_t) ) );
     if( ch < 0 )
     {
-        free(cc);
+        ph_free(cc);
         //LOG_ERROR0( 0, "out of buttons" );
         return INVALID_POOL_HANDLE;
     }
@@ -160,7 +163,7 @@ static void w_add_to_group( window_handle_t w, control_t *cc )
     if( env.g == 0 )
     {
         // No other 
-        env.g = calloc( 1, sizeof(control_group_t) );
+        env.g = ph_calloc( 1, sizeof(control_group_t) );
         assert(env.g);
     }
 
@@ -210,14 +213,14 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     cc->focused = 0;        //< Selected in window
     cc->changed = 1;
 
-    if( 0 == memcmp( &cc->bg_color, &((color_t){0, 0, 0, 0}), sizeof(color_t) ) )
+    if( 0 == ph_memcmp( &cc->bg_color, &((color_t){0, 0, 0, 0}), sizeof(color_t) ) )
         cc->bg_color = (color_t){ .r = 237, .g = 235, .b = 232, .a = 0xFF };
 
-    memset( cc->buffer, 0, sizeof(cc->buffer) );
+    ph_memset( cc->buffer, 0, sizeof(cc->buffer) );
 
     if(cc->text)
     {
-        strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
+        ph_strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
         cc->text = cc->buffer;
     }
 }
@@ -249,7 +252,7 @@ control_handle_t w_add_control_persistent(window_handle_t w, control_t *cc )
 
 control_handle_t w_add_control( window_handle_t w, control_t *c )
 {
-    control_t *cc = calloc( 1, sizeof(control_t) );
+    control_t *cc = ph_calloc( 1, sizeof(control_t) );
     if( 0 == cc )
     {
         //LOG_ERROR0( 0, "out of buttons" );
@@ -280,7 +283,7 @@ void w_add_controls( window_handle_t w, control_t *c )
 
 void w_clear_control( control_t *c )
 {
-    memset( c, 0, sizeof(control_t) );
+    ph_memset( c, 0, sizeof(control_t) );
 }
 
 
@@ -381,7 +384,7 @@ control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, i
     cb.text = text;
     cb.fg_color = text_color;
 
-    cb.str_len = strnlen( text, 1024 ); // TODO define and describe
+    cb.str_len = ph_strnlen( text, 1024 ); // TODO define and describe
     cb.vis_len = cb.str_len;
 
     cb.pas_bg_image = &text_field_x200_bmp;

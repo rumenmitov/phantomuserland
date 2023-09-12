@@ -48,9 +48,9 @@ static __inline u_long ulmin(u_long a, u_long b) { return (a < b ? a : b); }
 static __inline off_t omax(off_t a, off_t b) { return (a > b ? a : b); }
 static __inline off_t omin(off_t a, off_t b) { return (a < b ? a : b); }
 
-static __inline int abs(int a) { return (a < 0 ? -a : a); }
-static __inline long labs(long a) { return (a < 0 ? -a : a); }
-static __inline quad_t qabs(quad_t a) { return (a < 0 ? -a : a); }
+// static __inline int abs(int a) { return (a < 0 ? -a : a); }
+// static __inline long labs(long a) { return (a < 0 ? -a : a); }
+// static __inline quad_t qabs(quad_t a) { return (a < 0 ? -a : a); }
 
 #ifndef	HAVE_INLINE_FFS
 int	 ffs(int);

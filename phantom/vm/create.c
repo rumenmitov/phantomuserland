@@ -15,6 +15,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <ph_string.h>
+
 #include <kernel/vm.h>
 #include <spinlock.h>
 
@@ -29,7 +31,7 @@
 
 #include "ids/opcode_ids.h"
 
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <video/screen.h>
 
@@ -233,7 +235,7 @@ pvm_object_t     pvm_create_string_object_binary(const char *value, int n_bytes)
 	pvm_internal_init_string(_data);
 
 	if(value)
-		memcpy(data_area->data, value, data_area->length = n_bytes );
+		ph_memcpy(data_area->data, value, data_area->length = n_bytes );
 
 	return _data;
 
@@ -241,7 +243,7 @@ pvm_object_t     pvm_create_string_object_binary(const char *value, int n_bytes)
 
 pvm_object_t     pvm_create_string_object(const char *value)
 {
-	return pvm_create_string_object_binary(value, strlen(value));
+	return pvm_create_string_object_binary(value, ph_strlen(value));
 }
 
 pvm_object_t     pvm_create_string_object_binary_cat(
@@ -260,10 +262,10 @@ pvm_object_t     pvm_create_string_object_binary_cat(
 
 	if(value1)
 	{
-		memcpy(data_area->data, value1, data_area->length = n_bytes1 );
+		ph_memcpy(data_area->data, value1, data_area->length = n_bytes1 );
 		if(value2)
 		{
-			memcpy(data_area->data+n_bytes1, value2, n_bytes2 );
+			ph_memcpy(data_area->data+n_bytes1, value2, n_bytes2 );
 			data_area->length += n_bytes2;
 		}
 	}
@@ -277,7 +279,7 @@ void pvm_internal_init_string(pvm_object_t  os)
 {
 	struct data_area_4_string* data_area = (struct data_area_4_string*)&(os->da);
 
-	memset( (void *)data_area, 0, os->_da_size );
+	ph_memset( (void *)data_area, 0, os->_da_size );
 	data_area->length = 0;
 }
 
@@ -303,7 +305,7 @@ int pvm_strcmp(pvm_object_t s1, pvm_object_t s2)
     if( l1 > l2 ) return 1;
     if( l2 > l1 ) return -1;
 
-    return strncmp( d1, d2, l1 );
+    return ph_strncmp( d1, d2, l1 );
 }
 
 
@@ -328,8 +330,8 @@ pvm_create_page_object( int n_slots, pvm_object_t *init, int init_slots )
 	pvm_object_t * data_area = (pvm_object_t *)&(_data->da);
 
 	// NB! Bug! Here is the way to set object pointers to some garbage value
-	//if( init_value )	memcpy( data_area, init_value, das );
-	//else            	memset( data_area, 0, das );
+	//if( init_value )	ph_memcpy( data_area, init_value, das );
+	//else            	ph_memset( data_area, 0, das );
 
 	assert(init_slots < n_slots);
 
@@ -420,7 +422,7 @@ void pvm_gc_iter_call_frame(gc_iterator_call_t func, pvm_object_t  os, void *arg
 
 static pvm_object_t create_interface_worker( int n_methods )
 {
-	//if(debug_init) printf("create interface\n");
+	//if(debug_init) ph_printf("create interface\n");
 
 	int das = n_methods*sizeof(pvm_object_t );
 
@@ -445,7 +447,7 @@ pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent
     {
         // root classes have N_SYS_METHODS slots in interface, don't cry about that
         if( n_methods > N_SYS_METHODS )
-            printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
+            ph_printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
         base_icount = n_methods;
     }
 
@@ -468,7 +470,7 @@ pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent
 
 void pvm_internal_init_interface(pvm_object_t  os)
 {
-	memset( os->da, 0, os->_da_size );
+	ph_memset( os->da, 0, os->_da_size );
 }
 
 void pvm_gc_iter_interface(gc_iterator_call_t func, pvm_object_t  os, void *arg)
@@ -729,7 +731,7 @@ pvm_object_t     pvm_create_binary_object(int size, void *init)
 
 	struct data_area_4_binary *da = (struct data_area_4_binary *)ret->da;
 	da->data_size = size;
-	if( init != NULL ) memcpy( da->data, init, size );
+	if( init != NULL ) ph_memcpy( da->data, init, size );
 	return ret;
 }
 
@@ -869,7 +871,7 @@ pvm_object_t pvm_weakref_get_object(pvm_object_t wr )
 
     // TODO should we check refcount before and return null if zero?
     if( 0 == da->object->_ah.refCount )
-        printf("zero object in pvm_weakref_get_object\n");
+        ph_printf("zero object in pvm_weakref_get_object\n");
 
     out = ref_inc_o( da->object );
 
@@ -907,7 +909,7 @@ void pvm_internal_init_window(pvm_object_t os)
 
     void *pixels = &bda->data;
 
-    strlcpy( da->title, "Window", sizeof(da->title) );
+    ph_strlcpy( da->title, "Window", sizeof(da->title) );
 
     da->fg = COLOR_BLACK;
     da->bg = COLOR_WHITE;
@@ -981,7 +983,7 @@ void pvm_restart_window( pvm_object_t o )
     struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
     window_handle_t pixels = (window_handle_t)&bda->data;
 
-    printf("restart WIN\n");
+    ph_printf("restart WIN\n");
 
     w_restart_init( &(da->w), pixels );
 
@@ -1113,7 +1115,7 @@ void pvm_internal_init_connection(pvm_object_t  os)
     struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
 
     da->kernel = 0;
-    memset( da->name, 0, sizeof(da->name) );
+    ph_memset( da->name, 0, sizeof(da->name) );
 }
 
 
@@ -1144,7 +1146,7 @@ void pvm_gc_finalizer_connection( pvm_object_t  os )
     //#warning disconnect!
     errno_t ret = phantom_disconnect_object( da );
     if( ret )
-        printf("automatic disconnect failed - %d\n", ret );
+        ph_printf("automatic disconnect failed - %d\n", ret );
 
 
 }
@@ -1152,13 +1154,13 @@ void pvm_gc_finalizer_connection( pvm_object_t  os )
 void pvm_restart_connection( pvm_object_t o )
 {
     struct data_area_4_connection *da = pvm_object_da( o, connection );
-printf("restarting connection");
+ph_printf("restarting connection");
     da->kernel = 0;
 
     int ret = pvm_connect_object(o,0);
 
     if( ret )
-        printf("reconnect failed %d\n", ret );
+        ph_printf("reconnect failed %d\n", ret );
 
 //#warning restart!
 }
@@ -1174,7 +1176,7 @@ void pvm_internal_init_tcp(pvm_object_t os)
     struct data_area_4_tcp      *da = (struct data_area_4_tcp *)os->da;
 
     da->connected = 0;
-    //memset( da->name, 0, sizeof(da->name) );
+    //ph_memset( da->name, 0, sizeof(da->name) );
 }
 
 pvm_object_t     pvm_create_tcp_object(void)
@@ -1212,7 +1214,7 @@ void pvm_restart_tcp( pvm_object_t o )
     //da->connected = 0;
     if( da->connected )
     {
-        printf("restarting TCP - unimpl!");
+        ph_printf("restarting TCP - unimpl!");
     }
 
 }
@@ -1238,7 +1240,7 @@ pvm_object_t     pvm_create_code_object(int size, void *code)
 
 	struct data_area_4_code *da = (struct data_area_4_code *)ret->da;
 	da->code_size = size;
-	memcpy( da->code, code, size );
+	ph_memcpy( da->code, code, size );
 	return ret;
 }
 

@@ -15,7 +15,7 @@
 
 #include <phantom_libc.h>
 #include <hal.h>
-#include <time.h>
+#include <ph_time.h>
 
 #include <kernel/cond.h>
 #include <kernel/mutex.h>

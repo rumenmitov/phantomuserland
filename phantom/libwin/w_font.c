@@ -21,11 +21,11 @@
 #include <video/font.h>
 #include <kernel/libkern.h>
 
-#include <assert.h>
-#include <string.h>
+#include <phantom_assert.h>
+#include <ph_string.h>
 #include <phantom_libc.h>
 
-// Kills kernel - needs big stack (256 kb or more), calls malloc - must
+// Kills kernel - needs big stack (256 kb or more), calls ph_malloc - must
 // be called out of spinlock, trapno 0: Divide error, error 00000000 EIP 1f5ae0: _gray_render_line
 
 #define TTF_TTY 0
@@ -36,7 +36,9 @@ static __inline__ int _bpc(const drv_video_font_t *font)
     return font->ysize * (1 + ((font->xsize-1) / 8));
 }
 
-__inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, char c )
+// XXX : __inline__ causes undefined reference when using -O0 option 
+//__inline__
+const char *drv_video_font_get_char( const drv_video_font_t *font, char c )
 {
     //int bpc = font->ysize * (1 + ((font->xsize-1) / 8));
     const char *cp = font->font + c * _bpc(font);
@@ -47,7 +49,9 @@ __inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, ch
 
 
 // Returns -1 if can't draw, 0 if done
-__inline__ int w_font_draw_char(
+// XXX : __inline__ causes undefined reference when using -O0 option 
+// __inline__
+int w_font_draw_char(
                                          window_handle_t win,
                                          const drv_video_font_t *font,
                                          char c, rgba_t color, rgba_t bg,
@@ -142,7 +146,7 @@ void w_font_draw_string(
 {
     //if(font->xsize < 0)        font_reverse_x((drv_video_font_t *)font);
 
-    int nc = strlen(s);
+    int nc = ph_strlen(s);
 
     while(nc--)
     {
@@ -242,7 +246,7 @@ void w_font_tty_string(
 {
     rgba_t color = _color;
     rgba_t back  = _back;
-    //int nc = strlen(s);
+    //int nc = ph_strlen(s);
     int bright = 0;
     //int startx = *x;
 
@@ -346,7 +350,7 @@ static void font_reverse_x(drv_video_font_t *font)
 {
     if(font->xsize > 0) return;
     font->xsize = -font->xsize;
-    //printf("reverse font x\n");
+    //ph_printf("reverse font x\n");
 
     int bpcx = 1 + ((font->xsize-1) / 8);
     int bcount = bpcx * font->ysize;

@@ -9,14 +9,14 @@
 **/
 
 #include <kernel/amap.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 
 
 static amap_entry_t * new_entry( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags )
 {
-    amap_entry_t *ret = (amap_entry_t *)malloc(sizeof(amap_entry_t));
+    amap_entry_t *ret = (amap_entry_t *)ph_malloc(sizeof(amap_entry_t));
     if(ret == 0) panic("out of mem in amap");
 
     ret->start = from;
@@ -35,7 +35,7 @@ static void join( amap_t *map, amap_entry_t *e )
     e->n_elem += ne->n_elem;
     queue_remove(&(map->queue), ne, amap_entry_t *, chain);
 
-    free(ne);
+    ph_free(ne);
 }
 
 // Split entry so that first entry after split will have n_elem_in_first elems
@@ -106,7 +106,7 @@ amap_destroy( amap_t *map )
     while( !queue_empty(&(map->queue)) )
     {
         queue_remove_first(&(map->queue), ie, amap_entry_t *, chain);
-        free(ie);
+        ph_free(ie);
     }
 }
 
@@ -231,12 +231,12 @@ amap_dump( amap_t *map )
     queue_iterate(&(map->queue), ie, amap_entry_t *, chain)
     {
         /*
-        printf(
+        ph_printf(
                "[0x%08X - 0x%08X[ : 0x%4X\n",
                (int)ie->start, (int)ie->start+ie->n_elem, ie->flags
               );
         */
-        printf(
+        ph_printf(
                "[0x%09qX - 0x%09qX[ : 0x%4X\n",
                ie->start, ie->start+ie->n_elem, ie->flags
               );

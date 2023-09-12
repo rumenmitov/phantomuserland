@@ -1,5 +1,7 @@
 #include "zgl.h"
 
+#include <ph_string.h>
+
 void glopNormal(GLContext * c, GLParam * p)
 {
     V3 v;
@@ -223,7 +225,7 @@ void glopVertex(GLContext * c, GLParam * p)
 	if (!newarray) {
 	    gl_fatal_error("unable to allocate GLVertex array.\n");
 	}
-	memcpy(newarray, c->vertex, n * sizeof(GLVertex));
+	ph_memcpy(newarray, c->vertex, n * sizeof(GLVertex));
 	gl_free(c->vertex);
 	c->vertex = newarray;
     }

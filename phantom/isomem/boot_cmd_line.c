@@ -17,12 +17,15 @@
 #include <phantom_types.h>
 #include <phantom_assert.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
 #include <multiboot.h>
 #include <kernel/vm.h>
 #include <kernel/boot.h>
 //#include <hal.h>
 #include "misc.h"
+
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 static const char *default_argv[] = {"phantom", 0};
 static const char *default_env[] = {0};
@@ -90,12 +93,12 @@ phantom_parse_cmd_line( const char* cmdline )
             {
                 assert(ntoken > 0 );
                 token_len[ntoken-1] = cp - last_token_start;
-                token[ntoken-1] = strndup( token_start[ntoken-1], token_len[ntoken-1] );
+                token[ntoken-1] = ph_strndup( token_start[ntoken-1], token_len[ntoken-1] );
             }
 
             if( ntoken >= MAXTOK )
             {
-                printf("too many tokens on cmdline");
+                ph_printf("too many tokens on cmdline");
                 break;
             }
 
@@ -113,7 +116,7 @@ phantom_parse_cmd_line( const char* cmdline )
         {
             assert(ntoken > 0 );
             token_len[ntoken-1] = cp - last_token_start;
-            token[ntoken-1] = strndup( token_start[ntoken-1], token_len[ntoken-1] );
+            token[ntoken-1] = ph_strndup( token_start[ntoken-1], token_len[ntoken-1] );
         }
 
     }
@@ -128,7 +131,7 @@ phantom_parse_cmd_line( const char* cmdline )
     int start_opt = 1; // Assume 0 is kernel name
 
     if( token[0][0] == '-' ||
-        strchr( token[0], '=' ) != 0 )
+        ph_strchr( token[0], '=' ) != 0 )
         start_opt = 0; // No
 
     int end_boot_opts = -1;
@@ -137,7 +140,7 @@ phantom_parse_cmd_line( const char* cmdline )
     {
         SHOW_FLOW( 2, "'%s'", token[i]);
 
-        if( 0 == strcmp( token[i], "--" ) )
+        if( 0 == ph_strcmp( token[i], "--" ) )
         {
             end_boot_opts = i;
             SHOW_FLOW0( 2, " EBOOT");
@@ -146,7 +149,7 @@ phantom_parse_cmd_line( const char* cmdline )
     }
 
     // + 4 for final zeros
-    const char **vector = malloc( sizeof(void *) * (ntoken + 4 ));
+    const char **vector = ph_malloc( sizeof(void *) * (ntoken + 4 ));
 
     // Have env and/or boot opts?
     if(end_boot_opts >= 0)
@@ -237,7 +240,7 @@ char *syslog_dest_address_string = 0;
 
 
 #define ISARG(__aname,__flag) do { \
-    if( !strcmp( arg, __aname ) ) \
+    if( !ph_strcmp( arg, __aname ) ) \
     { \
         __flag = 1; \
     	return 1;\
@@ -287,7 +290,7 @@ phantom_process_boot_options(void)
             continue;
         }
 
-        int alen = strlen( arg );
+        int alen = ph_strlen( arg );
 
         SHOW_INFO( 0, "arg = %s", arg );
 
@@ -298,30 +301,30 @@ phantom_process_boot_options(void)
         if( *arg != '-' )
             goto error;
 
-        //if( strlen( arg ) != 2 )            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
+        //if( ph_strlen( arg ) != 2 )            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
 
         switch( arg[1] )
         {
         case 'd':
         case 'e':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_error = (int)atol( arg+3 );
+            debug_max_level_error = (int)ph_atol( arg+3 );
             break;
 
         case 'f':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_flow = (int)atol( arg+3 );
+            debug_max_level_flow = (int)ph_atol( arg+3 );
             break;
 
         case 'i':
             if(alen < 4 || arg[2] != '=') goto error;
-            debug_max_level_info = (int)atol( arg+3 );
+            debug_max_level_info = (int)ph_atol( arg+3 );
             break;
 
         case 's':
             if(alen < 4 || arg[2] != '=') goto error;
-            if( syslog_dest_address_string ) free(syslog_dest_address_string);
-            syslog_dest_address_string = strdup( arg+3 );
+            if( syslog_dest_address_string ) ph_free(syslog_dest_address_string);
+            syslog_dest_address_string = ph_strdup( arg+3 );
             break;
 
         default:

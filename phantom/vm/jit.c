@@ -110,13 +110,13 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
         jit_mark_possible_label(j);
 
         unsigned char instruction = pvm_code_get_byte(code);
-        //printf("instr 0x%02X ", instruction);
+        //ph_printf("instr 0x%02X ", instruction);
 
 
         switch(instruction)
         {
         case opcode_nop:
-            //if( debug_print_instr ) printf("nop; ");
+            //if( debug_print_instr ) ph_printf("nop; ");
             break;
 
         case opcode_debug:
@@ -124,30 +124,30 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             {
                 int type = pvm_code_get_byte(code); //cf->cs.get_instr( cf->IP );
 
-                //printf("\n\nDebug 0x%02X", type );
+                //ph_printf("\n\nDebug 0x%02X", type );
                 if( type & 0x80 )
                 {
-                    //printf(" (" );
+                    //ph_printf(" (" );
                     pvm_object_t o = pvm_code_get_string(code);
                     //pvm_object_print(o);
                     ref_dec_o(o);
-                    //printf(")" );
+                    //ph_printf(")" );
                 }
 
                 if( type & 0x01 ) debug_print_instr = 1;
                 if( type & 0x02 ) debug_print_instr = 0;
 
                 /*
-                if( is_empty() ) printf(", istack empty");
-                else                    printf(",\n\tistack top = %d", is_top() );
-                if( os_empty() ) printf(", ostack empty");
+                if( is_empty() ) ph_printf(", istack empty");
+                else                    ph_printf(",\n\tistack top = %d", is_top() );
+                if( os_empty() ) ph_printf(", ostack empty");
                 else
                 {
-                    printf(",\n\tostack top = {" );
+                    ph_printf(",\n\tostack top = {" );
                     pvm_object_print( os_top() );
-                    printf("}" );
+                    ph_printf("}" );
                 }
-                printf(";\n\n");
+                ph_printf(";\n\n");
                 */
             }
 
@@ -157,22 +157,22 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
-            if( debug_print_instr ) printf("is dup; ");
+            if( debug_print_instr ) ph_printf("is dup; ");
             jit_is_push( j, jit_is_top( j ) );
             break;
 
         case opcode_is_drop:
-            if( debug_print_instr ) printf("is drop; ");
+            if( debug_print_instr ) ph_printf("is drop; ");
             jit_is_pop( j );
             break;
 
         case opcode_iconst_0:
-            if( debug_print_instr ) printf("iconst 0; ");
+            if( debug_print_instr ) ph_printf("iconst 0; ");
             jit_is_push( j, jit_iconst( j, 0 ) );
             break;
 
         case opcode_iconst_1:
-            if( debug_print_instr ) printf("iconst 1; ");
+            if( debug_print_instr ) ph_printf("iconst 1; ");
             jit_is_push( j, jit_iconst( j, 1 ) );
             break;
 
@@ -180,7 +180,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             {
                 int v = pvm_code_get_byte(code);
                 jit_is_push( j, jit_iconst( j, v ) );
-                if( debug_print_instr ) printf("iconst8 = %d; ", v);
+                if( debug_print_instr ) ph_printf("iconst8 = %d; ", v);
                 break;
             }
 
@@ -188,18 +188,18 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             {
                 int v = pvm_code_get_int32(code);
                 jit_is_push( j, jit_iconst( j, v ) );
-                if( debug_print_instr ) printf("iconst32 = %d; ", v);
+                if( debug_print_instr ) ph_printf("iconst32 = %d; ", v);
                 break;
             }
 
 
         case opcode_isum:
-            if( debug_print_instr ) printf("isum; ");
+            if( debug_print_instr ) ph_printf("isum; ");
             jit_binary_op( j, jit_gen_add );
             break;
 
         case opcode_imul:
-            if( debug_print_instr ) printf("imul; ");
+            if( debug_print_instr ) ph_printf("imul; ");
             {
                 //int mul = is_pop();
                 //is_push( is_pop() * mul );
@@ -208,7 +208,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_isubul:
-            if( debug_print_instr ) printf("isubul; ");
+            if( debug_print_instr ) ph_printf("isubul; ");
             {
                 jit_value_t u = jit_is_pop( j );
                 jit_value_t l = jit_is_pop( j );
@@ -218,7 +218,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_isublu:
-            if( debug_print_instr ) printf("isublu; ");
+            if( debug_print_instr ) ph_printf("isublu; ");
             {
                 jit_value_t u = jit_is_pop( j );
                 jit_value_t l = jit_is_pop( j );
@@ -228,7 +228,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_idivul:
-            if( debug_print_instr ) printf("idivul; ");
+            if( debug_print_instr ) ph_printf("idivul; ");
             {
                 jit_value_t u = jit_is_pop( j );
                 jit_value_t l = jit_is_pop( j );
@@ -238,7 +238,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_idivlu:
-            if( debug_print_instr ) printf("idivlu; ");
+            if( debug_print_instr ) ph_printf("idivlu; ");
             {
                 jit_value_t u = jit_is_pop( j );
                 jit_value_t l = jit_is_pop( j );
@@ -248,78 +248,78 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_ior:
-            if( debug_print_instr ) printf("ior; ");
+            if( debug_print_instr ) ph_printf("ior; ");
             //{ int operand = is_pop();	is_push( is_pop() | operand ); }
             jit_binary_op( j, jit_gen_binor );
             break;
 
         case opcode_iand:
-            if( debug_print_instr ) printf("iand; ");
+            if( debug_print_instr ) ph_printf("iand; ");
             //{ int operand = is_pop();	is_push( is_pop() & operand ); }
             jit_binary_op( j, jit_gen_binand );
             break;
 
         case opcode_ixor:
-            if( debug_print_instr ) printf("ixor; ");
+            if( debug_print_instr ) ph_printf("ixor; ");
             //{ int operand = is_pop();	is_push( is_pop() ^ operand ); }
             jit_binary_op( j, jit_gen_binxor );
             break;
 
         case opcode_inot:
-            if( debug_print_instr ) printf("inot; ");
+            if( debug_print_instr ) ph_printf("inot; ");
             jit_unary_op( j, jit_gen_binnot );
             break;
 
 
 
         case opcode_log_or:
-            if( debug_print_instr ) printf("lor; ");
+            if( debug_print_instr ) ph_printf("lor; ");
             jit_binary_op( j, jit_gen_logor );
             break;
 
         case opcode_log_and:
-            if( debug_print_instr ) printf("land; ");
+            if( debug_print_instr ) ph_printf("land; ");
             jit_binary_op( j, jit_gen_logand );
             break;
 
         case opcode_log_xor:
-            if( debug_print_instr ) printf("lxor; ");
+            if( debug_print_instr ) ph_printf("lxor; ");
             jit_binary_op( j, jit_gen_logxor );
             break;
 
         case opcode_log_not:
-            if( debug_print_instr ) printf("lnot; ");
+            if( debug_print_instr ) ph_printf("lnot; ");
             jit_unary_op( j, jit_gen_lognot );
             break;
 
 
         case opcode_ige:	// >=
-            if( debug_print_instr ) printf("ige; ");
+            if( debug_print_instr ) ph_printf("ige; ");
             jit_binary_op( j, jit_gen_ige );
             break;
         case opcode_ile:	// <=
-            if( debug_print_instr ) printf("ile; ");
+            if( debug_print_instr ) ph_printf("ile; ");
             jit_binary_op( j, jit_gen_ile );
             break;
         case opcode_igt:	// >
-            if( debug_print_instr ) printf("igt; ");
+            if( debug_print_instr ) ph_printf("igt; ");
             jit_binary_op( j, jit_gen_igt );
             break;
         case opcode_ilt:	// <
-            if( debug_print_instr ) printf("ilt; ");
+            if( debug_print_instr ) ph_printf("ilt; ");
             jit_binary_op( j, jit_gen_ilt );
             break;
 
 
 
         case opcode_i2o:
-            if( debug_print_instr ) printf("i2o; ");
+            if( debug_print_instr ) ph_printf("i2o; ");
             jit_push_arg( j, jit_is_pop( j ) );
             jit_os_push( j, jit_gen_call( j, JIT_F_CREATE_INT_OBJ ) );
             break;
 
         case opcode_o2i:
-            if( debug_print_instr ) printf("o2i; ");
+            if( debug_print_instr ) ph_printf("o2i; ");
             {
                 jit_is_push( j, jit_o2int( j, jit_os_pop( j ) ) );// push AX
                 //jit_refdec( j ); // TODO jit_o2int must refdec?
@@ -328,7 +328,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
 
         case opcode_os_eq:
-            if( debug_print_instr ) printf("os eq; ");
+            if( debug_print_instr ) ph_printf("os eq; ");
             {
                 jit_value_t v1 = jit_os_pop( j );
                 jit_value_t v2 = jit_os_pop( j );
@@ -342,7 +342,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             }
 
         case opcode_os_neq:
-            if( debug_print_instr ) printf("os neq; ");
+            if( debug_print_instr ) ph_printf("os neq; ");
             {
                 jit_value_t v1 = jit_os_pop( j );
                 jit_value_t v2 = jit_os_pop( j );
@@ -356,7 +356,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             }
 
         case opcode_os_isnull:
-            if( debug_print_instr ) printf("isnull; ");
+            if( debug_print_instr ) ph_printf("isnull; ");
             {
                 jit_value_t o1 = jit_os_pop( j );
                 jit_is_push( j, jit_is_null( j, o1 ) );
@@ -366,7 +366,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
         case opcode_os_push_null:
         case opcode_summon_null:
-            if( debug_print_instr ) printf("push null; ");
+            if( debug_print_instr ) ph_printf("push null; ");
             {
                 jit_os_push( j, jit_get_null( j ) );
                 break;
@@ -375,46 +375,46 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // summoning, special ----------------------------------------------------
 
         case opcode_summon_thread:
-            if( debug_print_instr ) printf("summon thread; ");
+            if( debug_print_instr ) ph_printf("summon thread; ");
             jit_os_push( j, jit_get_thread( j ) );
             break;
 
         case opcode_summon_this:
-            if( debug_print_instr ) printf("summon this; ");
+            if( debug_print_instr ) ph_printf("summon this; ");
             jit_os_push( j, jit_refinc( j, jit_get_this( j ) ) );
             break;
 
         case opcode_summon_class_class:
-            if( debug_print_instr ) printf("summon class class; ");
+            if( debug_print_instr ) ph_printf("summon class class; ");
             jit_os_push( j, jit_get_class_class( j ) );
             break;
 
         case opcode_summon_interface_class:
-            if( debug_print_instr ) printf("summon interface class; ");
+            if( debug_print_instr ) ph_printf("summon interface class; ");
             // locked refcnt
             jit_os_push( j, jit_get_iface_class( j ) );
             break;
 
         case opcode_summon_code_class:
-            if( debug_print_instr ) printf("summon code class; ");
+            if( debug_print_instr ) ph_printf("summon code class; ");
             // locked refcnt
             jit_os_push( j, jit_get_code_class( j ) );
             break;
 
         case opcode_summon_int_class:
-            if( debug_print_instr ) printf("summon int class; ");
+            if( debug_print_instr ) ph_printf("summon int class; ");
             // locked refcnt
             jit_os_push( j, jit_get_int_class( j ) );
             break;
 
         case opcode_summon_string_class:
-            if( debug_print_instr ) printf("summon string class; ");
+            if( debug_print_instr ) ph_printf("summon string class; ");
             // locked refcnt
             jit_os_push( j, jit_get_string_class( j ) );
             break;
 
         case opcode_summon_array_class:
-            if( debug_print_instr ) printf("summon array class; ");
+            if( debug_print_instr ) ph_printf("summon array class; ");
             // locked refcnt
             jit_os_push( j, jit_get_array_class( j ) );
             break;
@@ -425,7 +425,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
         case opcode_summon_by_name:
             {
-                if( debug_print_instr ) printf("summon by name; ");
+                if( debug_print_instr ) ph_printf("summon by name; ");
 
                 pvm_object_t name = pvm_code_get_string(code);
                 pvm_object_t cl = pvm_exec_lookup_class_by_name( name ); // TODO XXX must inc ref
@@ -434,7 +434,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
                 // Need throw here?
 
                 if( pvm_is_null( cl ) ) {
-                    printf("JIT: summon by name: null class\n");
+                    ph_printf("JIT: summon by name: null class\n");
                     return ENOENT;
 
                     // TODO XXX generate summon in run time?
@@ -457,7 +457,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
 
         case opcode_new:
-            if( debug_print_instr ) printf("new; ");
+            if( debug_print_instr ) ph_printf("new; ");
             {
                 //pvm_object_t cl = os_pop();
                 //os_push( pvm_create_object( cl ) );
@@ -469,7 +469,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_copy:
-            if( debug_print_instr ) printf("copy; ");
+            if( debug_print_instr ) ph_printf("copy; ");
             {
                 jit_push_arg( j, jit_os_pop( j ) );
                 jit_os_push( j, jit_gen_call( j, JIT_F_COPY_OBJ ) );
@@ -482,7 +482,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // compose/decompose
 #if 0
         case opcode_os_compose32:
-            if( debug_print_instr ) printf(" compose32; ");
+            if( debug_print_instr ) ph_printf(" compose32; ");
             {
                 int num = pvm_code_get_int32(code);
                 pvm_object_t in_class = os_pop();
@@ -491,7 +491,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             break;
 
         case opcode_os_decompose:
-            if( debug_print_instr ) printf(" decompose; ");
+            if( debug_print_instr ) ph_printf(" decompose; ");
             {
                 pvm_object_t to_decomp = os_pop();
                 int num = da_po_limit(to_decomp);
@@ -509,7 +509,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // string ----------------------------------------------------------------
 
         case opcode_sconst_bin:
-            if( debug_print_instr ) printf("sconst bin; ");
+            if( debug_print_instr ) ph_printf("sconst bin; ");
             //os_push(pvm_code_get_string(code));
             {
                 int constid = jit_alloc_const( j, pvm_code_get_string( code ) );
@@ -523,7 +523,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
         case opcode_jmp:
             {
                 int newip = pvm_code_get_rel_IP_as_abs(code);
-                if( debug_print_instr ) printf("jmp %d; ", newip );
+                if( debug_print_instr ) ph_printf("jmp %d; ", newip );
                 //da->code.IP = pvm_code_get_rel_IP_as_abs(code);
                 jit_jump( j, newip );
             }
@@ -532,20 +532,20 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
         case opcode_djnz:
             {
-                if( debug_print_instr ) printf("djnz " );
+                if( debug_print_instr ) ph_printf("djnz " );
                 int newip = pvm_code_get_rel_IP_as_abs(code);
 
                 //is_push( is_pop() - 1 );
                 jit_decrement( j, jit_is_top(j) );
                 jit_jnz( j, newip, jit_is_top(j) );
 
-                //if( debug_print_instr ) printf("(%d) -> %d; ", is_top() , new_IP );
+                //if( debug_print_instr ) ph_printf("(%d) -> %d; ", is_top() , new_IP );
             }
             break;
 
         case opcode_jz:
             {
-                if( debug_print_instr ) printf("jz " );
+                if( debug_print_instr ) ph_printf("jz " );
                 int newip = pvm_code_get_rel_IP_as_abs(code);
                 jit_jz( j, newip, jit_is_pop(j) );
             }
@@ -556,33 +556,33 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             {
 #warning impl
                 /*
-                if( debug_print_instr ) printf("switch ");
+                if( debug_print_instr ) ph_printf("switch ");
                 unsigned int tabsize    = pvm_code_get_int32(code);
                 int shift               = pvm_code_get_int32(code);
                 unsigned int divisor    = pvm_code_get_int32(code);
                 int stack_top = is_pop();
 
-                if( debug_print_instr ) printf("(%d+%d)/%d, ", stack_top, shift, divisor );
+                if( debug_print_instr ) ph_printf("(%d+%d)/%d, ", stack_top, shift, divisor );
 
 
                 unsigned int start_table_IP = da->code.IP;
                 unsigned int displ = (stack_top+shift)/divisor;
                 unsigned int new_IP = start_table_IP+(tabsize*4); // default
 
-                if( debug_print_instr ) printf("displ %d, etab addr %d ", displ, new_IP );
+                if( debug_print_instr ) ph_printf("displ %d, etab addr %d ", displ, new_IP );
 
 
                 if( displ < tabsize )
                 {
                     da->code.IP = start_table_IP+(displ*4); // BUG! 4!
-                    if( debug_print_instr ) printf("load from %d, ", da->code.IP );
+                    if( debug_print_instr ) ph_printf("load from %d, ", da->code.IP );
                     new_IP = pvm_code_get_rel_IP_as_abs(code);
                 }
                 da->code.IP = new_IP;
 
-                if( debug_print_instr ) printf("switch(%d) ->%d; ", displ, new_IP );
+                if( debug_print_instr ) ph_printf("switch(%d) ->%d; ", displ, new_IP );
                 */
-                printf("no switch yet");
+                ph_printf("no switch yet");
                 return ENXIO;
             }
             break;
@@ -590,7 +590,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
 
         case opcode_ret:
             {
-                if( debug_print_instr ) printf( "\nret\n" );
+                if( debug_print_instr ) ph_printf( "\nret\n" );
                 jit_ret(j);
             }
             break;
@@ -598,20 +598,20 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // exceptions are like ret ---------------------------------------------------
 
         case opcode_throw:
-            if( debug_print_instr ) printf( "\nthrow\n" );
+            if( debug_print_instr ) ph_printf( "\nthrow\n" );
             jit_throw(j, jit_os_pop(j) );
             break;
 
         case opcode_push_catcher:
             {
                 unsigned addr = pvm_code_get_rel_IP_as_abs(code);
-                if( debug_print_instr ) printf("push catcher %u; ", addr );
+                if( debug_print_instr ) ph_printf("push catcher %u; ", addr );
                 jit_es_push( j, jit_os_pop(j), addr );
             }
             break;
 
         case opcode_pop_catcher:
-            if( debug_print_instr ) printf("pop catcher; ");
+            if( debug_print_instr ) ph_printf("pop catcher; ");
             jit_refdec( j, jit_es_pop(j) );
             break;
 
@@ -650,17 +650,17 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             // object stack --------------------------------------------------------------
 
         case opcode_os_dup:
-            if( debug_print_instr ) printf("os dup; ");
+            if( debug_print_instr ) ph_printf("os dup; ");
             jit_os_push( j, jit_refinc( j, jit_os_top( j ) ) );
             break;
 
         case opcode_os_drop:
-            if( debug_print_instr ) printf("os drop; ");
+            if( debug_print_instr ) ph_printf("os drop; ");
             jit_refdec( j, jit_os_pop( j ) );
             break;
 
         case opcode_os_pull32:
-            if( debug_print_instr ) printf("os pull; ");
+            if( debug_print_instr ) ph_printf("os pull; ");
             {
                 int pos = pvm_code_get_int32(code);
                 jit_os_push( j, jit_refinc( j, jit_os_pull( j, pos ) )  ); // TODO XXX load must refinc!
@@ -776,7 +776,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
                 break;
             }
 
-            printf("JIT: Unknown op code 0x%X\n", instruction );
+            ph_printf("JIT: Unknown op code 0x%X\n", instruction );
 
             return ENOENT;
         }

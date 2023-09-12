@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 //#include <event.h>
 //#include <spinlock.h>

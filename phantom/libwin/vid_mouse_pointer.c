@@ -13,6 +13,8 @@
 #include <video/screen.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+
 #define ms_hot_shift_x 0
 // #define ms_hot_shift_y (mpointer->ysize)
 #define ms_hot_shift_y 0
@@ -66,10 +68,10 @@ void vid_mouse_draw_deflt()
 
 void vid_mouse_set_cursor_deflt(drv_video_bitmap_t *nc)
 {
-    if(screencopy) { free(screencopy); screencopy = 0; }
+    if(screencopy) { ph_free(screencopy); screencopy = 0; }
     mpointer = nc;
     if(mpointer)
-        screencopy = malloc(drv_video_bitmap_bytes( nc->xsize, nc->ysize ) );
+        screencopy = ph_malloc(drv_video_bitmap_bytes( nc->xsize, nc->ysize ) );
 }
 
 void vid_mouse_off_deflt()

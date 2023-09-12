@@ -5,7 +5,7 @@ void gl_print_matrix( const float *m)
    int i;
 
    for (i=0;i<4;i++) {
-      printf("%f %f %f %f\n", m[i], m[4+i], m[8+i], m[12+i] );
+      ph_printf("%f %f %f %f\n", m[i], m[4+i], m[8+i], m[12+i] );
    }
 }
 

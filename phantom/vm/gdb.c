@@ -82,8 +82,8 @@
 
 
 
-#include <string.h>
-#include <assert.h>
+#include <ph_string.h>
+#include <phantom_assert.h>
 #include "vm/internal_da.h"
 #include "vm/exec.h"
 
@@ -201,14 +201,14 @@ static void getpacket(char *buffer)
 
     while(1)
     {
-        printf("GDB read pkt " );
+        ph_printf("GDB read pkt " );
         /*
          * wait around for the start character,
          * ignore all other characters
          */
         while ((ch = (getDebugChar() & 0x7f)) != '$') ;
 
-        //printf("GDB pkt start " );
+        //ph_printf("GDB pkt start " );
 
         checksum = 0;
         xmitcsum = -1;
@@ -226,7 +226,7 @@ static void getpacket(char *buffer)
             count = count + 1;
         }
 
-        //printf("GDB pkt # " );
+        //ph_printf("GDB pkt # " );
 
         if (count >= BUFMAX)
             continue;
@@ -238,7 +238,7 @@ static void getpacket(char *buffer)
             xmitcsum = hex(getDebugChar() & 0x7f) << 4;
             xmitcsum |= hex(getDebugChar() & 0x7f);
 
-            //printf("GDB got csum " );
+            //ph_printf("GDB got csum " );
 
             if (checksum != xmitcsum)
                 putDebugChar('-');	/* failed checksum */
@@ -256,7 +256,7 @@ static void getpacket(char *buffer)
                     /*
                      * remove sequence chars from buffer
                      */
-                    count = strlen(buffer);
+                    count = ph_strlen(buffer);
                     for (i=3; i <= count; i++)
                         buffer[i-3] = buffer[i];
                 }
@@ -265,7 +265,7 @@ static void getpacket(char *buffer)
 
         if(checksum != xmitcsum)
         {
-            printf("GDB my check = %x, his = %x", checksum, xmitcsum );
+            ph_printf("GDB my check = %x, his = %x", checksum, xmitcsum );
             continue;
         }
         break;
@@ -444,7 +444,7 @@ void gdb_stub_get_non_pt_regs(gdb_pt_regs *regs)
             fpregs->fprs[3].d=
             fpregs->fprs[5].d=
             fpregs->fprs[7].d=0;
-        memset(&fpregs->fprs[8].d,0,sizeof(freg_t)*8);
+        ph_memset(&fpregs->fprs[8].d,0,sizeof(freg_t)*8);
         }
     */
 }
@@ -474,10 +474,10 @@ static void report_tid_extra_info(char *sbuf, int bufmax, int tid)
 
     char name[BUFMAX];
 
-    strlcpy( name, "NameWith,Comma", BUFMAX );
+    ph_strlcpy( name, "NameWith,Comma", BUFMAX );
     repl( name, ',', '?' );
 
-    snprintf(
+    ph_snprintf(
              sbuf, bufmax, "status=%s,name=%s,object=%x,",
              //(t_run ? "run" : "stop"),
              "run",
@@ -514,12 +514,12 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
      * Wait for input from remote GDB
      */
     while (1) {
-        //printf("GDB wait for cmd\n" );
+        //ph_printf("GDB wait for cmd\n" );
 
         output_buffer[0] = 0;
         getpacket(input_buffer);
 
-        printf("GDB cmd '%s'\n", input_buffer );
+        ph_printf("GDB cmd '%s'\n", input_buffer );
 
         switch (input_buffer[0])
         {
@@ -565,7 +565,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                  hex2mem (ptr, (char *)regs->fp_regs,sizeof(s390_fp_regs), FALSE);
                  gdb_stub_set_non_pt_regs(regs);
                  */
-                strcpy(output_buffer,"OK");
+                ph_strcpy(output_buffer,"OK");
             }
             break;
 
@@ -579,13 +579,13 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 && *ptr++ == ','
                 && hexToInt(&ptr, &length))
             {
-                printf("GDB read mem %d @ 0x%p\n", (int)length, (void *)addr );
+                ph_printf("GDB read mem %d @ 0x%p\n", (int)length, (void *)addr );
                 if (mem2hex((char *)addr, output_buffer, length, 1))
                     break;
-                strcpy (output_buffer, "E03");
+                ph_strcpy (output_buffer, "E03");
             }
             else
-                strcpy(output_buffer,"E01");
+                ph_strcpy(output_buffer,"E01");
             break;
 
             /*
@@ -600,12 +600,12 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 && *ptr++ == ':')
             {
                 if (hex2mem(ptr, (char *)addr, length, 1))
-                    strcpy(output_buffer, "OK");
+                    ph_strcpy(output_buffer, "OK");
                 else
-                    strcpy(output_buffer, "E03");
+                    ph_strcpy(output_buffer, "E03");
             }
             else
-                strcpy(output_buffer, "E02");
+                ph_strcpy(output_buffer, "E02");
             break;
 
             /*
@@ -665,12 +665,12 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
             ptr = &input_buffer[1];
             {
                 static int startTid = 0;
-                if( 0 == strcmp( ptr, "fThreadInfo" ))
+                if( 0 == ph_strcmp( ptr, "fThreadInfo" ))
                 {
                     startTid = 0;
                     goto sendThreadList;
                 }
-                if( 0 == strcmp( ptr, "sThreadInfo" ))
+                if( 0 == ph_strcmp( ptr, "sThreadInfo" ))
                 {
                 sendThreadList:
                     ;
@@ -685,28 +685,28 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     if(startTid == 0)
                     {
                         // just one thread in pvm_test yet
-                        snprintf( output_buffer, sizeof(output_buffer), "m %lx", (unsigned long) 1 );
+                        ph_snprintf( output_buffer, sizeof(output_buffer), "m %lx", (unsigned long) 1 );
                         startTid++;
                     }
                     else
                     {
-                        //printf("startTid != 0\n" );
-                        snprintf( output_buffer, sizeof(output_buffer), "l" );
+                        //ph_printf("startTid != 0\n" );
+                        ph_snprintf( output_buffer, sizeof(output_buffer), "l" );
                     }
 #endif
                     break;
                 }
 
                 int tid;
-                if( 1 == sscanf( ptr, "ThreadExtraInfo,%d", &tid ) )
+                if( 1 == ph_sscanf( ptr, "ThreadExtraInfo,%d", &tid ) )
                 {
                     char sbuf[BUFMAX];
                     report_tid_extra_info(sbuf, BUFMAX, tid);
-                    mem2hex(sbuf, output_buffer, strlen(sbuf), 0);
+                    mem2hex(sbuf, output_buffer, ph_strlen(sbuf), 0);
                     break;
                 }
 
-                //strcpy(output_buffer,"E00");
+                //ph_strcpy(output_buffer,"E00");
                 break;
 
             }
@@ -727,8 +727,8 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 {
                     //void *a = hal_object_space_address();
                     //mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
-                    //printf(":p answer '%s'\n", output_buffer );
-                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (unsigned long) hal_object_space_address() );
+                    //ph_printf(":p answer '%s'\n", output_buffer );
+                    ph_snprintf( output_buffer, sizeof(output_buffer), "%lx", (unsigned long) hal_object_space_address() );
                     break;
                 }
 
@@ -737,7 +737,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 {
                     if( (!hexToInt(&ptr, &addr)) || *ptr++ != ',' || *ptr++ == 0 )
                     {
-                        strcpy(output_buffer, "E03"); // TODO check 03
+                        ph_strcpy(output_buffer, "E03"); // TODO check 03
                         break;
                     }
 
@@ -745,7 +745,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     int method = (int)addr;
 
                     create_and_run_object(class_name, method );
-                    strcpy(output_buffer, "OK");
+                    ph_strcpy(output_buffer, "OK");
                     break;
                 }
 
@@ -755,28 +755,28 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     pvm_object_t cns = pvm_create_string_object(ptr);
                     if( pvm_is_null(cns) )
                     {
-                        strcpy(output_buffer, "E03"); // TODO check 03
+                        ph_strcpy(output_buffer, "E03"); // TODO check 03
                         break;
                     }
 
                     pvm_object_t c = pvm_exec_lookup_class_by_name(cns);
                     if( pvm_is_null(c) )
                     {
-                        strcpy(output_buffer, "E02"); // TODO check 02
+                        ph_strcpy(output_buffer, "E02"); // TODO check 02
                         break;
                     }
 
                     pvm_object_t o = pvm_create_object(c);
                     if( pvm_is_null(o) )
                     {
-                        strcpy(output_buffer, "E01"); // TODO check 01
+                        ph_strcpy(output_buffer, "E01"); // TODO check 01
                         break;
                     }
 
                     // TODO add to kernel objects list (object must be available from root)
 
-                    //snprintf( output_buffer, sizeof(output_buffer), "%lx, %lx", (long)o, (long)o.interface  );
-                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (long)o );
+                    //ph_snprintf( output_buffer, sizeof(output_buffer), "%lx, %lx", (long)o, (long)o.interface  );
+                    ph_snprintf( output_buffer, sizeof(output_buffer), "%lx", (long)o );
                     break;
                 }
 
@@ -785,19 +785,19 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     addr_t mode;
                     if(hexToInt(&ptr, &mode))
                     {
-                        printf("GDB snapshots %s\n", mode ? "on" : "off" );
+                        ph_printf("GDB snapshots %s\n", mode ? "on" : "off" );
                         // TODO implement
-                        strcpy(output_buffer,"E01");
-                        //snprintf( output_buffer, sizeof(output_buffer), "OK" );
+                        ph_strcpy(output_buffer,"E01");
+                        //ph_snprintf( output_buffer, sizeof(output_buffer), "OK" );
                     }
                     else
-                        strcpy(output_buffer,"E01");
+                        ph_strcpy(output_buffer,"E01");
 
                     break;
                 }
 
             default:
-                strcpy(output_buffer,"E00"); // TODO check
+                ph_strcpy(output_buffer,"E00"); // TODO check
 
             }
 
@@ -810,7 +810,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
          * reply to the request
          */
 
-        printf("GDB answer '%s'\n", output_buffer );
+        ph_printf("GDB answer '%s'\n", output_buffer );
 
         putpacket(output_buffer);
 

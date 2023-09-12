@@ -28,19 +28,19 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
 
     if( f == NULL )
     {
-        //if(debug_print) printf("Can't open %s\n", fn );
+        //if(debug_print) ph_printf("Can't open %s\n", fn );
         return 1;
     }
 
     fseek( f, 0, SEEK_END );
     long fsize = ftell(f);
-    //printf("fsize %d\n", fsize );
+    //ph_printf("fsize %d\n", fsize );
 
-    unsigned char *code = (unsigned char *)malloc(fsize);
+    unsigned char *code = (unsigned char *)ph_malloc(fsize);
     if( code == NULL )
     {
         fclose( f );
-        printf("Can't alloc mem\n" );
+        ph_printf("Can't alloc mem\n" );
         return 1;
     }
 
@@ -48,8 +48,8 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     int ret = fread( code, 1, fsize, f );
     if( fsize != ret )
     {
-        printf("Can't read code: ret = %d\n", ret );
-        free( code );
+        ph_printf("Can't read code: ret = %d\n", ret );
+        ph_free( code );
         fclose( f );
         return 1;
     }
@@ -84,7 +84,7 @@ int bulk_read_f( int count, void *data )
 
     if( count > left ) count = left;
 
-    memcpy( data, bulk_read_pos, count );
+    ph_memcpy( data, bulk_read_pos, count );
 
     bulk_read_pos += count;
 
@@ -94,17 +94,17 @@ int bulk_read_f( int count, void *data )
 
 void save_mem( void *mem, int size )
 {
-    printf("Creating mem dump file\n" );
+    ph_printf("Creating mem dump file\n" );
     FILE * f = (FILE *)fopen( "wsnap.dump", "wb" );
 
     if( f == NULL )
     {
-        printf("Can't create mem dump file\n" );
+        ph_printf("Can't create mem dump file\n" );
     }
 
     fseek( f, 0, SEEK_END );
     if( 1 != fwrite( mem, size, 1, f ) )
-        printf("Can't save mem dump, IO error\n" );
+        ph_printf("Can't save mem dump, IO error\n" );
 
     fclose( f );
 }

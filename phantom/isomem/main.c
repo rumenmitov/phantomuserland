@@ -9,7 +9,8 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <string.h>
+#include <ph_string.h>
+// #include <ph_malloc.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
 #include <kernel/boot.h>
@@ -20,7 +21,7 @@
 #include <hal.h>
 #include <multiboot.h>
 #include <elf.h>
-#include <unix/uuprocess.h>
+// #include <unix/uuprocess.h>
 
 
 
@@ -30,6 +31,21 @@
 
 
 #include <kernel/amap.h>
+
+#include <vm/alloc.h>
+#include <kernel/dpc.h>
+#include "svn_version.h"
+#include <video/internal.h>
+#include "vm_map.h"
+#include "pager.h"
+#include <kernel/snap_sync.h>
+#include <vm/root.h>
+
+#include <init_routines.h>
+
+#include <ph_malloc.h>
+#include <ph_io.h>
+#include <ph_os.h>
 
 static amap_t ram_map;
 
@@ -43,6 +59,9 @@ static amap_t ram_map;
 
 #include "genode_disk.h"
 
+#include "snap_internal.h"
+#include "kernel/trap.h"
+
 // Headless video driver
 
 struct drv_video_screen_t        *video_drv = 0;
@@ -53,9 +72,34 @@ extern int pvm_video_init(); // We need it only here
 
 // Init functions
 
+
+void start_phantom();
+
+
 void
 phantom_multiboot_main()
 {
+    // TODO : REMOVE
+
+
+    char test_string[] = "hello there!"; 
+    char* a = (char*)ph_malloc(ph_strlen(test_string) + 1);
+    if (ph_memcpy(a, test_string, ph_strlen(test_string) + 1) != a){
+        ph_printf("memcpy returned not dest address!!!\n");
+    }
+    if (ph_memcmp(a, test_string, ph_strlen(test_string) + 1)){
+        ph_free(a);
+        ph_printf("not equal!!!\n");
+    }
+    
+    // ph_printf("a[]=%c\n", a[0]);
+    ph_printf("a[]=%c\n", a[1]);
+    ph_printf("a[]=%c\n", a[12]);
+    ph_printf("a[]=%c\n", a[13]);
+
+    ph_printf("a[]=%c\n", a[14]);
+    ph_free(a);
+
     // Assuming we don't really need arch and board init. If we need, enable and implement
     /*
         arch_init_early();
@@ -138,14 +182,17 @@ phantom_multiboot_main()
 
 int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
-    printf("Waiting...\n");
+    ph_printf("Waiting...\n");
     // wait_for_continue();
+
+    // Test sleep
+    // hal_sleep_msec(100);
 
     // Running adapters tests
 
 	// if (!test_thread_creation())
 	// {
-	// 	printf("Test creation test failed!\n");
+	// 	ph_printf("Test creation test failed!\n");
 	// 	return;
 	// }
 
@@ -155,7 +202,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     (void) envp;
 
-    snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
+    ph_snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
 
     // Runs all functions defined with macro INIT_ME
     run_init_functions( INIT_LEVEL_PREPARE ); // OK
@@ -241,7 +288,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     {
         extern const char* SVN_Version;
         extern struct utsname phantom_uname;
-        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+        ph_strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
     //pressEnter("will run DPC");
@@ -249,7 +296,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options(); // OK. Let's keep it
 
 #if defined(ARCH_arm) && 0
@@ -313,7 +360,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
         drv_video_init_windows();
         init_main_event_q();
-        init_new_windows();
+        // init_new_windows();
     }
 
     //SHOW_FLOW0( 0, "Will sleep" );
@@ -360,7 +407,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     // If this is test run, switch to test code
     // -----------------------------------------------------------------------
 #if !defined(ARCH_arm)
-    if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
+    if( argc >= 3 && (0 == ph_strcmp( argv[1], "-test" )) )
     {
         SHOW_FLOW0( 0, "Sleep before tests to settle down boot activities" );
         hal_sleep_msec( 2000 );
@@ -368,7 +415,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
         run_test( argv[2], argv[3] );
 	// CI: this message is being watched by CI scripts (ci-runtest.sh)
         SHOW_FLOW0( 0, "Test done, reboot");
-        exit(0);
+
+        // XXX : Do proper exit!
+        // exit(0);
+        hal_sleep_msec(1000000);
     }
 #else
     {
@@ -384,6 +434,11 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     run_test( "all", "" );
 
+#ifdef PHANTOM_TESTS_ONLY 
+    ph_printf("\n\n======================\n");
+    ph_printf("Testing is done!\n");
+#endif
+
     // Probably not needed
     /*
 #ifdef ARCH_ia32
@@ -398,6 +453,94 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     //pressEnter("will start phantom");
     start_phantom();
+
+
+    // If we are in test environment, start tests. Otherwise run VM
+
+    #ifdef PHANTOM_TESTS_ONLY
+    ph_printf("Starting persistent memory test\n");
+    {
+        // Trying to trigger page faults on certain pages
+
+        // TODO : Move to a separate test
+        // Calling page faults on first 200 pages
+        // hal_printf("-- Initializing first 200 pages (test)\n");
+
+        int write_data = 1;
+
+        for (unsigned long i = 0 ; i < 200 ; i++){
+            hal_printf("-- Calling pf handler %d (test)\n", i);
+
+            struct trap_state ts_stub;
+            ts_stub.state = 0;
+            genode_pf_handler_wrapper((void*)(i * PAGE_SIZE), 1, -1, &ts_stub);
+
+            hal_printf("-- Checking access (test)\n");
+
+
+            if (i == 0){
+                // Firstly, check if we have something in a snapshot. If we have, then we just verify that it is fine
+                char test_string[] = "phantom snapshot test string is here";
+                char* addr_to_check = (char*)hal_object_space_address() + sizeof(struct pvm_object_storage);
+
+                if (ph_strncmp(addr_to_check, test_string, ph_strlen(test_string)) == 0){
+                    ph_printf("-- Detected test string in 0th page of obj.space. Will check if data is correct\n");
+                    write_data = 0;
+                } else {
+                    // to snapshot verification to work pages should contain only objects
+                    // so, let's declare a single object of large size
+
+                    // Write an object header at the very beginning of object space
+                    struct pvm_object_storage header = {0};
+                    header._ah.object_start_marker = PVM_OBJECT_START_MARKER;
+                    // let it be of the maximum possible size
+                    header._ah.exact_size = ~0;
+                    ph_memcpy((void*)hal_object_space_address(), &header, sizeof(struct pvm_object_storage));
+
+                    // Writing a test string
+
+                    ph_memcpy((void*)addr_to_check, test_string, ph_strlen(test_string));
+                }
+
+                // Skipping the rest
+                continue;
+            }
+            
+            
+            // for (unsigned long j = 1; j <= i; j++)
+            {
+                // char* test_addr = (char*)hal_object_space_address() + j * PAGE_SIZE;
+                char* test_addr = (char*)hal_object_space_address() + i * PAGE_SIZE;
+
+                if (write_data){
+                    // Write some test data
+                    for (size_t k = 0; k < 16; k++){
+                        *(test_addr + k) = 'T';
+                    }
+                    // Write a page number
+                    *((unsigned long*)(test_addr + 16)) = i;
+                }
+
+                // Check that we actually wrote what we want
+
+                for (size_t k = 0; k < 16; k++){
+                    assert(*(test_addr + k) == 'T');
+                }
+                assert(*((unsigned long*)(test_addr + 16)) == i);
+
+            }
+        }
+
+        // Performing a snapshot
+
+        do_snapshot();
+
+        ph_printf("Finishing the test\n");
+
+    }
+    return 0;
+    #endif
+
 
 #ifdef ARCH_ia32
     phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
@@ -418,6 +561,16 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 #endif
 
 
+    // SHOW_FLOW0( 2, "Initializing first 200 pages with write faults");
+    // // for (int i=0; i< 200;i++){
+    // //     char* obj_addr = hal_object_space_address() + i * PAGE_SIZE;
+    // //     *obj_addr = 0x0;
+    // // }
+    // for (int i=0; i< 200;i++){
+    //     char* obj_addr = hal_object_space_address() + i * PAGE_SIZE;
+        
+    //     *obj_addr = 0x0;
+    // }
 
 
     SHOW_FLOW0( 2, "Will init phantom root... ");
@@ -447,12 +600,12 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
     //init_wins(u_int32_t ip_addr);
 
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    ph_printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
     {
         hal_sleep_msec(60000*13);
-        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        ph_printf("\nWILL CRASH ON PURPOSE\n\n" );
         hal_sleep_msec(20000);
         hal_cpu_reset_real();
     }
@@ -474,7 +627,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 void start_phantom()
 {
 
-    printf("DEBUG!!! STARTING PHANTOM\n");
+    ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");
     SHOW_FLOW0( 2, "Will init snap interlock... ");

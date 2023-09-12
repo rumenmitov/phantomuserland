@@ -46,7 +46,7 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
         {
             bit_zbmover_to_screen = (void *)auto_rgba2rgba_zbmove;
 
-            printf("use sse bitblt mover\n");
+            ph_printf("use sse bitblt mover\n");
         }
 #endif
         bit_mover_byte_step = 4;

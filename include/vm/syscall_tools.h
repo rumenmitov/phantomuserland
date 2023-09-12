@@ -66,7 +66,7 @@
     } while(0)
 
 #define DEBUG_INFO \
-    if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __func__, __FILE__, __LINE__ )
+    if( debug_print) ph_printf("\n\n --- syscall %s at %s line %d called ---\n\n", __func__, __FILE__, __LINE__ )
 
 // --------------------------------------------------------------------------
 // Int/string parameters shortcuts

@@ -1,7 +1,7 @@
 #ifndef _EV_PRIVATE_H
 #define _EV_PRIVATE_H
 
-#include <time.h>
+#include <ph_time.h>
 #include <event.h>
 
 

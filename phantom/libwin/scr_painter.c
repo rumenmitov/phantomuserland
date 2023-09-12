@@ -20,7 +20,7 @@
 
 #if VIDEO_NEW_PAINTER
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <kernel/init.h>
 #include <kernel/libkern.h>
 #include <kernel/sem.h>
@@ -28,8 +28,11 @@
 #include <queue.h>
 #include <phantom_libc.h>
 
+#include <ph_malloc.h>
+
 #include <kernel/snap_sync.h>
 
+#include <init_routines.h>
 
 static tid_t            painter_tid = -1;
 static hal_sem_t        painter_sem;
@@ -63,7 +66,7 @@ static bool paint_q_empty(void)
 
 static pqel_t * mkel( rect_t *r )
 {
-    pqel_t *new_el = calloc(1,sizeof(pqel_t));
+    pqel_t *new_el = ph_calloc(1,sizeof(pqel_t));
     if( 0 != new_el )
         new_el->r = *r;
     
@@ -107,7 +110,7 @@ again:
         // qe includes r - skip addition
         if( rect_includes( &pqel->r, r ) )
         {
-            free( new_el );
+            ph_free( new_el );
             goto finish;
         }
     }
@@ -242,11 +245,11 @@ static void repaint_q(void)
     {
         pqel_t *temp_pqel;
 
-        printf("Printing scr painter queue:\n");
+        ph_printf("Printing scr painter queue:\n");
         int idx = 0;
         queue_iterate( &rect_list, temp_pqel, pqel_t *, chain )
         {
-            printf("Q[%d] me=%p, prev=%p, next=%p\n", idx++, temp_pqel, temp_pqel->chain.prev, temp_pqel->chain.next);
+            ph_printf("Q[%d] me=%p, prev=%p, next=%p\n", idx++, temp_pqel, temp_pqel->chain.prev, temp_pqel->chain.next);
         }
     }
 
@@ -273,13 +276,13 @@ static void repaint_q(void)
         //     (&rect_list)->next = ___next; 
         // }
 
-        printf("!!!: Processedd scr queue element!!!\n");
+        ph_printf("!!!: Processedd scr queue element!!!\n");
 
         // TODO : REMOVE!!!
         // break;
 
         // rect_t r = pqel->r;
-        // free(pqel);
+        // ph_free(pqel);
 
 #if !USE_ZBUF_SHADOW
         // scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?
@@ -311,7 +314,7 @@ static void painter_thread(void *arg)
 
 }
 
-static void start_painter_thread(void)
+void start_painter_thread(void)
 {
     paint_q_init();
 

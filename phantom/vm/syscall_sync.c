@@ -19,7 +19,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
-#include <time.h>
+#include <ph_time.h>
 #include <threads.h>
 
 #include <kernel/snap_sync.h>
@@ -210,7 +210,7 @@ static int si_mutex_9_unlock( pvm_object_t me, pvm_object_t *ret, struct data_ar
     switch(rc)
     {
     case EINVAL:
-        printf("mutex unlock - not owner");
+        ph_printf("mutex unlock - not owner");
         SYSCALL_THROW_STRING( "mutex unlock - not owner" );
         // unreached
         break;

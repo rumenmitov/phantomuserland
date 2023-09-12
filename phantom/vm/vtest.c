@@ -18,7 +18,7 @@
 
 void videotest(void)
 {
-    //printf("\n\nTEST\n\n");
+    //ph_printf("\n\nTEST\n\n");
     //SHOW_FLOW0( 1, "videotest()" );
     //drv_video_window_t *w1 = drv_video_window_create( WXS, WYS, 350, 350, COLOR_BLACK, "Test 2", WFLAG_WIN_DECORATED );
 
@@ -48,7 +48,7 @@ void videotest(void)
 
     if( font1 == INVALID_POOL_HANDLE )
     {
-        printf("\n\nTTF 1 FAIL\n\n");
+        ph_printf("\n\nTTF 1 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font1,
@@ -62,7 +62,7 @@ void videotest(void)
     if( font2 == INVALID_POOL_HANDLE )
     {
         //w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
-        printf("\n\nTTF 2 FAIL\n\n");
+        ph_printf("\n\nTTF 2 FAIL\n\n");
     }
     else
         w_ttfont_draw_string( w, font2,
@@ -99,7 +99,7 @@ static void mkFlamePalette()
 {
     u_int8_t i;
 
-    memset( palette, 0, sizeof(palette) );
+    ph_memset( palette, 0, sizeof(palette) );
 
     for( i = 0; i < MaxColor; i++ )
         palette[i] = Hsi2Rgb(4.6-1.5*i/MaxColor,i/MaxColor,i/MaxColor);
@@ -154,7 +154,7 @@ void genflame( char *video, int vsize, int xsize )
 void flame(drv_video_window_t *w)
 {
     int vsize = w->xsize * w->ysize;
-    char *video = calloc( 1, vsize );
+    char *video = ph_calloc( 1, vsize );
 
     mkFlamePalette();
 
@@ -236,7 +236,7 @@ void videotest()
         FILE *f = fopen(bpm, "r" );
         if(f == NULL )
         {
-            printf("can't open %s\n", bpm );
+            ph_printf("can't open %s\n", bpm );
             exit(33);
         }
 
@@ -244,9 +244,9 @@ void videotest()
         long size = ftell( f );
         fseek( f, 0, SEEK_SET );
 
-        printf("Size of %s is %ld\n", bpm, size );
+        ph_printf("Size of %s is %ld\n", bpm, size );
 
-        char *data = malloc(size);
+        char *data = ph_malloc(size);
 
         fread( data, size, 1, f );
         fclose(f);
@@ -254,10 +254,10 @@ void videotest()
         struct drv_video_bitmap_t *bmp;
         int result = bmp_ppm_load( &bmp, data );
 
-        free(data);
+        ph_free(data);
 
         if(result)
-            printf("can't parse %s: %d\n", bpm, result );
+            ph_printf("can't parse %s: %d\n", bpm, result );
         else
         {
             drv_video_bitblt(bmp->pixel, 0, 0, bmp->xsize, bmp->ysize, 0xFF );
@@ -288,7 +288,7 @@ void videotest()
     }
 #endif
 
-    //drv_video_window_t *w = malloc(drv_video_window_bytes(140,80));
+    //drv_video_window_t *w = ph_malloc(drv_video_window_bytes(140,80));
     //w->xsize = 140;
     //w->ysize = 80;
 

@@ -459,7 +459,7 @@ void pvm_restart_io( pvm_object_t o )
     //da->connected = 0;
     //if( da->connected )
     {
-        printf("restarting IO - unimpl!");
+        ph_printf("restarting IO - unimpl!");
     }
 
 }

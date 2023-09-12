@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <ph_os.h>
 #include "zgl.h"
 
 void gl_fatal_error(char *format, ...) //__attribute__((noreturn))
@@ -11,7 +12,7 @@ void gl_fatal_error(char *format, ...) //__attribute__((noreturn))
   //vfprintf(stderr,format,ap);
   //fprintf(stderr,"\n");
 
-  vprintf(format,ap);
+  ph_vprintf(format,ap);
 
   exit(1);
 

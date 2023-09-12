@@ -21,13 +21,15 @@
 //#include <drv_video_screen.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 //#include <video.h>
 #include <video/rect.h>
 #include <video/zbuf.h>
 #include <video/screen.h>
 
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 
 /** Z buffer itself. */
@@ -48,12 +50,12 @@ static rect_t zbuf_rect;
 
 void scr_zbuf_init()
 {
-    if(zbuf) free(zbuf);
+    if(zbuf) ph_free(zbuf);
 
     zbsize = scr_get_xsize() * scr_get_ysize() * sizeof(zbuf_t);
     zbwidth = scr_get_xsize();
 
-    zbuf = malloc( zbsize );
+    zbuf = ph_malloc( zbsize );
 
     zbuf_rect.x = 0;
     zbuf_rect.y = 0;
@@ -63,7 +65,7 @@ void scr_zbuf_init()
     scr_zbuf_reset();
 
 #if USE_ZBUF_SHADOW
-    zbuf_shadow = malloc( zbsize );
+    zbuf_shadow = ph_malloc( zbsize );
     scr_zbuf_reset_shadow();
 #endif
 }
@@ -72,14 +74,14 @@ void scr_zbuf_init()
 
 void scr_zbuf_reset()
 {
-    memset( zbuf, 0, zbsize );
+    ph_memset( zbuf, 0, zbsize );
 }
 
 /* wrong! not byte but zbuf_t!
 void scr_zbuf_reset_z(zbuf_t z)
 {
     //LOG_FLOW( 1, "%d", z );
-    memset( zbuf, z, zbsize );
+    ph_memset( zbuf, z, zbsize );
 }
 */
 
@@ -164,7 +166,7 @@ void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
         assert( p >= (void*)zbuf );
         assert( p+len <= ((void*)zbuf)+zbsize );
 
-        memset( p, zpos, len );
+        ph_memset( p, zpos, len );
     }
 }
 #else
@@ -202,7 +204,7 @@ static void do_scr_zbuf_reset_square_z(zbuf_t *target, int x, int y, int xsize, 
         assert( p >= (void*)target );
         assert( p+len <= ((void*)target)+zbsize );
 
-        memset( p, zpos, len );
+        ph_memset( p, zpos, len );
     }
 }
 
@@ -226,7 +228,7 @@ static void scr_zbuf_reset_shadow(void)
 {
     // in shadow -1 means not active (== ZBUF_TOP) - not copied to zbuf no application
     //scr_zbuf_request_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
-    memset( zbuf_shadow, 0xFF, zbsize );
+    ph_memset( zbuf_shadow, 0xFF, zbsize );
 }
 
 void scr_zbuf_apply_shadow(void)
@@ -277,7 +279,7 @@ void scr_zbuf_dump()
     int ysize = scr_get_ysize();
     int xsize = scr_get_xsize();
 
-    printf("zbuf dump %d*%d\n", xsize, ysize );
+    ph_printf("zbuf dump %d*%d\n", xsize, ysize );
     for(y = 0; y < ysize; y++)
     {
         int x;
@@ -286,9 +288,9 @@ void scr_zbuf_dump()
         for( x = 0; x < xsize; x++ )
         {
             int linpos = x + y*xsize;
-            printf("%02X", zbuf[linpos] );
+            ph_printf("%02X", zbuf[linpos] );
         }
-        printf("\n");
+        ph_printf("\n");
     }
 }
 

@@ -12,7 +12,7 @@
 #include <video/vops.h>
 #include <video/internal.h>
 #include <video/screen.h>
-#include <assert.h>
+#include <phantom_assert.h>
 #include <sys/types.h>
 
 #ifdef PHANTOM_GENODE
@@ -45,7 +45,7 @@ void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize,
 
 void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
 {
-    //printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
+    //ph_printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
     assert(video_drv->screen != 0);
 
     // we can't do it here - mouse itself uses us!
@@ -70,7 +70,7 @@ void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize,
     {
         // This one is easy candy
 
-        //printf("yshift = %d\n", yshift );
+        //ph_printf("yshift = %d\n", yshift );
         from += xsize*yshift; // Just skip some lines;
         ysize -= yshift; // Less lines to go
         ypos += yshift;
@@ -81,7 +81,7 @@ void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize,
     assert(xshift >= 0);
 
 
-    //printf("xshift = %d\n", xshift );
+    //ph_printf("xshift = %d\n", xshift );
 
     // xlen is how many pixels to move for each line
     int xlen = xsize;
@@ -108,7 +108,7 @@ void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize,
     int wline = 0;
 
 
-    //printf("xlen = %d, sline = %d yafter=%d \n", xlen, sline, yafter );
+    //ph_printf("xlen = %d, sline = %d yafter=%d \n", xlen, sline, yafter );
 
     if(reverse)
     {

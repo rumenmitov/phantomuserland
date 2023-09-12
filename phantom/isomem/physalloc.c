@@ -8,10 +8,10 @@
 //  *
 // **/
 
-// #include <string.h>
-// #include <stdio.h>
+// #include <ph_string.h>
+// // #include <stdio.h>
 // #include <phantom_assert.h>
-// #include <malloc.h>
+// #include <ph_malloc.h>
 
 // #include <kernel/physalloc.h>
 // #include <kernel/debug.h>
@@ -53,7 +53,7 @@
 
 //     // Mark everything used.
 //     // Caller later will free what is supposed to be free
-//     memset( arena->map, 0xFF, n_map_elems );
+//     ph_memset( arena->map, 0xFF, n_map_elems );
 
 //     arena->alloc_last_pos = 0;
 //     arena->n_used_pages = n_alloc_units;
@@ -74,7 +74,7 @@
 // void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
 // {
 //     int n_map_elems = ((n_alloc_units-1)/8)+1;
-//     void *mapbuf = (void *)malloc(n_map_elems);
+//     void *mapbuf = (void *)ph_malloc(n_map_elems);
 //     do_phantom_phys_alloc_init(arena, n_alloc_units, n_map_elems, mapbuf);
 // }
 
@@ -249,7 +249,7 @@
 //         return ENOMEM;  // not found
 //     }
 
-//     memset( &(arena->map[arena->alloc_last_pos - N]), ~0, elem_no*BITS_PER_ELEM/8 );
+//     ph_memset( &(arena->map[arena->alloc_last_pos - N]), ~0, elem_no*BITS_PER_ELEM/8 );
 
 //     //partial elements:
 //     map_elem_t elem = arena->map[arena->alloc_last_pos-1];
@@ -275,7 +275,7 @@
 
 
 // #include <sys/libkern.h>
-// #include <stdio.h>
+// // #include <stdio.h>
 
 // long phantom_phys_stat_arena( physalloc_t *arena )
 // {

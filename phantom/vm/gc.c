@@ -30,8 +30,8 @@
 #define debug_allocation 0
 
 
-#define DEBUG_PRINT(a)   if (debug_allocation) printf(a)
-#define DEBUG_PRINT1(a,b)  if (debug_allocation) printf(a,b)
+#define DEBUG_PRINT(a)   if (debug_allocation) ph_printf(a)
+#define DEBUG_PRINT1(a,b)  if (debug_allocation) ph_printf(a,b)
 
 
 
@@ -106,7 +106,7 @@ void run_gc()
     //TODO: refine synchronization
 
     if (debug_memory_leaks) pvm_memcheck();  // visualization
-    if (debug_memory_leaks) printf("gc started...  ");
+    if (debug_memory_leaks) ph_printf("gc started...  ");
 
 
     cycle_root_buffer_clear(); // so two types of gc could coexists
@@ -123,9 +123,9 @@ void run_gc()
     int freed = free_unmarked();
 
     if ( freed > 0 )
-       printf("\ngc: %i objects freed\n", freed);
+       ph_printf("\ngc: %i objects freed\n", freed);
 
-    if (debug_memory_leaks) printf("gc finished!\n");
+    if (debug_memory_leaks) ph_printf("gc finished!\n");
     if (debug_memory_leaks) pvm_memcheck();  // visualization
 
     //TODO refine synchronization
@@ -345,15 +345,15 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
     // Can be used to trace some specific object's access
     //if( p != (void *)0x7acbe56c )
     //if( p != (void *)0x7acbd0e8 )
-    //if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
+    //if( 0 != ph_strncmp(msg, "gc", 2) || !debug_memory_leaks )
     //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) )
         return;
-    printf("touch %s %p, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
+    ph_printf("touch %s %p, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
     print_object_flags(p);
     //dumpo(p);
     //getchar();
-    printf("\n"); // for GDB to break here
+    ph_printf("\n"); // for GDB to break here
 #endif
 }
 
@@ -373,8 +373,8 @@ void do_ref_dec_p(pvm_object_storage_t *p)
     //if(p->_ah.refCount <= 0) {
     /*if( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) ) {
        //DEBUG_PRINT("Y");
-        printf(" %d", p->_ah.refCount );
-        printf(" @ 0x%X", p); getchar();
+        ph_printf(" %d", p->_ah.refCount );
+        ph_printf(" @ 0x%X", p); getchar();
     }*/
 
     if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!

@@ -1,4 +1,4 @@
-#include <string.h>
+#include <ph_string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,7 +15,7 @@ void CUnitInitialize(void)
 {
     if (CU_initialize_registry() != CUE_SUCCESS) {
         //fprintf(stderr, "Failed to initialize the CUnit registry: %d\n", CU_get_error());
-        printf( "Failed to initialize the CUnit registry: %d\n", CU_get_error() );
+        ph_printf( "Failed to initialize the CUnit registry: %d\n", CU_get_error() );
         exit(1);
     }
 }

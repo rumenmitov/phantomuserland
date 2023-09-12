@@ -4,13 +4,16 @@
 
 #include <phantom_libc.h>
 
-//#include <stdio.h>
+//// #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ph_string.h>
 #include "ui.h"
 
 //#include "drv_video_screen.h"
 #include "tinyphantom.h"
+
+#include <ph_malloc.h>
+#include <ph_os.h>
 
 //static	GR_WINDOW_ID	w1;		/* id for large window */
 //static	GR_GC_ID	gc1;		/* graphics context for text */
@@ -45,14 +48,14 @@ ui_loop(int argc,char **argv, const char *name)
 
         /*
 	if (GrOpen() < 0) {
-		printf("cannot open graphics\n");
+		ph_printf("cannot open graphics\n");
 		exit(1);
 	}*/
 	
         width = 400;
         height = 300;
 
-        w1 = malloc(drv_video_window_bytes(width,height));
+        w1 = ph_malloc(drv_video_window_bytes(width,height));
         w1->xsize = width;
         w1->ysize = height;
 
@@ -72,7 +75,7 @@ ui_loop(int argc,char **argv, const char *name)
 
             continue;
             int c = getchar();
-            printf("ph_loop ");
+            ph_printf("ph_loop ");
             switch(c)
             {
             case 0x1B:

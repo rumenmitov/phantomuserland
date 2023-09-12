@@ -12,12 +12,14 @@
 
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <errno.h>
+
+#include <ph_string.h>
 
 #include <kernel/vm.h>
 #include <kernel/stats.h>
@@ -938,6 +940,9 @@ pager_update_superblock()
     assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
 #endif
 
+    // TODO : REMOVE!!!
+    superblock.disk_page_count=0x50000;
+
     phantom_calc_sb_checksum( &superblock );
 
 #if USE_SYNC_IO
@@ -994,7 +999,7 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
 {
     struct phantom_disk_blocklist freelist;
 
-    memset( &freelist, 0, sizeof( freelist ) );
+    ph_memset( &freelist, 0, sizeof( freelist ) );
 
     freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
     freelist.head.used = 0;
@@ -1099,6 +1104,10 @@ pager_put_to_free_list( disk_page_no_t free_page )
             superblock.free_list = free_page;
 
             hal_mutex_unlock(&pager_freelist_mutex);
+
+            // TODO : Added here to test if disk pages leak is fixed. Check if it is ok.
+            // pager_update_superblock();
+
             return;
         }
     else
@@ -1182,8 +1191,10 @@ pager_refill_free_reserve()
             free_reserve[free_reserve_n++] = list->list[--list->head.used];
         else
             {
-            if(list->head.next == 0 || list->head.next == superblock.free_list)
+            if(list->head.next == 0 || list->head.next == superblock.free_list){
+                SHOW_FLOW0( 10, "Using the last blocklist... ");
                 break; // that was last one, we will not kill freelist head
+            }
 
             free_reserve[free_reserve_n++] = superblock.free_list;
             superblock.free_list = list->head.next;
@@ -1202,7 +1213,7 @@ pager_refill_free_reserve()
                 list->head._reserved != 0
                 )
                 {
-                printf("Free list head values are insane, need fsck\n");
+                ph_printf("Free list head values are insane, need fsck\n");
                 list->head.used = 0;
                 list->head.next = 0;
                 list->head.magic = 0;
@@ -1210,17 +1221,22 @@ pager_refill_free_reserve()
                 // We are possibly still able to do a snap because
                 // superblock.free_start allocations are possibly available
                 // (btw we better try to reclaim superblock.free_start space
-                // in free()), and we can find out if we can make one
+                // in ph_free()), and we can find out if we can make one
                 // more snap...
                 break;
                 }
 
+            // TODO : Temporarily disabled superblock update here. Check if it is ok.
             pager_update_superblock();
             }
         }
 
     while( free_reserve_n < free_reserve_size && superblock.free_start < superblock.disk_page_count )
         free_reserve[free_reserve_n++] = superblock.free_start++;
+    
+    if (superblock.free_start >= superblock.disk_page_count - 100){
+        SHOW_ERROR(0, "Running out of free space! %x %x", superblock.free_start, superblock.disk_page_count);
+    }
 
         // BUG!
         // In fact, it is enough to have async save here.

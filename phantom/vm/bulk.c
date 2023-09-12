@@ -19,7 +19,9 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
+
+#include <ph_malloc.h>
 
 
 #include "vm/internal_da.h"
@@ -67,7 +69,7 @@ int pvm_load_class_from_module( const char *class_name, pvm_object_t   *out )
 {
     seekf(0);
 
-    if(DEBUG) printf("Bulk: looking for class %s\n", class_name);
+    if(DEBUG) ph_printf("Bulk: looking for class %s\n", class_name);
 
     // If we are in user mode (pvm_test/pvm_headless), or kernel
     // has some disks mounted, try to find class in .pc file.
@@ -86,7 +88,7 @@ int pvm_load_class_from_module( const char *class_name, pvm_object_t   *out )
             break;
         }
 
-        if(DEBUG) printf("Bulk: checking class %s\n", ch.name);
+        if(DEBUG) ph_printf("Bulk: checking class %s\n", ch.name);
 
         if( 0 == cncmp( class_name, ch.name ) )
             return load(ch.data_length, out);
@@ -119,9 +121,9 @@ static int skip( int len )
 
 static int load( int len, pvm_object_t   *out )
 {
-    if(DEBUG) printf("Bulk: loading\n" );
+    if(DEBUG) ph_printf("Bulk: loading\n" );
 
-    void *buf = malloc(len);
+    void *buf = ph_malloc(len);
     if( buf == 0 )
         return -1;
 
@@ -132,7 +134,7 @@ static int load( int len, pvm_object_t   *out )
 
 
     int lret = pvm_load_class_from_memory( buf, len, out );
-    free( buf );
+    ph_free( buf );
 
     return lret;
 }

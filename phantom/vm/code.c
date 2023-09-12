@@ -16,7 +16,7 @@
 #include "vm/object_flags.h"
 #include "vm/exception.h"
 
-//#define hal_printf printf
+//#define hal_printf ph_printf
 
 #define int_size() 4
 #define long_size() 8
@@ -57,7 +57,7 @@ static void
 throw_bounds( int ip, int max_IP, char *where )
 {
     char errtext[200];
-    snprintf(errtext, sizeof(errtext)-1, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
+    ph_snprintf(errtext, sizeof(errtext)-1, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
     pvm_exec_panic0( errtext );
 }
 

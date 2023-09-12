@@ -226,7 +226,7 @@ void pvm_restart_udp( pvm_object_t o )
     //da->connected = 0;
     if( da->connected )
     {
-        printf("restarting TCP - unimpl!");
+        ph_printf("restarting TCP - unimpl!");
     }
 
 }

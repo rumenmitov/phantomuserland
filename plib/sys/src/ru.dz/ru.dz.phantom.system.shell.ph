@@ -68,6 +68,7 @@ class shell extends runnable
     void run(var parent_object @const ) [8]
     {
 
+/* XXX : Commented until window system is fixed
         win = new .internal.window();
         win.setWinPosition(50,310);
         win.setTitle("Disk io stats");
@@ -81,10 +82,12 @@ class shell extends runnable
         old_idle = 0;
 
         white = 0xFFFFFFFF;
+*/
 
         console = new .internal.io.tty();
         incr = 1;
 
+/* XXX : Commented until window system and connetctions are fixed
         console.moveWindow(10,10);
         console.setTitle("VM Shell");
 		console.setbgcolor( 0xFFFFFFFF );
@@ -108,12 +111,17 @@ class shell extends runnable
 
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");
+*/
+
 /* moved to run in boot thread
 		// Run tests in plib/sys/src/test
 		var suite : .test.suite;
 		suite = new .test.suite();
 		suite.run();
 */
+        
+        console.putws("About to start the demo\n");
+
 		demo = new .ru.dz.demo.start();
 		demo.run(console);
 
@@ -127,6 +135,7 @@ class shell extends runnable
             console.putws(incr.toString());
             console.putws("  ");
 
+/* XXX : Commented until connections and windows are fixed
             conn.block(null, 500);
 
             stat_val = stat_conn.block( 26, 0 ); // blk io per sec
@@ -161,16 +170,17 @@ class shell extends runnable
             old_idle = cpu_idle;            
             stat_pos = stat_next_pos;
             
-            /*
-            if( stat_pos >= win.getXSize()-1 )
-	        win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
-            else
-                stat_pos = stat_pos + 1;
-            */
+            
+            // if( stat_pos >= win.getXSize()-1 )
+	        // win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
+            // else
+            //     stat_pos = stat_pos + 1;
+            
 
             win.update();
 
             //mtx.unlock();
+*/
 
             incr = incr + 1;
         }

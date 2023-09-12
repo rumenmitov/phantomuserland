@@ -11,14 +11,17 @@
 
 #define DEBUG_MSG_PREFIX "init"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
 
 #include <sys/types.h>
 #include <phantom_libc.h>
+#include <ph_io.h>
 #include <kernel/init.h>
+
+#include <init_routines.h>
 
 // See kernel/boot.h
 unsigned int	arch_flags = 0; 
@@ -50,7 +53,7 @@ void __phantom_run_constructors (void)
 #if 1
     count = _init_array_end - _init_array_start;
 /*
-    printf("%d c'tors (%p - %p) @ (%p - %p)\n", 
+    ph_printf("%d c'tors (%p - %p) @ (%p - %p)\n", 
 		count,
 		_init_array_start, _init_array_end,
 		&_init_array_start, &_init_array_end
@@ -58,7 +61,7 @@ void __phantom_run_constructors (void)
 */
     for (i = 0; i < count; i++)
     {
-        //printf("c'tor %p\n", _init_array_start[i]);
+        //ph_printf("c'tor %p\n", _init_array_start[i]);
         _init_array_start[i] ();
     }
 #endif
@@ -97,6 +100,8 @@ static void run_next_init( int level, struct init_record *ir )
     if( ir == 0 )
         return;
 
+    ph_printf("!!!! INIT !!!!!\n");
+
     SHOW_FLOW( 6, "init %d ir %p (%p,%p,%p)", level, ir, ir->init_1, ir->init_2, ir->init_3 );
 
     switch( level )
@@ -124,7 +129,26 @@ static void run_next_init( int level, struct init_record *ir )
 
 void run_init_functions( int level )
 {
-    run_next_init( level, init_list_root );
+    // run_next_init( level, init_list_root );
+    // XXX : Refactor! Using this function to specify init routines!
+    switch (level)
+    {
+    case INIT_LEVEL_PREPARE:
+        phantom_init_stat_counters();
+        break;
+    case INIT_LEVEL_INIT:
+        vm_map_pre_init();
+        start_painter_thread();
+        deferred_refdec_init();
+        break;
+    case INIT_LEVEL_LATE:
+        phantom_init_stat_counters2();
+        break;
+    
+    default:
+        SHOW_ERROR( 0, "wrong level %d", level );
+        break;
+    }
 }
 
 

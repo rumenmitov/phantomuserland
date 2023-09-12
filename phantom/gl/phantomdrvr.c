@@ -3,6 +3,7 @@
 #include "zgl.h"
 
 #include <stdlib.h>
+#include <ph_os.h>
 
 #include "tinyphantom.h"
 
@@ -86,7 +87,7 @@ int PhantomMakeCurrent( window_handle_t drawable, TinyPhantomContext *ctx )
         zb=ZB_open(xsize,ysize,mode,0,NULL,NULL,NULL);
         if (zb == NULL) {
             //fprintf(stderr, "Error while initializing Z buffer\n");
-            printf( "Error while initializing Z buffer\n");
+            ph_printf( "Error while initializing Z buffer\n");
             exit(1);
         }
 
@@ -124,7 +125,7 @@ void PhantomSwapBuffers( window_handle_t drawable )
     //GrArea(drawable, ctx->gc, 0, 0, ctx->xsize, ctx->ysize, ctx->gl_context->zb->pbuf, ctx->pixtype);
 
     int565_to_rgba_move( ctx->w->w_pixel, (void *)ctx->gl_context->zb->pbuf, ctx->w->xsize*ctx->w->ysize );
-//printf("blit ");
+//ph_printf("blit ");
     drv_video_winblt( ctx->w );
 }
 

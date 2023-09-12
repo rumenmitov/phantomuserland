@@ -14,12 +14,12 @@
 #include <video/internal.h>
 #include <video/vops.h>
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 //#include <event.h>
 //#include <spinlock.h>
 
-#include <sys/libkern.h>
+#include <kernel/libkern.h>
 
 #include "trig_func.inc"
 
@@ -406,7 +406,7 @@ int x,y,x1,c;
         if (cx!=cx1)
         {
             wall();
-            memset(ptr,col,cx1-cx);
+            ph_memset(ptr,col,cx1-cx);
             ptr+=cx1-cx;
         }
         m=15;
@@ -492,7 +492,7 @@ void polyfill(int n,int *tp,int c)
 
     if (c>=0) setcolor(c);
 
-    memset((void *)filltab,255,2*NBLIGNES);
+    ph_memset((void *)filltab,255,2*NBLIGNES);
     for(i=0;i<n-1;i++) fline(tp[i*2],tp[i*2+1],tp[i*2+2],tp[i*2+3]);
 }
 

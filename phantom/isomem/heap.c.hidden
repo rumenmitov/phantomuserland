@@ -1,6 +1,6 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <malloc.h>
+#include <ph_malloc.h>
 
 #include <hal.h>
 
@@ -202,7 +202,7 @@ static char *raw_alloc(unsigned int size, int bin_index)
     return retval;
 }
 
-void *malloc(size_t size)
+void *ph_malloc(size_t size)
 {
     void *address = NULL;
     int bin_index;
@@ -263,7 +263,7 @@ out:
     return address;
 }
 
-void free(void *address)
+void ph_free(void *address)
 {
     struct heap_page *page;
     struct heap_bin *bin;
@@ -329,12 +329,12 @@ void *realloc(void *ptr, size_t size)
 {
     // TODO poor man's realloc
 
-    void *newmem = malloc( size );
+    void *newmem = ph_malloc( size );
     if( newmem == 0 ) return 0;
 
     memcpy( newmem, ptr, size ); // XXX ERROR TODO if smaller we're busted!
 
-    free( ptr );
+    ph_free( ptr );
 
     return newmem;
 }

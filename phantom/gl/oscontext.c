@@ -3,7 +3,8 @@
 #include "zgl.h"
 #include <GL/gl.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <phantom_assert.h>
+#include <ph_os.h>
 
 static int buffercnt = 0;
 
@@ -33,7 +34,7 @@ ostgl_create_context(const int xsize,
     context->framebuffers[i] = framebuffers[i];
     zb = ZB_open(xsize, ysize, ZB_MODE_5R6G5B, 0, NULL, NULL, framebuffers[i]);
     if (zb == NULL) {
-      printf( "Error while initializing Z buffer\n");
+      ph_printf( "Error while initializing Z buffer\n");
       exit(1);
     }
     context->zbs[i] = zb;

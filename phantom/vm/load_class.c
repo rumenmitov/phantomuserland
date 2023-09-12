@@ -13,6 +13,8 @@
 
 #include <phantom_libc.h>
 
+#include <ph_string.h>
+
 #include <endian.h>
 
 #include "vm/object.h"
@@ -78,9 +80,9 @@ pvm_dump_type( struct type_loader_handler *th )
 
     if(th->is_container)
     {
-        printf("[ ");
+        ph_printf("[ ");
         pvm_object_print( th->contained_class_name );
-        printf(" ]");
+        ph_printf(" ]");
     }
 
 }
@@ -100,18 +102,18 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 
     pvm_object_t name = pvm_code_get_string(&(mh->ch));
 
-    if(debug_print) printf("Method is: " );
+    if(debug_print) ph_printf("Method is: " );
     if(debug_print) pvm_object_print( name );
     mh->my_name = name;
     //ref_dec_o(name);
 
     mh->my_ordinal = pvm_code_get_int32(&(mh->ch));
-    if(debug_print) printf(", ordinal %d\n", mh->my_ordinal );
+    if(debug_print) ph_printf(", ordinal %d\n", mh->my_ordinal );
 
     int code_size   = in_size - mh->ch.IP;
     const unsigned char *code_data = mh->ch.code+mh->ch.IP;
 
-    //if(debug_print) printf("code size %d, IP = %d, in_size = %d\n", code_size, IP, in_size );
+    //if(debug_print) ph_printf("code size %d, IP = %d, in_size = %d\n", code_size, IP, in_size );
 
     mh->my_code = pvm_create_code_object( code_size, (void *)code_data );
 }
@@ -147,11 +149,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
     {
         const unsigned char *ptr = rec_start;
 
-        //printf("%d bytes left\n", data + fsize - ptr );
+        //ph_printf("%d bytes left\n", data + fsize - ptr );
 
-        if( strncmp( (const char *)ptr, "phfr:", 5 ) )
+        if( ph_strncmp( (const char *)ptr, "phfr:", 5 ) )
         {
-            printf("No record marker\n" );
+            ph_printf("No record marker\n" );
             return 1;
         }
 
@@ -169,11 +171,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
         ptr += sizeof(long);
         #endif
 
-        if(debug_print) printf("type '%c', size %4d: ", record_type, record_size );
+        if(debug_print) ph_printf("type '%c', size %4d: ", record_type, record_size );
 
         if( record_size < 6+8 )
         {
-            printf("Invalid record size\n" );
+            ph_printf("Invalid record size\n" );
             return 1;
         }
 
@@ -188,18 +190,18 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
         {
         case 'C': // class
             {
-                if(0||debug_print) printf("Class is: " );
+                if(0||debug_print) ph_printf("Class is: " );
 
                 class_name = pvm_code_get_string(&h);//.get_string();
                 if(0||debug_print) pvm_object_print( class_name );
 
                 n_object_slots = pvm_code_get_int32(&h); //.get_int32();
-                if(debug_print) printf(", %d fields", n_object_slots );
+                if(debug_print) ph_printf(", %d fields", n_object_slots );
 
                 n_method_slots = pvm_code_get_int32(&h);
-                if(debug_print) printf(", %d methods", n_method_slots );
+                if(debug_print) ph_printf(", %d methods", n_method_slots );
 
-                if(0||debug_print) printf("\n");	// terminate string
+                if(0||debug_print) ph_printf("\n");	// terminate string
 
                 pvm_object_t base_name = pvm_code_get_string(&h);
 
@@ -219,19 +221,19 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                     if( pvm_is_internal_class(base_class) )
                     {
                         base_class = pvm_get_null_class();
-                        printf("Class ");
+                        ph_printf("Class ");
                         pvm_object_print( class_name );
-                        printf(" attempted to extend internal class. Child of void now.\n");
+                        ph_printf(" attempted to extend internal class. Child of void now.\n");
                     }
                 }
 #endif
                 if(debug_print)
                 {
-                    printf("Class ");
+                    ph_printf("Class ");
                     pvm_object_print( class_name );
-                    printf(" based on: " );
+                    ph_printf(" based on: " );
                     pvm_object_print( base_name );
-                    printf(" @%p\n", base_class);
+                    ph_printf(" @%p\n", base_class);
                 }
 
                 ref_dec_o(base_name);
@@ -263,7 +265,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
         case 'l': // IP to line num map
             {
 
-                if(debug_print) printf(" line num map\n");
+                if(debug_print) ph_printf(" line num map\n");
                 int ordinal = pvm_code_get_int32(&h);
                 int mapsize = pvm_code_get_int32(&h);
 
@@ -284,10 +286,10 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                         sp->ip = pvm_code_get_int32(&h);
                         sp->line = pvm_code_get_int32(&h);
 
-                        printf("map l %d -> ip %ld\n", sp->line, sp->ip );
+                        ph_printf("map l %d -> ip %ld\n", sp->line, sp->ip );
                     }
 
-                    printf("! "); pvm_object_print( map ); printf(" !\n");
+                    ph_printf("! "); pvm_object_print( map ); ph_printf(" !\n");
                 }
 
                 pvm_set_ofield( ip2line_maps, ordinal, map );
@@ -296,7 +298,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
         case 'S': // method signature
             {
-                if(debug_print) printf("meth sig\n" );
+                if(debug_print) ph_printf("meth sig\n" );
 
                 pvm_object_t m_name = pvm_code_get_string(&h);
                 int m_ordinal = pvm_code_get_int32(&h);
@@ -309,11 +311,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
                 if(debug_print)
                 {
-                    printf("Method ");
+                    ph_printf("Method ");
                     pvm_dump_type( &mth );
-                    printf(" '");
+                    ph_printf(" '");
                     pvm_object_print( m_name );
-                    printf("' ord %d args %d ( ", m_ordinal, m_n_args );
+                    ph_printf("' ord %d args %d ( ", m_ordinal, m_n_args );
                 }
 
                 int i = m_n_args;
@@ -328,15 +330,15 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                     if(debug_print)
                     {
                         pvm_object_print( a_name );
-                        printf(" : " );
+                        ph_printf(" : " );
                         pvm_dump_type( &th );
                         if(i > 0 )
-                            printf(", ");
+                            ph_printf(", ");
                     }
 
                 }
 
-                if(debug_print) printf(" )\n");
+                if(debug_print) ph_printf(" )\n");
 
             }
             break;
@@ -369,16 +371,16 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                 else
                     //if(debug_print)
                 {
-                    printf("unknown const (id %d) type: ", c_ordinal );
+                    ph_printf("unknown const (id %d) type: ", c_ordinal );
                     pvm_dump_type( &th );
-                    printf("\n" );
+                    ph_printf("\n" );
                 }
             }
             break;
 
         case 'f': // field names
             {
-                if(debug_print) printf("fields\n" );
+                if(debug_print) ph_printf("fields\n" );
 
                 while( h.IP < h.IP_max )
                 {
@@ -390,13 +392,13 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
                     if(debug_print)
                     {
-                        printf("Field '");
+                        ph_printf("Field '");
                         pvm_object_print( f_name );
 
-                        printf("' ord %d type: ", f_ordinal );
+                        ph_printf("' ord %d type: ", f_ordinal );
 
                         pvm_dump_type( &th );
-                        printf("\n");
+                        ph_printf("\n");
                     }
 
                     pvm_set_ofield( field_names, f_ordinal, f_name );
@@ -408,7 +410,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
         default:
             {
-                printf("Class record '%c' ignored\n", record_type );
+                ph_printf("Class record '%c' ignored\n", record_type );
             }
         }
 
@@ -429,9 +431,9 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
     if(debug_print)
     {
-        printf("\nDone loading "); 
+        ph_printf("\nDone loading "); 
         pvm_object_print( class_name );
-        printf(" @%p\n", new_class); 
+        ph_printf(" @%p\n", new_class); 
     }
 
     *out = new_class;

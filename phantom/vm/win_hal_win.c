@@ -22,7 +22,7 @@ void win_hal_init( void )
 
     //int rc =
     //CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
-    //if( rc) printf("Win32 can't run debugger thread\n");
+    //if( rc) ph_printf("Win32 can't run debugger thread\n");
 }
 
 void win_hal_disable_preemption(void)
@@ -73,7 +73,7 @@ struct phantom_mutex_impl
 void * win_hal_mutex_init(const char *name)
 {
     struct phantom_mutex_impl *impl;
-    impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    impl = ph_calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
     if(impl == 0) return 0;
 
     InitializeCriticalSection( &(impl->cs) );

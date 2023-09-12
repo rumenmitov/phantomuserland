@@ -13,7 +13,7 @@
 TEST_FUNCT(foo) {
 	char buf[BS];
 
-    //printf("test case 1\n");
+    //ph_printf("test case 1\n");
 	wtty_t	*w	= wtty_init( 128 );
 
 	int rc;
@@ -33,16 +33,16 @@ TEST_FUNCT(foo) {
 
 
 TEST_FUNCT(foo2) {
-    //printf("test case 2\n");
-    /* ”¥©ª®¢ë© ª®¤ */
+    //ph_printf("test case 2\n");
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     CU_ASSERT_EQUAL(1, 1);
 }
 #endif
 
 void runSuite(void) {
-    /* Š®¤ â¥áâ-áìîâ  */
+    /* ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ */
 
-    //printf("test suite\n");
+    //ph_printf("test suite\n");
 
     CU_pSuite suite = CUnitCreateSuite("Wtty");
     if (suite) {

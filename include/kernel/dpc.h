@@ -13,7 +13,7 @@
 #ifndef KERNEL_DPC_H
 #define KERNEL_DPC_H
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <spinlock.h>
 #include <hal.h>
 

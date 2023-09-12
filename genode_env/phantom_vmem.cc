@@ -33,6 +33,7 @@ extern "C"
 {
 
 #include <arch/arch_vmem_util.h>
+#include <kernel/page.h>
 #include <machdep.h>
 #include <hal.h>
 
@@ -122,7 +123,11 @@ extern "C"
         // Phantom::main_obj->_vme
         if (mapped == page_map)
         {
+            // Genode::log("Remapping addr, step 1 ", page_start_addr);
+            Phantom::main_obj->_vmem_adapter.unmap_page((addr_t)page_start_addr);
+            // Genode::log("Remapping addr, step 2 ", page_start_addr);
             Phantom::main_obj->_vmem_adapter.map_page(p, (addr_t)page_start_addr, writeable);
+            // Genode::log("Remapped addr ", page_start_addr);
         }
         else if (mapped == page_unmap)
         {
@@ -136,90 +141,23 @@ extern "C"
 
     /*
      *
-     *  Physical Allocation
-     *
-     */
-
-#if 0 // Disabled since implementing higher level interface (HAL)
-
-void phantom_phys_alloc_init_static(physalloc_t *arena, u_int32_t n_alloc_units, void *mapbuf)
-{
-    // _stub_print();
-}
-
-void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
-{
-    // _stub_print();
-}
-
-errno_t phantom_phys_alloc_page(physalloc_t *arena, physalloc_item_t *ret)
-{
-    _stub_print();
-}
-
-void phantom_phys_free_page(physalloc_t *arena, physalloc_item_t free)
-{
-    _stub_print();
-}
-
-errno_t phantom_phys_alloc_region(physalloc_t *arena, physalloc_item_t *ret, size_t len)
-{
-    _stub_print();
-}
-
-void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t n_pages)
-{
-    _stub_print();
-}
-
-#endif
-
-    /*
-     *
      * HAL functions to allocate/free phys/virtual memory
      *
      */
 
     errno_t hal_alloc_vaddress(void **result, int n_pages) // alloc address of a page, but not memory
     {
-        // XXX : Probably, can be optimized in future
-        // void *temp_res = nullptr;
-
-        // alloc_aligned() is used internally by alloc(). It also allows to set the from and to parameters
-
-        Genode::log("Allocation avail=", main_obj->_vmem_adapter._obj_space_allocator.avail(), " consumed=", main_obj->_vmem_adapter._obj_space_allocator.consumed());
-
-        // Genode::Range_allocator::Range alloc_range = {
-        //     main_obj->_vmem_adapter.OBJECT_SPACE_START,
-        //     main_obj->_vmem_adapter.OBJECT_SPACE_START + main_obj->_vmem_adapter.OBJECT_SPACE_SIZE};
-
-        // Genode::Allocator::Alloc_result alloc_res = main_obj->_vmem_adapter._obj_space_allocator.alloc_aligned((Genode::size_t)PAGE_SIZE * num, (unsigned)log2(PAGE_SIZE), alloc_range);
-
-        bool is_ok = false;
-
-        // Range_allocator::Range_result
-        //     alloc_res =
-        main_obj->_vmem_adapter
-            ._obj_space_allocator
-            .try_alloc(n_pages * PAGE_SIZE)
-            .with_result([&](void *addr)
-                         {
-                        *result = addr;
-                        is_ok = true; },
-                         [&](Range_allocator::Alloc_error err)
-                         {
-                             log("Failed to allocate ", n_pages, " pages in obj space! err:", err);
-                             is_ok = false;
-                         });
-
-        return is_ok ? 0 : 1;
+        (void)result;
+        (void)n_pages;
+        Genode::error("Trying to allocate virtual addr without physical one! Returning error");
+        return 1;
     }
 
     void hal_free_vaddress(void *addr, int num)
     {
-        // num = number of pages
-        void *obj_space_addr = (void *)((char *)addr);
-        main_obj->_vmem_adapter._obj_space_allocator.free(obj_space_addr, num);
+        (void)addr;
+        (void)num;
+        Genode::error("Trying to free only a virtual addr without physical one!");
     }
 
     void hal_init_physmem_alloc(void)
@@ -252,7 +190,7 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
 
             *result = (physaddr_t)temp_res;
 
-            Genode::log("Phys alloc: numpages= : ", npages, " addr=", Hex((physaddr_t)temp_res));
+            // Genode::log("Phys alloc: numpages= : ", npages, " addr=", Hex((physaddr_t)temp_res));
 
             return 0;
         }
@@ -292,6 +230,144 @@ void phantom_phys_free_region(physalloc_t *arena, physalloc_item_t start, size_t
     int arch_is_object_land_access_enabled()
     {
         return 1;
+    }
+
+    void hal_pv_alloc(physaddr_t *pa, void **va, int size_bytes)
+    {
+        int npages = ((size_bytes - 1) / PAGE_SIZE) + 1;
+
+        if (hal_alloc_phys_pages(pa, npages))
+            panic("out of physmem");
+
+        *va = main_obj->_vmem_adapter.map_somewhere((addr_t)*pa, true, npages);
+    }
+
+    void hal_pv_free(physaddr_t pa, void *va, int size_bytes)
+    {
+        if (hal_addr_is_in_object_vmem(va))
+        {
+            Genode::error("Object space addr in hal_pv_free! Will not free");
+            return;
+        }
+
+        int npages = ((size_bytes - 1) / PAGE_SIZE) + 1;
+
+        main_obj->_vmem_adapter.unmap_page((addr_t)va);
+        hal_free_phys_pages(pa, npages);
+    }
+
+    void
+    memcpy_v2p(physaddr_t to, void *from, size_t size)
+    {
+        void *addr;
+        // if (hal_alloc_vaddress(&addr, 1))
+        //     panic("out of vaddresses");
+
+#if 1 // panics, need test
+        if (!PAGE_ALIGNED(to))
+        {
+            // Process partial page
+
+            physaddr_t page = PREV_PAGE_ALIGN(to);
+            int shift = to - page;
+            size_t part = PAGE_SIZE - shift;
+
+            if (part > size)
+                part = size;
+
+            assert(shift < PAGE_SIZE);
+            assert(shift > 0);
+
+            // hal_page_control(page, addr, page_map, page_rw);
+            addr = main_obj->_vmem_adapter.map_somewhere(page, true, 1);
+
+            ph_memcpy(addr + shift, from, part);
+
+            // hal_page_control(page, addr, page_unmap, page_noaccess);
+            main_obj->_vmem_adapter.unmap_page((addr_t)addr);
+            addr = nullptr;
+
+            to += part;
+            from += part;
+            size -= part;
+        }
+#endif
+
+        if (size > 0)
+            assert(PAGE_ALIGNED(to));
+
+        while (size > 0)
+        {
+            int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
+            size -= stepSize;
+
+            // hal_page_control(to, addr, page_map, page_rw);
+            addr = main_obj->_vmem_adapter.map_somewhere((addr_t)to, true, 1);
+
+            ph_memcpy(addr, from, stepSize);
+            // Genode::log("V2P: ", Hex((addr_t)addr), " ", Hex((addr_t)from), " ", stepSize);
+
+            // hal_page_control(to, addr, page_unmap, page_noaccess);
+            main_obj->_vmem_adapter.unmap_page((addr_t)addr);
+            addr = nullptr;
+
+            to += PAGE_SIZE;
+            from += PAGE_SIZE;
+        }
+
+        assert(size == 0);
+
+        // hal_free_vaddress(addr, 1);
+    }
+
+    void
+    memcpy_p2v(void *to, physaddr_t from, size_t size)
+    {
+        void *addr;
+        // if (hal_alloc_vaddress(&addr, 1))
+        //     panic("out of vaddresses");
+
+        assert(PAGE_ALIGNED(from));
+
+        do
+        {
+            int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
+            size -= stepSize;
+
+            // hal_page_control(from, addr, page_map, page_rw);
+            addr = main_obj->_vmem_adapter.map_somewhere((addr_t)from, true, 1);
+
+            ph_memcpy(to, addr, stepSize);
+
+            // hal_page_control(from, addr, page_unmap, page_noaccess);
+            main_obj->_vmem_adapter.unmap_page((addr_t)addr);
+            addr = nullptr;
+
+            to += PAGE_SIZE;
+            from += PAGE_SIZE;
+
+        } while (size > 0);
+
+        assert(size == 0);
+
+        // hal_free_vaddress(addr, 1);
+    }
+
+    void
+    hal_copy_page_v2p(physaddr_t to, void *from)
+    {
+        void *addr;
+        // if (hal_alloc_vaddress(&addr, 1))
+        //     panic("out of vaddresses");
+        // hal_page_control(to, addr, page_map, page_rw);
+        addr = main_obj->_vmem_adapter.map_somewhere((addr_t)to, true, 1);
+
+        ph_memcpy(addr, from, hal_mem_pagesize());
+
+        // hal_page_control(to, addr, page_unmap, page_noaccess);
+        main_obj->_vmem_adapter.unmap_page((addr_t)addr);
+        addr = nullptr;
+        // hal_free_vaddress(addr, 1);
     }
 
     int genode_register_page_fault_handler(int (*pf_handler)(void *address, int write, int ip, struct trap_state *ts))

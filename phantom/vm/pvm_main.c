@@ -19,6 +19,8 @@
 #define debug_level_info 10
 
 #include <stdarg.h>
+#include <ph_os.h>
+#include <ph_string.h>
 
 #include <phantom_libc.h>
 #include <kernel/boot.h>
@@ -47,7 +49,7 @@ void json_process_for_parent( const char *content, jsmntok_t *tokens, size_t n_t
     //struct data_area_4_directory *tlda = pvm_object_da( pvm_root.class_dir, directory );
     // errno_t rc = hdir_add( tlda, name, name_len, content );
     
-    printf("\n\nfor parent %d:\n", parent );
+    ph_printf("\n\nfor parent %d:\n", parent );
 
     int i;
     for( i = 0; i < n_tokens; i++ )
@@ -55,9 +57,9 @@ void json_process_for_parent( const char *content, jsmntok_t *tokens, size_t n_t
         if( tokens[i].parent != parent ) continue;
 
         int size = tokens[i].end - tokens[i].start;
-        printf("%d:\t parent %4d size %3d type %d", i, tokens[i].parent, size, tokens[i].type );
-        if(size) printf(" '%.*s'", size, content + tokens[i].start );
-        printf("\n");
+        ph_printf("%d:\t parent %4d size %3d type %d", i, tokens[i].parent, size, tokens[i].type );
+        if(size) ph_printf(" '%.*s'", size, content + tokens[i].start );
+        ph_printf("\n");
 
         pvm_object_t subdir = 0;
         json_process_for_parent( content, tokens, n_tokens, tokens[i].parent, subdir );
@@ -80,17 +82,17 @@ void test_json()
     //size_t o_count = 0;
 
 
-    //printf("buf '%s'\n", buf );
+    //ph_printf("buf '%s'\n", buf );
 
     const char *content = http_skip_header( buf );
 
-    //printf("content '%s'\n\n", content );
+    //ph_printf("content '%s'\n\n", content );
 #if 1
 /*
-    json_value *jv = json_parse( content, strlen(content) );
+    json_value *jv = json_parse( content, ph_strlen(content) );
     pvm_object_t top = pvm_convert_json_to_objects( jv );
     json_value_free( jv );
-    printf("\n\n------------------------- OBJECT LAND -------------------\n\n" );
+    ph_printf("\n\n------------------------- OBJECT LAND -------------------\n\n" );
 */
     pvm_object_t top = pvm_json_parse( content );
     pvm_print_json( top );
@@ -99,7 +101,7 @@ void test_json()
     errno_t rc = json_parse( content, &tokens, &o_count );
     if( rc )
     {
-        printf("err json %d\n", rc );
+        ph_printf("err json %d\n", rc );
         return;
     }
 
@@ -107,12 +109,12 @@ void test_json()
         int i;
         for( i = 0; i < o_count; i++ )
         {
-            //printf("%d:\t parent %3d '%.*s'\n", i, tokens[i].parent, buf+tokens[i].start, tokens[i].size );
+            //ph_printf("%d:\t parent %3d '%.*s'\n", i, tokens[i].parent, buf+tokens[i].start, tokens[i].size );
             int size = tokens[i].end - tokens[i].start;
-            printf("%d:\t parent %4d size %3d type %d", i, tokens[i].parent, size, tokens[i].type );
+            ph_printf("%d:\t parent %4d size %3d type %d", i, tokens[i].parent, size, tokens[i].type );
             if(size)
-                printf(" '%.*s'", size, content + tokens[i].start );
-            printf("\n");
+                ph_printf(" '%.*s'", size, content + tokens[i].start );
+            ph_printf("\n");
         }
     }
 
@@ -166,11 +168,11 @@ extern void wait_for_continue();
 
 int main(int argc, char* argv[])
 {
-    printf("\n\n\n\n----- Phantom exec test v. 0.6\n\n");
+    ph_printf("\n\n\n\n----- Phantom exec test v. 0.6\n\n");
 
     #ifdef PHANTOM_GENODE
 
-    printf("Waiting to start...\n");
+    ph_printf("Waiting to start...\n");
     wait_for_continue();
 
     #endif
@@ -191,7 +193,7 @@ int main(int argc, char* argv[])
 
     if( pvm_video_init() )
     {
-        printf("Video init failed\n");
+        ph_printf("Video init failed\n");
         exit(22);
     }
 
@@ -207,8 +209,8 @@ int main(int argc, char* argv[])
     // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 
 
-    mem = malloc(size+1024*10);
-    setDiffMem( mem, malloc(size+1024*10), size );
+    mem = ph_malloc(size+1024*10);
+    setDiffMem( mem, ph_malloc(size+1024*10), size );
 
     hal_init( mem, size );
     //pvm_alloc_threaded_init(); // no threads yet - no lock
@@ -247,11 +249,11 @@ int main(int argc, char* argv[])
     #endif
 
     char fn[1024];
-    snprintf( fn, 1024, "%s/%s", dir, rest );
+    ph_snprintf( fn, 1024, "%s/%s", dir, rest );
 
     if( load_code( &bulk_code, &bulk_size, fn ) ) //"pcode/classes") )
     {
-        printf("No bulk classes file '%s'\n", fn );
+        ph_printf("No bulk classes file '%s'\n", fn );
         exit(22);
     }
     bulk_read_pos = bulk_code;
@@ -276,12 +278,12 @@ int main(int argc, char* argv[])
 
 #if 0
 //ui_loop( argc, argv, "test");
-    printf("\nPhantom code finished\n" );
+    ph_printf("\nPhantom code finished\n" );
     //getchar();
     //{ char c; read( 0, &c, 1 ); }
     sleep(100);
 #else
-    printf("\nPhantom code finished\n" );
+    ph_printf("\nPhantom code finished\n" );
 
     if(arg_run_debugger)
     {
@@ -293,10 +295,10 @@ int main(int argc, char* argv[])
 #if 0
     pvm_memcheck();
 
-    printf("will run GC\n" );
+    ph_printf("will run GC\n" );
     run_gc();
 
-    printf("press enter\n" );
+    ph_printf("press enter\n" );
 //    getchar();
 
     pvm_memcheck();
@@ -311,7 +313,7 @@ int main(int argc, char* argv[])
 
 static void usage()
 {
-    printf(
+    ph_printf(
            "Usage: pvm_test [-flags] [env_name=env_val]\n\n"
            "Flags:\n"
            "\t-di\t- debug (print) instructions\n"
@@ -344,11 +346,11 @@ static void args(int argc, char* argv[])
     {
         char *arg = *++argv;
 
-        if( *arg != '-' && index( arg, '=' ) )
+        if( *arg != '-' && ph_index( arg, '=' ) )
         {
             if( main_envc >= MAXENVBUF )
             {
-                printf("Env too big\n");
+                ph_printf("Env too big\n");
                 exit(22);
             }
             envbuf[main_envc++] = arg;
@@ -369,7 +371,7 @@ static void args(int argc, char* argv[])
             {
                 arg++; // skip 'c'
                 const char *start_class = arg;
-                printf("Will start ");
+                ph_printf("Will start ");
             }
             break;
         */
@@ -394,7 +396,7 @@ static void args(int argc, char* argv[])
         case 'l':
             {
                 const char *fn = arg+1;
-                printf("Will log to '%s'\n", fn );
+                ph_printf("Will log to '%s'\n", fn );
                 win_hal_open_kernel_log_file( fn );
             }
             break;
@@ -402,7 +404,7 @@ static void args(int argc, char* argv[])
         case 'o':
             {
                 const char *fn = arg+1;
-                printf("Will send console output to '%s'\n", fn );
+                ph_printf("Will send console output to '%s'\n", fn );
                 win_hal_open_kernel_out_file( fn );
             }
             break;

@@ -19,8 +19,7 @@
 
 #ifdef PHANTOM_GENODE
 
-#include <stdbool.h>
-#include <time.h>
+// #include <stdbool.h>
 
 // next are for Unix emulation env
 typedef int		_pid_t;
@@ -36,6 +35,32 @@ typedef u_int64_t   	bigtime_t;
 #ifndef __cplusplus
 typedef u_int8_t        Bool; // vmware svga
 #endif
+
+// Required by time.h
+typedef	u_int64_t	time_t;
+typedef u_int64_t   	bigtime_t;
+
+// Required by window system
+// typedef u_int32_t       wchar_t;
+
+// Required for Unix emulation env
+typedef unsigned int 	_dev_t;
+typedef unsigned int 	dev_t;
+typedef unsigned int 	_ino_t;
+typedef unsigned int 	ino_t;
+typedef int		_pid_t;
+typedef _pid_t		pid_t;
+typedef int		tid_t;
+typedef unsigned short 	_mode_t;
+typedef _mode_t		mode_t;
+typedef int		_sigset_t;
+typedef _sigset_t	sigset_t;
+
+#ifndef __cplusplus
+typedef u_int8_t        bool;
+// typedef u_int8_t        Bool; // vmware svga
+#endif
+
 
 #else
 
@@ -71,8 +96,6 @@ typedef u_int32_t       phys_page_t;
 
 
 // next are for Unix emulation env
-typedef unsigned int 	_dev_t;
-typedef unsigned int 	dev_t;
 typedef unsigned int 	_ino_t;
 typedef unsigned int 	ino_t;
 typedef int		_pid_t;

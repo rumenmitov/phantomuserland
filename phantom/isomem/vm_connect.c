@@ -37,6 +37,8 @@
 #include <kernel/khash.h>
 #include <threads.h>
 
+#include <ph_string.h>
+#include <ph_malloc.h>
 
 /**
  *
@@ -108,7 +110,7 @@ static void *pool_el_create(void *init)
 {
     (void) init;
 
-    kohandle_entry_t *el = calloc(1, sizeof(kohandle_entry_t));
+    kohandle_entry_t *el = ph_calloc(1, sizeof(kohandle_entry_t));
     SHOW_ERROR0( 0, "ko handle init");
 
     el->next = 0;
@@ -411,7 +413,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 
         if(te->volatile_state_size)
         {
-            da->v_kernel_state = calloc(1,te->volatile_state_size);
+            da->v_kernel_state = ph_calloc(1,te->volatile_state_size);
             if( da->v_kernel_state == 0)
             {
                 da->kernel = 0;
@@ -428,7 +430,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
             pvm_object_t bo = pvm_create_binary_object( te->persistent_state_size, 0);
             if( pvm_isnull(bo) )
             {
-                free(da->v_kernel_state);
+                ph_free(da->v_kernel_state);
                 da->v_kernel_state = 0;
                 da->kernel = 0;
                 return ENOMEM;
@@ -445,7 +447,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 
         errno_t ret = 0;
 
-        const char *suffix = strchr( name, ':' );
+        const char *suffix = ph_strchr( name, ':' );
         if( suffix ) suffix++; // Skip ':' itself
 
         // call init
@@ -529,7 +531,7 @@ static void run_cb_thread(void *arg)
     pvm_object_t args[1] = { p->arg };
     struct data_area_4_connection * da = p->da;
 
-    free(p);
+    ph_free(p);
 
     SHOW_FLOW( 1, "cb conn '%s'", da->name );
 
@@ -556,7 +558,7 @@ static void run_cb_thread(void *arg)
 
 static errno_t run_cb( struct data_area_4_connection *da, pvm_object_t o )
 {
-    struct cb_parm *p = calloc(1, sizeof(struct cb_parm));
+    struct cb_parm *p = ph_calloc(1, sizeof(struct cb_parm));
     if(!p)
     {
         ref_dec_o(o);
@@ -573,7 +575,7 @@ static errno_t run_cb( struct data_area_4_connection *da, pvm_object_t o )
     if( tid < 0 )
     {
         ref_dec_o(o);
-        free(p);
+        ph_free(p);
         return EAGAIN;
     }
 

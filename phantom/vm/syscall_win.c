@@ -173,12 +173,12 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
     char buf[BS+2];
 
     if( len > BS ) len = BS;
-    strncpy( buf, data, len );
+    ph_strncpy( buf, data, len );
     buf[len] = 0;
 
     SYS_FREE_O(_text);
 
-    //printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
+    //ph_printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
 
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;
@@ -384,7 +384,7 @@ static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area
     const char * data = (const char *)pvm_get_str_data(_text);
 
     if( len > PVM_MAX_TTY_TITLE-1 ) len = PVM_MAX_TTY_TITLE-1 ;
-    strlcpy( da->title, data, len+1 );
+    ph_strlcpy( da->title, data, len+1 );
     //buf[len] = 0;
 
     SYS_FREE_O(_text);

@@ -12,8 +12,9 @@
 **/
 
 
-#include <string.h>
-#include <assert.h>
+#include <ph_string.h>
+#include <ph_malloc.h>
+#include <phantom_assert.h>
 
 #include <video/screen.h>
 #include <video/internal.h>
@@ -136,7 +137,7 @@ void    pvm_x11_window_thread()
 
 
     win_x11_message_loop();
-    //printf("Message loop end\n");
+    //ph_printf("Message loop end\n");
 
 }
 */
@@ -147,7 +148,7 @@ int pvm_video_init()
 
     drv_video_headless.screen = screen_image;
 
-    //printf("Starting headless graphics 'driver'\n" );
+    //ph_printf("Starting headless graphics 'driver'\n" );
 
     scr_zbuf_init();
     scr_zbuf_turn_upside(1);
@@ -160,7 +161,7 @@ int pvm_video_init()
 
 void win_x11_key_event( int x, int y, unsigned int state, unsigned int keycode, int isRelease )
 {
-    printf("-ky- %x %x\r", state, keycode );
+    ph_printf("-ky- %x %x\r", state, keycode );
 }
 
 void win_x11_mouse_event( int x, int y, unsigned int state )
@@ -180,7 +181,7 @@ void win_x11_mouse_event( int x, int y, unsigned int state )
     e.abs_y = VSCREEN_HEIGHT - y - 1;
 
     ev_q_put_any( &e );
-    printf("-ms- %x\r", state );
+    ph_printf("-ms- %x\r", state );
 #endif
 }
 

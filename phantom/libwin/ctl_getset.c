@@ -17,9 +17,12 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include <assert.h>
+#include <phantom_assert.h>
 
 #include <kernel/pool.h>
+
+#include <ph_malloc.h>
+#include <ph_string.h>
 
 #include <video/rect.h>
 #include <video/window.h>
@@ -125,7 +128,7 @@ void ctl_img_copy_and_blend( drv_video_bitmap_t **dst, uint32_t *alloc_flag, drv
 
     if( (*alloc_flag) && (*dst) )
     {
-        free( *dst );
+        ph_free( *dst );
         *dst = 0;
         *alloc_flag = 0;
     }
@@ -202,10 +205,10 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
     GET_CONTROL
 
     //const char *old = cc->text;
-    //cc->text = strdup(text);
-    //if( old ) free((void *)old);
+    //cc->text = ph_strdup(text);
+    //if( old ) ph_free((void *)old);
 
-    strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
+    ph_strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
     cc->text = cc->buffer;
 
     cc->fg_color = text_color;
@@ -217,7 +220,7 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 void w_control_get_text( window_handle_t w, control_handle_t ch, char *text_buf, size_t buf_size )
 {
     GET_CONTROL    
-    strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
+    ph_strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
     w_paint_control( w, cc );
     RELEASE_CONTROL
 }

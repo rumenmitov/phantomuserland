@@ -196,11 +196,11 @@ extern "C"
 
         // mapping the page
 
-        // hal_pv_alloc(&pa, &va, MSIZE);
-        hal_alloc_vaddress(&va, 1);
-        hal_alloc_phys_page(&pa);
+        hal_pv_alloc(&pa, &va, PAGE_SIZE);
+        // hal_alloc_vaddress(&va, 1);
+        // hal_alloc_phys_page(&pa);
 
-        hal_page_control_etc(pa, va, page_map, page_readwrite, 0);
+        // hal_page_control_etc(pa, va, page_map, page_readwrite, 0);
 
         // Checking the access
 
@@ -238,10 +238,12 @@ extern "C"
 
         // Unmapping the page
 
-        hal_page_control_etc(pa, va, page_unmap, page_readwrite, 0);
+        // hal_page_control_etc(pa, va, page_unmap, page_readwrite, 0);
 
-        hal_free_vaddress(va, 1);
-        hal_free_phys_page(pa);
+        // hal_free_vaddress(va, 1);
+        // hal_free_phys_page(pa);
+
+        hal_pv_free(pa, va, PAGE_SIZE);
 
         return true;
     }
@@ -253,10 +255,16 @@ extern "C"
         const int phys_count = 10;
 
         void *va = nullptr;
+        physaddr_t pa_orig = 0x0;
+
+        // Allocating pv to get a free adress and the unmapping
+        hal_pv_alloc(&pa_orig, &va, PAGE_SIZE);
+        hal_page_control(pa_orig, va, page_unmap, page_readwrite);
+
         physaddr_t pas[phys_count];
 
         // allocating one virtual page
-        hal_alloc_vaddress(&va, 1);
+        // hal_alloc_vaddress(&va, 1);
 
         // And several physical
         for (int i = 0; i < phys_count; i++)
@@ -305,12 +313,15 @@ extern "C"
             hal_page_control_etc(pas[i], va, page_unmap, page_readwrite, 0);
         }
 
-        hal_free_vaddress(va, 1);
+        // hal_free_vaddress(va, 1);
 
         for (int i = 0; i < phys_count; i++)
         {
             hal_free_phys_page(pas[i]);
         }
+
+        hal_page_control(pa_orig, va, page_map, page_rw);
+        hal_pv_free(pa_orig, va, PAGE_SIZE);
 
         return true;
     }

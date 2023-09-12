@@ -124,7 +124,22 @@
     "stdio.h": "c",
     "wrappers.h": "c",
     "cdefs.h": "c",
-    "genode_misc.h": "c"
+    "genode_misc.h": "c",
+    "arch_vmem_util.h": "c",
+    "types.h": "c",
+    "array": "cpp",
+    "*.tcc": "cpp",
+    "functional": "cpp",
+    "memory": "cpp",
+    "tuple": "cpp",
+    "fstream": "cpp",
+    "istream": "cpp",
+    "limits": "cpp",
+    "ostream": "cpp",
+    "numeric": "cpp",
+    "sstream": "cpp",
+    "streambuf": "cpp",
+    "utility": "cpp"
   },
   "cmake.configureOnOpen": false
 }

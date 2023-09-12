@@ -14,9 +14,12 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <assert.h>
+#include <phantom_assert.h>
 #include <phantom_libc.h>
 #include <event.h>
+
+#include <ph_string.h>
+#include <ph_malloc.h>
 
 #include <video/window.h>
 #include <video/control.h>
@@ -34,7 +37,7 @@ drv_video_window_t *	focused_window = 0;
 void drv_video_window_free(drv_video_window_t *w)
 {
     drv_video_window_destroy(w);
-    free(w);
+    ph_free(w);
 }
 
 /**
@@ -74,7 +77,7 @@ void iw_switch_buffers(drv_video_window_t *w)
 
     // If not full paint, copy current displayed buffer to paint buffer
     if(!WIN_HAS_FLAG(w,WFLAG_WIN_FULLPAINT))
-        memmove( w->w_pixel, w->r_pixel, sizeof(rgba_t) * w->xsize * w->ysize );
+        ph_memmove( w->w_pixel, w->r_pixel, sizeof(rgba_t) * w->xsize * w->ysize );
 #else
 
 #ifndef r_pixel
@@ -96,7 +99,7 @@ common_window_init( drv_video_window_t *w,  void *pixels,
     if(pixels == 0)
     {
         // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
-        pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+        pixels = ph_calloc( 1, drv_video_window_bytes(xsize, ysize) );
         assert(pixels != 0); // userland gives us buffer, so we alloc just for kernel
     }
 
@@ -187,16 +190,16 @@ void w_restart_attach( drv_video_window_t *w )
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
 {
-    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
+    drv_video_window_t *w = ph_calloc(1,sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
 
         // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
-    void *pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+    void *pixels = ph_calloc( 1, drv_video_window_bytes(xsize, ysize) );
 
     if(pixels == 0)
     {
-        free(w);
+        ph_free(w);
         return 0;
     }
 
@@ -219,10 +222,11 @@ drv_video_window_create(
     //LOG_FLOW()
     lprintf( "drv_video_window_create %dx%d\n", xsize, ysize ); 
 
-    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
+    drv_video_window_t *w = ph_calloc(1,sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
 
+    ph_memset(w, 0x0, sizeof(drv_video_window_t));
 
     drv_video_window_init( w, 0, xsize, ysize, x, y, bg, flags, title );
     //w->flags = flags;
@@ -259,11 +263,14 @@ drv_video_window_init( drv_video_window_t *w,
 
     w->title = title ? title : "?";
 
+    ph_printf("!!! Locking window\n");
     w_lock();
+    ph_printf("!!! Locked window\n");
     //drv_video_winblt_locked( w->w_owner ); // need?
     //win_make_decorations(w);
     iw_enter_allwq(w);
     win_make_decorations(w);
+    ph_printf("!!! Unlocking window\n");
     w_unlock();
 
     // Actually reorders window in all w list - finally it is possible that win
@@ -277,8 +284,11 @@ drv_video_window_init( drv_video_window_t *w,
 void iw_enter_allwq( drv_video_window_t *w)
 {
     w_assert_lock();
+    ph_printf("!!! Putting in the queue\n");
     queue_enter(&allwindows, w, drv_video_window_t *, chain);
+    ph_printf("!!! Reordering on z\n");
     drv_video_window_rezorder_all();
+    ph_printf("!!! Finished reordring on z\n");;
 }
 
 
