@@ -11,7 +11,7 @@
 #include <base/allocator_avl.h>
 #include <block_session/connection.h>
 
-#include <libc/component.h>
+// #include <libc/component.h>
 
 #include "phantom_env.h"
 #include "disk_backend.h"

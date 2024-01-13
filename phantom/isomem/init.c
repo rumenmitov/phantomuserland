@@ -38,6 +38,7 @@ extern void (*_fini_array_end []) (void) __attribute__((weak));
 //extern void _init (void);
 //extern void _fini (void);
 
+// This function is currently unused
 /* Iterate over all the init routines.  */
 void __phantom_run_constructors (void)
 {
@@ -50,7 +51,7 @@ void __phantom_run_constructors (void)
 */
     //    _init ();
 
-#if 1
+#if 0
     count = _init_array_end - _init_array_start;
 /*
     ph_printf("%d c'tors (%p - %p) @ (%p - %p)\n", 

@@ -78,12 +78,13 @@ void hal_printf( char *format, ... )
 
 #include <sys/syslog.h>
 
+// This function is currently unused
 void hal_log( char *format, ... )
 {
     va_list argList;
     va_start(argList, format);
     //vfprintf( stderr, format, argList );
-    vsyslog(LOG_KERN, format, argList);
+    //vsyslog(LOG_KERN, format, argList);
 
     va_end(argList);
     //fflush(stderr);
