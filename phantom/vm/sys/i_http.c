@@ -151,7 +151,7 @@ void pvm_gc_finalizer_http( pvm_object_t  os )
 
 void pvm_restart_http( pvm_object_t o )
 {
-    struct data_area_4_http *da = pvm_object_da( o, http );
+    // struct data_area_4_http *da = pvm_object_da( o, http );
 
     //da->connected = 0;
     //if( da->connected )

@@ -86,7 +86,6 @@ void test_fail_msg(errno_t rc, const char *msg)
 #define TEST(name) \
     ({                                  		\
     fhandler_f = 0;                                     \
-    int rc;                                             \
     {                                                   \
         if( all || (0 == ph_strcmp( test_name, #name )) )  \
         report( do_test_##name(test_parm), #name );     \

@@ -42,8 +42,10 @@ extern void (*_fini_array_end []) (void) __attribute__((weak));
 /* Iterate over all the init routines.  */
 void __phantom_run_constructors (void)
 {
+#if 0
     size_t count;
     size_t i;
+#endif
 /*
     count = __preinit_array_end - __preinit_array_start;
     for (i = 0; i < count; i++)

@@ -1,6 +1,6 @@
 set (PHANTOM_PVM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-set (source_all 
+set (PHANTOM_PVM_SOURCE 
     exec.c 
     syscall_io.c 
     backtrace.c 
@@ -49,7 +49,10 @@ set (source_all
 	headless_screen.c
 )
 
-# convert filenames to absolute paths
-list(TRANSFORM source_all PREPEND ${PHANTOM_PVM_DIR}/)
+set (${WAMR_SOURCES} "")
+include (${PHANTOM_PVM_DIR}/wamr.cmake)
 
-set (PHANTOM_PVM_SOURCE ${source_all})
+# convert filenames to absolute paths
+list(TRANSFORM PHANTOM_PVM_SOURCE PREPEND ${PHANTOM_PVM_DIR}/)
+
+set (PHANTOM_PVM_SOURCE ${PHANTOM_PVM_SOURCE} ${WAMR_SOURCES})

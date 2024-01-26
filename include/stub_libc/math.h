@@ -267,6 +267,14 @@ extern float expm1f(float);
 extern float log1pf(float);
 
 /*
+	???
+*/
+extern int 		signbit(double);
+extern double 	fmax(double, double);
+extern double 	fmin(double, double);
+extern double 	trunc(double); 
+
+/*
  * Float versions of reentrant version of gamma & lgamma; passes
  * signgam back by reference as the second argument; user must
  * allocate space for signgam.

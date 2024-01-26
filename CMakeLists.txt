@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(PhantomGenode)
+
+message("CMAKE C FLAGS DEFAULT: ${CMAKE_C_FLAGS}")
+message("CMAKE EXECUTABLE LINKER FLAGS DEFAULT: ${CMAKE_EXE_LINKER_FLAGS}")
 
 include (phantom/gl/phantom_gl.cmake)
 include (genode_env/genode_env.cmake)
@@ -36,12 +41,13 @@ string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
 add_executable(isomem ${SOURCES})
 
-set_property(TARGET isomem PROPERTY C_STANDARD 99)
+target_link_libraries (isomem vmlib)
 
+set (CMAKE_C_STANDARD 99)
 
-# target_compile_options(isomem PRIVATE
-# 	-Werror=implicit-function-declaration
-# )
+# disable -rdynamic flag
+set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+set (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 

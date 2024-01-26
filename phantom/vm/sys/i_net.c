@@ -151,7 +151,7 @@ void pvm_gc_finalizer_net( pvm_object_t  os )
 
 void pvm_restart_net( pvm_object_t o )
 {
-    struct data_area_4_net *da = pvm_object_da( o, net );
+    // struct data_area_4_net *da = pvm_object_da( o, net );
 
     //da->connected = 0;
     //if( da->connected )

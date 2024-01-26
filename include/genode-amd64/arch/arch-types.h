@@ -35,5 +35,5 @@ typedef long			_off_t;
 
 /* Integer types capable of holding object pointers */
 
-typedef int intptr_t;
-typedef unsigned int uintptr_t;
+typedef int64_t intptr_t;
+typedef u_int64_t uintptr_t;

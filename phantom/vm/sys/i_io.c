@@ -115,7 +115,7 @@ static int io_15_hashcode( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object(
-       ((int)me)^0x8536A634^((int)&io_15_hashcode)
+       ((int)((intptr_t)me))^0x8536A634^((int)((intptr_t)&io_15_hashcode))
                                         ));
 }
 
