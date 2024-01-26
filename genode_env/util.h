@@ -22,4 +22,4 @@ extern "C"
     double ph_pow(double, double);
 }
 
-#endif GENODE_PHANTOM_UTIL_H
+#endif // GENODE_PHANTOM_UTIL_H

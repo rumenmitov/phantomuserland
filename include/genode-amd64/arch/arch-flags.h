@@ -14,7 +14,7 @@
 #define _ARCH_FLAGS_
 
 #ifndef ARCH_amd64
-#warning Wrong arch?
+#warning Why does this define exist ?? why it should not be used ?
 #endif
 
 

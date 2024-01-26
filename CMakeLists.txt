@@ -31,6 +31,7 @@ get_filename_component(relConfigInclude "include/kernel/config.h"
                        REALPATH BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 add_compile_options(-include ${relConfigInclude})
 
+# remove -Werror automatically added by goa
 string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
 add_executable(isomem ${SOURCES})
@@ -38,9 +39,11 @@ add_executable(isomem ${SOURCES})
 set_property(TARGET isomem PROPERTY C_STANDARD 99)
 
 
-target_compile_options(isomem PRIVATE
-	-Werror=implicit-function-declaration
-)
+# target_compile_options(isomem PRIVATE
+# 	-Werror=implicit-function-declaration
+# )
+
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 
 # Checking if we want to run only tests
 

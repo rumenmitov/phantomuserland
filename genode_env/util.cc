@@ -46,12 +46,6 @@ extern "C"
         return Genode::memcpy(dst0, src0, length);
     }
 
-    void bcopy(void *src0, void *dst0, size_t length)
-    {
-        // XXX : src0 was const void*
-        ph_memcpy(src0, dst0, length);
-    }
-
     void *ph_memmove(void *dst0, const void *src0, size_t length)
     {
         return Genode::memmove(dst0, src0, length);
@@ -71,8 +65,10 @@ extern "C"
         ph_memset(dst0, 0x0, length);
     }
 
-    char *	ph_strrchr(const char *p, int ch){
+    char* ph_strrchr(const char *p, int ch){
         char* res = (char*)p;
+        (void)ch;
+        #warning Unimplemented function: ph_strrchr
         Genode::warning("Unimplemented function ph_strrchr()!");
         return res;
     }
@@ -169,10 +165,14 @@ extern "C"
                 res = res / a;
             }
         }
+
+        return res;
     }
 
+    // TODO: actually use `level` parameter for something
     void ph_syslog(int level, const char * fmt, ...) {
         va_list ap;
+        (void) level;
 
         va_start(ap, fmt);
         ph_printf("\033[33m");
@@ -182,16 +182,26 @@ extern "C"
     }
 
     int ph_setjmp (jmp_buf b){
+        #warning Unimplemented function ph_setjmp
+        (void)b;
         Genode::error("Unimplemented ph_setjmp()!");
         return 0;
     }
 
     void ph_longjmp (jmp_buf b, int s){
+        #warning Unimplemented function ph_setjmp
+        (void)b;
+        (void)s;
         Genode::error("Unimplemented ph_longjmp()!");
     }
 
     void ph_qsort( void *ptr, size_t count, size_t size,
             int (*comp)(const void *, const void *) ){
+        #warning Unimplemented function ph_qsort
+        (void)ptr;
+        (void)count;
+        (void)size;
+        (void)comp;
         Genode::error("Unimplemented ph_qsort()!");
     }
 

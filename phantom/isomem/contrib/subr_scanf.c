@@ -297,7 +297,7 @@ literal:
 				}
 				nread += sum;
 			} else {
-				bcopy(inp, va_arg(ap, char *), width);
+				ph_memcpy(va_arg(ap, char *), inp, width);
 				inr -= width;
 				inp += width;
 				nread += width;

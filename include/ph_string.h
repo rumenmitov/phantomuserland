@@ -14,7 +14,6 @@ void *	ph_memmove(void *dst0, const void *src0, size_t length);
 int 	ph_memcmp(const void *s1v, const void *s2v, size_t size);
 void *	ph_memset(void *dst0, int c0, size_t length);
 
-void    bcopy(const void *src0, void *dst0, size_t length);
 void    bzero(void *dst0, size_t length);
 
 char *	ph_strcat(char *s, const char *add);
