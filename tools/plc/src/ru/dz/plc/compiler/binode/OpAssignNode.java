@@ -208,7 +208,11 @@ public class OpAssignNode extends BiNode {
 			generateCast( varType );
 
 			_r.generate_code(c,s); 
-			move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
+			
+			if (_r.is_on_int_stack()) {
+				print_warning("Skipping stack move on assignment. Pray you know what you do.");
+			} else
+				move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
 			
 			if(!isVoidParent()) c.emitOsDup(); // return a copy
 			

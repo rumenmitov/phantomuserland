@@ -35,7 +35,7 @@ public class CastNode extends Node {
 
 		if(!pt.is_on_int_stack())
 		{
-			c.emitNumericPrefix(pt);
+			c.emitNumericPrefix(_l.getType());
 			c.emit_i2o();
 			generate_object_cast(c);
 		}
