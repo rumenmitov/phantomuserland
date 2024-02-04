@@ -361,7 +361,24 @@ static int si_float_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_
 {
     DEBUG_INFO;
     char buf[100];
-    ph_snprintf( buf, sizeof(buf), "%f", pvm_get_float(me) ); // TODO right size?
+    //ph_snprintf( buf, sizeof(buf), "%f", pvm_get_float(me) ); // TODO right size?
+
+    // XXX: ph_snprintf does not have %f, but this implementation is bad
+    float value = pvm_get_float(me);
+    size_t cur = ph_snprintf( buf, sizeof(buf), "%d", (int)value );
+
+    float decimals = value - (int)value;
+    if (decimals < 0) decimals = -decimals;
+
+    if (decimals > 0) buf[cur++] = '.';
+
+    for (int i = 0; i < 6; i++) {
+        decimals *= 10;
+        cur += ph_snprintf( buf + cur, sizeof(buf) + cur, "%d", (int)decimals );
+        decimals -= (int) decimals;
+    }
+    /// XXX
+    
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -419,7 +436,24 @@ static int si_double_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data
 {
     DEBUG_INFO;
     char buf[100];
-    ph_snprintf( buf, sizeof(buf), "%f", pvm_get_double(me) ); // TODO right size?
+    //ph_snprintf( buf, sizeof(buf), "%f", pvm_get_double(me) ); // TODO right size?
+
+    // XXX: ph_snprintf does not have %f, but this implementation is bad
+    double value = pvm_get_double(me);
+    size_t cur = ph_snprintf( buf, sizeof(buf), "%lld", (long long)value );
+
+    double decimals = value - (long long)value;
+    if (decimals < 0) decimals = -decimals;
+
+    if (decimals > 0) buf[cur++] = '.';
+
+    while (decimals > 0) {
+        decimals *= 10;
+        cur += ph_snprintf( buf + cur, sizeof(buf) + cur, "%d", (int)decimals );
+        decimals -= (int) decimals;
+    }
+    /// XXX
+
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 

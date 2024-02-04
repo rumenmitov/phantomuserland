@@ -21,7 +21,7 @@ import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
 //import .test.suite;
 
-import .ru.dz.demo.start;
+import .ru.dz.demo.wasm;
 
 attribute const * ->!;
 
@@ -51,7 +51,7 @@ class shell extends runnable
 
     //var mtx : .internal.mutex;
 
-    var demo : .ru.dz.demo.start;
+    var demo : .ru.dz.demo.wasm;
 /*
     void init()
     {
@@ -122,7 +122,7 @@ class shell extends runnable
         
         console.putws("About to start the demo\n");
 
-		demo = new .ru.dz.demo.start();
+		demo = new .ru.dz.demo.wasm();
 		demo.run(console);
 
         while(1)
