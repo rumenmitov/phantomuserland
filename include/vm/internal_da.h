@@ -360,6 +360,7 @@ struct data_area_4_tcp
 #include "../phantom/vm/sys/i_port.h"
 #include "../phantom/vm/sys/i_ui_control.h"
 #include "../phantom/vm/sys/i_ui_font.h"
+#include "../phantom/vm/sys/i_wasm.h"
 
 
 

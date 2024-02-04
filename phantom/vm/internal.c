@@ -525,7 +525,18 @@ struct internal_class pvm_internal_classes[] =
         0
     },
 
-
+    
+    {
+        ".internal.wasm",
+        PVM_ROOT_OBJECT_WASM_CLASS,
+        IINIT(wasm),
+        pvm_gc_finalizer_wasm,
+        pvm_restart_wasm,
+        sizeof(struct data_area_4_wasm),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
 };
 
 int pvm_n_internal_classes = sizeof(pvm_internal_classes) / sizeof(struct internal_class);

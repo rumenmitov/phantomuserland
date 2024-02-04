@@ -102,7 +102,7 @@ struct Phantom::PhantomThreadWithArgs : PhantomGenericThread
         _thread_entry(_args);
     }
 
-    PhantomThreadWithArgs(Genode::Env &env, void (*thread_entry)(void *arg), void *args) : PhantomGenericThread(env, "Phantom", 8192),
+    PhantomThreadWithArgs(Genode::Env &env, void (*thread_entry)(void *arg), void *args) : PhantomGenericThread(env, "Phantom", 16394),
                                                                                            _thread_entry(thread_entry),
                                                                                            _args(args)
 

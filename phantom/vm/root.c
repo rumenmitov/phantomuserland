@@ -383,6 +383,7 @@ static void set_root_from_table()
     SET_ROOT_CLASS(port,PORT);
     SET_ROOT_CLASS(ui_control,UI_CONTROL);
     SET_ROOT_CLASS(ui_font,UI_FONT);
+    SET_ROOT_CLASS(wasm,WASM);
 }
 
 
@@ -440,6 +441,7 @@ GCINLINE pvm_object_t     pvm_get_port_class() { return pvm_root.port_class; }
 GCINLINE pvm_object_t     pvm_get_ui_control_class() { return pvm_root.ui_control_class; }
 GCINLINE pvm_object_t     pvm_get_ui_font_class() { return pvm_root.ui_font_class; }
 
+GCINLINE pvm_object_t     pvm_get_wasm_class() { return pvm_root.wasm_class; }
 
 #undef GCINLINE
 

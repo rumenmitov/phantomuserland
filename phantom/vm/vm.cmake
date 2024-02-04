@@ -45,6 +45,7 @@ set (PHANTOM_PVM_SOURCE
     sys/i_port.c 
     sys/i_http.c 
     sys/i_net.c 
+    sys/i_wasm.c
     # Headless screen first to enable video driver stub
 	headless_screen.c
 )

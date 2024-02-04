@@ -108,6 +108,8 @@ DEF_I(port)
 DEF_I(ui_control)
 DEF_I(ui_font)
 
+DEF_I(wasm)
+
 
 #undef DEF_I
 
