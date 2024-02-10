@@ -7,8 +7,6 @@ struct data_area_4_wasm
 {
     // has wasm runtime been initialized successfully ?
     bool         runtime_initialized;
-    // is a wasm program running right now? (checked on restart)
-    bool         in_progress;
 
     // binary array (runtime objects) 
     pvm_object_t wasm_runtime_objects_array;

@@ -68,7 +68,6 @@ void pvm_internal_init_wasm(pvm_object_t o)
 {
     struct data_area_4_wasm      *da = (struct data_area_4_wasm *)o->da;
 
-    da->in_progress = false;
     da->wasm_runtime_objects_array = pvm_create_array_object();
     da->wasm_instance_objects_array = pvm_create_array_object();
     da->wasm_code_str = NULL;
@@ -105,7 +104,7 @@ static int si_load_module_wasm_8( pvm_object_t me, pvm_object_t *ret, struct dat
     if (!wasm_da->runtime_initialized) SYSCALL_THROW_STRING("Wasm runtime initialization failed");
 
     CHECK_PARAM_COUNT(1);
-    if (wasm_da->in_progress) SYSCALL_THROW_STRING("Loading module while executing! ( how?? )");
+    if (wasm_da->function_instance) SYSCALL_THROW_STRING("Loading module while executing! ( how?? )");
     wasm_destroy_instance(wasm_da); // Unlodad previous module (if any)
 
     pvm_object_t code_obj = args[0];
@@ -148,9 +147,10 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
 {
     DEBUG_INFO;
     struct data_area_4_wasm *wasm_da = pvm_data_area( me, wasm );
+    // XXX are we SURE this is WASMFunctionInstance ???
+    WASMFunctionInstance* func = wasm_da->function_instance;
     pvm_object_t return_value = NULL;
-    // These default values trigger restart when passed to wasm_runtime_call_wasm
-    WASMFunctionInstance* func = NULL;
+    // If param_cell_num wil be passed as -1, it will trigger a restart from snapshot
     int param_cell_num = -1;
 
     if (!wasm_da->runtime_initialized) SYSCALL_THROW_STRING("Wasm runtime initialization failed");
@@ -171,7 +171,7 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
     // keep in mind that this uses error_buf to form strings
     #define FAIL_SYSCALL(...) do { ph_snprintf(error_buf, sizeof(error_buf), __VA_ARGS__); goto destroy; } while (0)
 
-    if (!wasm_da->in_progress) {
+    if (!func) { // if func is NULL, means we are running this syscall the first time (not restart)
         size_t func_name_len = pvm_get_str_len(func_name_obj);
         if( func_name_len > 256 ) SYSCALL_THROW_STRING( "Function name too long" );
         // phantom strings are not null-terminated, so we need a copy
@@ -179,7 +179,6 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
 
         func = wasm_runtime_lookup_function(wasm_da->module_instance, func_name_cstr, NULL);
         if (!func) FAIL_SYSCALL("Failed to find wasm function `%s`", func_name_cstr);
-        wasm_da->function_instance = func;
 
         if (wasm_args_count != func->param_count) 
             FAIL_SYSCALL("Expected %d, received %d parameters", func->param_count, wasm_args_count);
@@ -209,14 +208,13 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
         }
 
         param_cell_num = func->param_cell_num;
-        wasm_da->in_progress = true;
+        wasm_da->function_instance = func;
     }
 
     // Actual execution happens here. This function will sleep thread whenever snapshot flag is set
     if (!wasm_runtime_call_wasm(wasm_da->exec_env, func, param_cell_num, argv))
         FAIL_SYSCALL("Wasm function call failed: %s\n", wasm_runtime_get_exception(wasm_da->module_instance));
 
-    func = wasm_da->function_instance; // XXX are we SURE this is WASMFunctionInstance ???
     return_value = wasm_extract_return_value(argv, func->param_types[func->param_count], func->ret_cell_num);
     if (!return_value) FAIL_SYSCALL("Unexpected return type");
 
@@ -225,7 +223,6 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
 
 #undef FAIL_SYSCALL
 destroy:
-    wasm_da->in_progress = false;
     wasm_da->function_instance = NULL;
 
     if (return_value) SYSCALL_RETURN(return_value);
@@ -275,8 +272,4 @@ void pvm_restart_wasm(pvm_object_t o)
 {
     // XXX: do we reinitialize runtime if `runtime_initalized` is false?
     initialize_wasm(o);
-
-    struct data_area_4_wasm *da = (struct data_area_4_wasm *)o->da;
-
-    global_wasm = da;
 }
