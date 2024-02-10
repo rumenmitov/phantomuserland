@@ -220,8 +220,8 @@ void pager_enqueue_for_pagein_fast ( pager_io_request *rq )
 void pager_enqueue_for_pageout( pager_io_request *rq )
 {
     assert(rq->phys_page);
-    if( rq->flag_pagein ) panic("enqueue_for_pagein: page is already on pager queue (in)");
-    if( rq->flag_pageout ) panic("enqueue_for_pagein: page is already on pager queue (out)");
+    if( rq->flag_pagein ) panic("enqueue_for_pageout: page is already on pager queue (in)");
+    if( rq->flag_pageout ) panic("enqueue_for_pageout: page is already on pager queue (out)");
 
     rq->flag_pageout = 1;
     rq->next_page = 0;

@@ -152,6 +152,7 @@ void pvm_pop_array(pvm_object_t array, pvm_object_t value_to_pop )
             if (slot != da->used_slots-1) {
                 p[slot] = p[da->used_slots-1];
             }
+            p[da->used_slots - 1] = NULL;
             da->used_slots--;
             return;
         }

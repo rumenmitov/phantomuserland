@@ -107,7 +107,7 @@ static inline int find_arena_by_address(void *memaddr)
 static inline unsigned int round_size(unsigned int size, int arena)
 {
     (void) arena;
-    size = (((size - 1)/ 4) + 1) * 4 ;  //align 4 bytes
+    size = (((size - 1) / 8) + 1) * 8 ;  //align 8 bytes
 
     // for reference: minimal object (int) = 36 bytes
 
@@ -131,7 +131,7 @@ static void init_arenas( void * _pvm_object_space_start, unsigned int size )
     for( i = 0; i < ARENAS; i++) {
         start_a[i] = cur;
         curr_a[i] = cur;
-        cur += (size / 400) * percent_a[i] * 4;  //align 4 bytes
+        cur += (size / 800) * percent_a[i] * 8;  //align 8 bytes
         percent_100 += percent_a[i];
         end_a[i] = cur;
     }

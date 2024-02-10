@@ -96,7 +96,7 @@ static errno_t partFence( struct phantom_disk_partition *p )
 // ------------------------------------------------------------
 
 
-
+// TODO: this function is only called once in genode port. why and do we need it?
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
