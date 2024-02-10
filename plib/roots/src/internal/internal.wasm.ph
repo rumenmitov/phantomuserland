@@ -26,10 +26,10 @@ package .internal;
 
 class .internal.wasm
 {
-	/*
-	 * Call a wasm function named `funcname` from module `module`, and pass the array
-	 * of arguments to the function. Return value from the function is one of 4 wasm
-	 * fundamental types
-	 */
-	.internal.object  call(var module : .internal.string, var funcname : .internal.string, var args : .internal.object) [8] {  }
+	// Load a module from a string containing Wasm code
+	void 				loadModule(var module : .internal.string) [8] { }
+	// Invoke a function with a given name from the module loaded using loadModule().
+	// 		`args` : an array of objects which represent the function parameters
+	// 		returns an object containing return value of Wasm function call
+	.internal.object 	invokeWasm(var funcname : .internal.string, var args : .internal.object) [9] {  }
 };

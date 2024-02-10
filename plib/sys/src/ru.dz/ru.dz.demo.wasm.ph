@@ -22,21 +22,19 @@ class wasm
         var res : int;
         res = 0;
 
-		console.putws("INITIALIZATION OF WASM DEMO");
-
-        var code : .internal.string;
-        code = getWasmBinary();
-
-		console.putws("Started demo scenario");
+	console.putws("Started demo WebAssembly scenario");
 
         var wamr : .internal.wasm;
         wamr = new .internal.wasm();
+        wamr.loadModule(getWasmBinary());
 
         var args : .internal.object[];
         args = new .internal.object[]();
         var tmp : .internal.object;
 
         var result : .internal.object;
+
+        wamr.invokeWasm("hello_world", (.internal.object) args);
 
         // while (1) {
         //         wamr.call(code, "hello_world", (.internal.object) args);
@@ -49,9 +47,8 @@ class wasm
         tmp = 0;
         args[2] = tmp;
 
-        wamr.call(code, "print_prime_numbers", (.internal.object) args);
+        wamr.invokeWasm("print_prime_numbers", (.internal.object) args);
 
-        // wamr.call(code, "hello_world", (.internal.object) args);
 // 
         // var precision : int;
         // precision = 200000;

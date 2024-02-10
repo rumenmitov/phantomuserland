@@ -530,11 +530,10 @@ struct internal_class pvm_internal_classes[] =
         ".internal.wasm",
         PVM_ROOT_OBJECT_WASM_CLASS,
         IINIT(wasm),
-        pvm_gc_finalizer_wasm,
+        0, // no finalizer
         pvm_restart_wasm,
         sizeof(struct data_area_4_wasm),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
         0
     },
 };
