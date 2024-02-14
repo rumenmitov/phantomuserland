@@ -98,11 +98,7 @@
 #define ft_strcmp   ph_strcmp
 #define ft_strcpy   ph_strcpy
 #define ft_strlen   ph_strlen
-#ifdef PHANTOM_GENODE
 #define ft_strncmp  ph_strncmp
-#else
-#define ft_strncmp  ph_strncmp
-#endif
 #define ft_strncpy  ph_strncpy
 #define ft_strrchr  ph_strrchr
 

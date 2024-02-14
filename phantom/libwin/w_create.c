@@ -222,11 +222,9 @@ drv_video_window_create(
     //LOG_FLOW()
     lprintf( "drv_video_window_create %dx%d\n", xsize, ysize ); 
 
-    drv_video_window_t *w = ph_calloc(1,sizeof(drv_video_window_t));
+    drv_video_window_t *w = ph_calloc(1, sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
-
-    ph_memset(w, 0x0, sizeof(drv_video_window_t));
 
     drv_video_window_init( w, 0, xsize, ysize, x, y, bg, flags, title );
     //w->flags = flags;
@@ -263,14 +261,11 @@ drv_video_window_init( drv_video_window_t *w,
 
     w->title = title ? title : "?";
 
-    ph_printf("!!! Locking window\n");
     w_lock();
-    ph_printf("!!! Locked window\n");
     //drv_video_winblt_locked( w->w_owner ); // need?
     //win_make_decorations(w);
     iw_enter_allwq(w);
     win_make_decorations(w);
-    ph_printf("!!! Unlocking window\n");
     w_unlock();
 
     // Actually reorders window in all w list - finally it is possible that win
@@ -284,11 +279,8 @@ drv_video_window_init( drv_video_window_t *w,
 void iw_enter_allwq( drv_video_window_t *w)
 {
     w_assert_lock();
-    ph_printf("!!! Putting in the queue\n");
     queue_enter(&allwindows, w, drv_video_window_t *, chain);
-    ph_printf("!!! Reordering on z\n");
     drv_video_window_rezorder_all();
-    ph_printf("!!! Finished reordring on z\n");;
 }
 
 

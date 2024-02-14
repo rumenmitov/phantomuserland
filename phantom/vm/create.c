@@ -905,7 +905,7 @@ void pvm_internal_init_window(pvm_object_t os)
     pvm_object_t bin = pvm_create_binary_object( drv_video_window_bytes( PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE ) + sizeof(drv_video_window_t), 0 );
     da->o_pixels = bin;
 
-    struct data_area_4_binary *bda = (struct data_area_4_binary *)bin->da;
+    struct data_area_4_binary *bda = pvm_data_area(bin, binary);
 
     void *pixels = &bda->data;
 
@@ -919,7 +919,8 @@ void pvm_internal_init_window(pvm_object_t os)
 
     //lprintf("pvm_internal_init_window w %p pix %p\n", &(da->w), pixels );
 
-    drv_video_window_init( &(da->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
+    drv_video_window_init( &(da->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 
+            100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
     {
     pvm_object_t o;
@@ -935,7 +936,6 @@ void pvm_internal_init_window(pvm_object_t os)
     // TODO do it by class flag in create fixed or earlier?
     pvm_add_object_to_restart_list( o );
     }
-
 }
 
 

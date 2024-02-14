@@ -128,16 +128,16 @@ const char *utf8proc_errmsg(ssize_t errcode) {
 }
 
 ssize_t utf8proc_iterate(
-  const uint8_t *str, ssize_t ph_strlen, int32_t *dst
+  const uint8_t *str, ssize_t strlen, int32_t *dst
 ) {
   int length;
   int i;
   int32_t uc = -1;
   *dst = -1;
-  if (!ph_strlen) return 0;
+  if (!strlen) return 0;
   length = utf8proc_utf8class[str[0]];
   if (!length) return UTF8PROC_ERROR_INVALIDUTF8;
-  if (ph_strlen >= 0 && length > ph_strlen) return UTF8PROC_ERROR_INVALIDUTF8;
+  if (strlen >= 0 && length > strlen) return UTF8PROC_ERROR_INVALIDUTF8;
   for (i=1; i<length; i++) {
     if ((str[i] & 0xC0) != 0x80) return UTF8PROC_ERROR_INVALIDUTF8;
   }
@@ -363,7 +363,7 @@ ssize_t utf8proc_decompose_char(int32_t uc, int32_t *dst, ssize_t bufsize,
 }
 
 ssize_t utf8proc_decompose(
-  const uint8_t *str, ssize_t ph_strlen,
+  const uint8_t *str, ssize_t strlen,
   int32_t *buffer, ssize_t bufsize, int options
 ) {
   /* strlen will be ignored, if UTF8PROC_NULLTERM is set in options */
@@ -386,8 +386,8 @@ ssize_t utf8proc_decompose(
         if (rpos < 0) return UTF8PROC_ERROR_OVERFLOW;
         if (uc == 0) break;
       } else {
-        if (rpos >= ph_strlen) break;
-        rpos += utf8proc_iterate(str + rpos, ph_strlen - rpos, &uc);
+        if (rpos >= strlen) break;
+        rpos += utf8proc_iterate(str + rpos, strlen - rpos, &uc);
         if (uc < 0) return UTF8PROC_ERROR_INVALIDUTF8;
       }
       ssize_t decomp_result;
@@ -542,16 +542,16 @@ ssize_t utf8proc_reencode(int32_t *buffer, ssize_t length, int options) {
 #if 0 // needs realloc
 
 ssize_t utf8proc_map(
-  const uint8_t *str, ssize_t ph_strlen, uint8_t **dstptr, int options
+  const uint8_t *str, ssize_t strlen, uint8_t **dstptr, int options
 ) {
   int32_t *buffer;
   ssize_t result;
   *dstptr = NULL;
-  result = utf8proc_decompose(str, ph_strlen, NULL, 0, options);
+  result = utf8proc_decompose(str, strlen, NULL, 0, options);
   if (result < 0) return result;
   buffer = ph_malloc(result * sizeof(int32_t) + 1);
   if (!buffer) return UTF8PROC_ERROR_NOMEM;
-  result = utf8proc_decompose(str, ph_strlen, buffer, result, options);
+  result = utf8proc_decompose(str, strlen, buffer, result, options);
   if (result < 0) {
     ph_free(buffer);
     return result;

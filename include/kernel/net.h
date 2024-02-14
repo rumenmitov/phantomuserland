@@ -13,18 +13,7 @@
 
 #include <newos/nqueue.h>
 
-// #ifdef PHANTOM_GENODE
-
-// // #include <stdio.h>
-// #include <stddef.h>
-// #include <phantom_types.h>
-
-
-// #else
-
 #include <compat/newos.h>
-
-// #endif
 #include <newos/cbuf.h>
 
 #include <device.h>

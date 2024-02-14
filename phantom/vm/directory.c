@@ -394,7 +394,6 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
     dir->keys = pvm_create_array_object();
     dir->values = pvm_create_array_object();
     dir->flags = ph_calloc( sizeof(u_int8_t), initial_size );
-    ph_memset(dir->flags, 0x0, sizeof(u_int8_t) * initial_size);
 
     //hexdump( dir->flags, dir->capacity, "hdir flags", 0 );
 
