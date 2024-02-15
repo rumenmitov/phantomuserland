@@ -1,12 +1,31 @@
-#ifndef PHANTOM_MALLOC
-#define PHANTOM_MALLOC
+#ifndef PHANTOM_SETJMP
+#define PHANTOM_SETJMP
 
-#define _JBLEN 12 // Size of the jmp_buf on AMD64.
+#ifdef USE_LIBC_SETJMP
 
+#include <libc/setjmp.h>
+
+/*
+    These function have to defined using macros since
+    they work with execution context
+*/
+
+// usual setjmp
+#define ph_setjmp(jmp_buf) setjmp(jmp_buf)
+// usual longjmp
+#define ph_longjmp(jmp_buf, int) longjmp(jmp_buf, int)
+
+
+#else
+
+#warning Using unimplemented setjmp
+
+#define _JBLEN 1
 typedef int jmp_buf[_JBLEN];
 
-
-int ph_setjmp (jmp_buf);
+int ph_setjmp(jmp_buf);
 void ph_longjmp (jmp_buf, int);
+#endif // USE_LIBC_SETJMP
 
-#endif
+
+#endif // PHANTOM_SETJMP

@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(PhantomGenode)
 
-message("CMAKE C FLAGS DEFAULT: ${CMAKE_C_FLAGS}")
-message("CMAKE EXECUTABLE LINKER FLAGS DEFAULT: ${CMAKE_EXE_LINKER_FLAGS}")
+# message("CMAKE C FLAGS DEFAULT: ${CMAKE_C_FLAGS}")
+# message("CMAKE EXECUTABLE LINKER FLAGS DEFAULT: ${CMAKE_EXE_LINKER_FLAGS}")
 
 include (phantom/gl/phantom_gl.cmake)
 include (genode_env/genode_env.cmake)
@@ -13,13 +13,17 @@ include (phantom/libwin/libwin.cmake)
 include (phantom/libfreetype/libfreetype.cmake)
 include (phantom/vm/vm.cmake)
 
-set(SOURCES
+# this is a bit of a workaround that makes libc_setjmp work with goa
+include (genode_env/libc_setjmp.cmake)
+
+set(ISOMEM_SOURCE
 	${PHANTOM_GENODE_ENV_SOURCE}
 	${PHANTOM_GL_SOURCE}
 	${PHANTOM_ISOMEM_SOURCE}
 	${PHANTOM_LIBWIN_SOURCE}
 	${PHANTOM_LIBFREETYPE_SOURCE}
 	${PHANTOM_PVM_SOURCE}
+	${LIBC_SETJMP_SOURCES}
 )
 
 set(ARCH genode-amd64)
@@ -39,7 +43,7 @@ add_compile_options(-include ${relConfigInclude})
 # remove -Werror automatically added by goa
 string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
-add_executable(isomem ${SOURCES})
+add_executable(isomem ${ISOMEM_SOURCE})
 
 target_link_libraries (isomem vmlib)
 

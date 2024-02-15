@@ -181,19 +181,19 @@ extern "C"
         va_end(ap);
     }
 
+#ifndef USE_LIBC_SETJMP
     int ph_setjmp (jmp_buf b){
-        #warning Unimplemented function ph_setjmp
         (void)b;
         Genode::error("Unimplemented ph_setjmp()!");
         return 0;
     }
 
     void ph_longjmp (jmp_buf b, int s){
-        #warning Unimplemented function ph_setjmp
         (void)b;
         (void)s;
         Genode::error("Unimplemented ph_longjmp()!");
     }
+#endif
 
     void ph_qsort( void *ptr, size_t count, size_t size,
             int (*comp)(const void *, const void *) ){
