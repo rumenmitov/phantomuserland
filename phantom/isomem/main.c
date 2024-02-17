@@ -36,6 +36,7 @@
 #include <kernel/dpc.h>
 #include "svn_version.h"
 #include <video/internal.h>
+#include <video/screen.h>
 #include "vm_map.h"
 #include "pager.h"
 #include <kernel/snap_sync.h>
@@ -355,8 +356,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
     {
         pvm_video_init();   // Initializing headless video
 
-        // pvm_headless workaround
-        // scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+        scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 
         drv_video_init_windows();
         init_main_event_q();
