@@ -73,13 +73,20 @@ extern "C"
         return res;
     }
 
+    int ph_atoi(const char *nptr)
+    {
+        int res = 0;
+
+        Genode::ascii_to_signed<int>(nptr, res);
+
+        return res;
+    }
 
     long ph_atol(const char *nptr)
     {
-
         long res = 0;
 
-        Genode::ascii_to(nptr, res);
+        Genode::ascii_to_signed<long>(nptr, res);
 
         return res;
     }

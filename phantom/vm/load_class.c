@@ -160,16 +160,8 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
         ptr += 5;
 
         char record_type = *ptr++;
-        //record_size = htonl( *((long *)ptr)++ );
         record_size = htonl( *((long *)ptr) ); // TODO meant to be ntohl?
-        
-        #ifdef PHANTOM_GENODE
-        // XXX: Issue is that sizeof(long) in Genode is 8 bytes
-        //      htonl reads 4 bytes, but offset twice bigger
-        ptr += 4;
-        #else
-        ptr += sizeof(long);
-        #endif
+        ptr += 4; // no sizeof() here - this should be hardware independent
 
         if(debug_print) ph_printf("type '%c', size %4d: ", record_type, record_size );
 

@@ -184,14 +184,14 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
             FAIL_SYSCALL("Expected %d, received %d parameters", func->param_count, wasm_args_count);
 
         for (size_t i = 0, argv_pos = 0; i < wasm_args_count; i++) {
-            #define GET_ARG(wasm_type, ph_name, c_type)                                 \
-                case wasm_type: {                                                       \
-                    if (item->_class != pvm_get_##ph_name##_class())                    \
-                        FAIL_SYSCALL("Parameter %d: expected int argument", i + 1);     \
-                    c_type value = pvm_get_##ph_name(item);                             \
-                    ph_memcpy(&argv[argv_pos], &value, sizeof(c_type));                 \
-                    argv_pos += sizeof(c_type) / sizeof(uint32);                        \
-                    break;                                                              \
+            #define GET_ARG(wasm_type, ph_name, c_type)                                         \
+                case wasm_type: {                                                               \
+                    if (item->_class != pvm_get_##ph_name##_class())                            \
+                        FAIL_SYSCALL("Parameter %d: expected " #ph_name " argument", i + 1);    \
+                    c_type value = pvm_get_##ph_name(item);                                     \
+                    ph_memcpy(&argv[argv_pos], &value, sizeof(c_type));                         \
+                    argv_pos += sizeof(c_type) / sizeof(uint32);                                \
+                    break;                                                                      \
                 }
 
             pvm_object_t item = pvm_get_array_ofield(wasm_args_obj, i);

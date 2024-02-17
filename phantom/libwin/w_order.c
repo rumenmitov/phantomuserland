@@ -109,7 +109,7 @@ window_handle_t drv_video_next_window(window_handle_t curr)
 
     do {
 
-        LOG_FLOW( 3, "next = %x", (int)next );
+        LOG_FLOW( 3, "next = %p", next );
 
         if(reasonable_tries-- <= 0)
         {
@@ -125,21 +125,21 @@ window_handle_t drv_video_next_window(window_handle_t curr)
         // I'm decoration, don't choose me
         if( next->w_owner )
         {
-            LOG_FLOW( 4, "next = %x has owner", (int)next );
+            LOG_FLOW( 4, "next = %p has owner", next );
             continue;
         }
 
         // Don't choose unvisible ones
         if( !(next->state & WSTATE_WIN_VISIBLE) )
         {
-            LOG_FLOW( 4, "next = %x not visible", (int)next );
+            LOG_FLOW( 4, "next = %p not visible", next );
             continue;
         }
 
         // No focus means no focus
         if( next->flags & (WFLAG_WIN_NOFOCUS|WFLAG_WIN_NOKEYFOCUS) )
         {
-            LOG_FLOW( 4, "next = %x nofocus", (int)next );
+            LOG_FLOW( 4, "next = %p nofocus", next );
             continue;
         }
 

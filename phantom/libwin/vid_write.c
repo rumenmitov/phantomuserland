@@ -43,7 +43,7 @@ void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize,
 
 #else
 
-void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags)
 {
     //ph_printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
     assert(video_drv->screen != 0);
