@@ -58,8 +58,7 @@ extern "C"
     tid_t hal_start_thread(void (*thread)(void *arg), void *arg, int flags)
     {
         Genode::log("Starting new phantom thread!");
-        main_obj->_threads_repo.createThread(thread, arg, flags);
-        return 0;
+        return main_obj->_threads_repo.createThread(thread, arg, flags);
     }
 
     errno_t t_current_set_death_handler(void (*handler)(phantom_thread_t *tp))

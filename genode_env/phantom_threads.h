@@ -32,6 +32,9 @@ extern "C"
     };
 }
 
+// Fun fact: in original phantom this is 256 Kb
+constexpr unsigned int DEFAULT_STACK_SIZE = 16 * 1024;
+
 // Struct containing generic fields for all threads
 struct Phantom::PhantomGenericThread : public Genode::Thread
 {
@@ -87,9 +90,9 @@ struct Phantom::PhantomThread : PhantomGenericThread
         _thread_entry();
     }
 
-    PhantomThread(Genode::Env &env, void (*thread_entry)(void)) : PhantomGenericThread(env, "Phantom", 8192), _thread_entry(thread_entry)
-    {
-    }
+    PhantomThread(Genode::Env &env, void (*thread_entry)(void)) : 
+        PhantomGenericThread(env, "Phantom thread", DEFAULT_STACK_SIZE),
+        _thread_entry(thread_entry) { }
 };
 
 struct Phantom::PhantomThreadWithArgs : PhantomGenericThread
@@ -102,12 +105,9 @@ struct Phantom::PhantomThreadWithArgs : PhantomGenericThread
         _thread_entry(_args);
     }
 
-    PhantomThreadWithArgs(Genode::Env &env, void (*thread_entry)(void *arg), void *args) : PhantomGenericThread(env, "Phantom", 16394),
-                                                                                           _thread_entry(thread_entry),
-                                                                                           _args(args)
-
-    {
-    }
+    PhantomThreadWithArgs(Genode::Env &env, void (*thread_entry)(void *arg), void *args) : 
+        PhantomGenericThread(env, "Phantom arg thread", DEFAULT_STACK_SIZE),
+        _thread_entry(thread_entry), _args(args) { }
 
     PhantomThreadWithArgs(const PhantomThreadWithArgs &another) = delete;
     int operator=(const PhantomThreadWithArgs &another) = delete;

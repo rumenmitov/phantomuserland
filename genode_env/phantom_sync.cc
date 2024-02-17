@@ -146,6 +146,7 @@ extern "C"
         // main_obj->_heap.alloc(sizeof(Genode::Mutex), (void **)&c->impl->mutex);
         c->impl->mutex = (Genode::Mutex *)ph_malloc(sizeof(Genode::Mutex));
         construct_at<Genode::Mutex>(c->impl->mutex);
+        c->impl->counter = 0;
 
         c->impl->name = name;
 
