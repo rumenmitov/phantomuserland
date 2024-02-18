@@ -8,6 +8,7 @@
 #include "phantom_vmem.h"
 #include "phantom_timer.h"
 #include "phantom_threads.h"
+#include "phantom_framebuffer.h"
 
 namespace Phantom
 {
@@ -21,6 +22,8 @@ namespace Phantom
         Phantom::Timer_adapter _timer_adapter{_env};
         Phantom::PhantomThreadsRepo _threads_repo{_env, _heap};
         Phantom::Disk_backend _disk{_env, _heap};
+        // Constructible so that we can run Phantom without graphics if we want
+        Constructible<Phantom::FramebufferAdapter> _framebuffer;
         // XXX : docs says that it "allows only one timeout at a time"
         // Timer::Connection _sleep_timer{_env, "phantom_sleep_timer"};
 
@@ -29,7 +32,7 @@ namespace Phantom
         void* const _bulk_code_ptr{_env.rm().attach(_bulk_class_rom.dataspace())};
         const size_t _bulk_code_size{Dataspace_client(_bulk_class_rom.dataspace()).size()};
 
-        Main(Env &env) : _env(env)
+        Main(Env &env) : _env(env), _framebuffer()
         {
 
         }

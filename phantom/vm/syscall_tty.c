@@ -98,16 +98,14 @@ static int putws_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
 
     SYS_FREE_O(_text);
 
-    ph_printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
+    //printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
 
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;
 
     // TODO w_font_tty_string_n( &(da->w), tty_font, data, len, ...)
-    // w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
-    // w_update( &(da->w) );
-
-    // ph_printf("[TTY-%p] %s\n", &me, buf);
+    w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -177,10 +175,10 @@ static int clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
 
     DEBUG_INFO;
 
-    // da->x = da->y = 0;
+    da->x = da->y = 0;
 
-    // w_fill( &(da->w), da->bg );
-    // w_update( &(da->w) );
+    w_fill( &(da->w), da->bg );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -199,7 +197,7 @@ static int setcolor_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
     //int attr = (short)color;
 
     // TODO colors from attrs
-    //ph_printf("setcolor  font %d,%d\n", da->font_width, da->font_height );
+    //printf("setcolor  font %d,%d\n", da->font_width, da->font_height );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -238,23 +236,23 @@ static int tty_setWinPos_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    // struct data_area_4_tty      *da = pvm_data_area( me, tty );
+    struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
-    // CHECK_PARAM_COUNT(1);
+    CHECK_PARAM_COUNT(1);
 
-    // pvm_object_t _text = args[0];
-    // ASSERT_STRING(_text);
+    pvm_object_t _text = args[0];
+    ASSERT_STRING(_text);
 
-    // int len = pvm_get_str_len( _text );
-    // const char * data = (const char *)pvm_get_str_data(_text);
+    int len = pvm_get_str_len( _text );
+    const char * data = (const char *)pvm_get_str_data(_text);
 
-    // if( len > PVM_MAX_TTY_TITLE-1 ) len = PVM_MAX_TTY_TITLE-1 ;
-    // ph_strlcpy( da->title, data, len+1 );
-    // //buf[len] = 0;
+    if( len > PVM_MAX_TTY_TITLE-1 ) len = PVM_MAX_TTY_TITLE-1 ;
+    ph_strlcpy( da->title, data, len+1 );
+    //buf[len] = 0;
 
-    // SYS_FREE_O(_text);
+    SYS_FREE_O(_text);
 
-    // w_set_title( &(da->w), da->w.title );
+    w_set_title( &(da->w), da->w.title );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -347,18 +345,13 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 
     //void *pixels = &(tty->w) + sizeof(drv_video_window_t);
 
-    ph_printf("!!! : DEBUG : INIT WINDOW AHEAD\n");
-
-    // drv_video_window_init( &(tty->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
+    drv_video_window_init( &(tty->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
 
     //lprintf("pvm_internal_init_tty %p pix %p", &(tty->w), pixels );
 
-    ph_printf("!!! : DEBUG : CLEAR WINDOW AHEAD\n");
 
-    // w_clear( &(tty->w) );
-    // w_update( &(tty->w) );
-    
-    ph_printf("!!! : DEBUG : ADDING TO RESTART AHEAD\n");
+    w_clear( &(tty->w) );
+    //w_update( &(tty->w) );
 
     pvm_add_object_to_restart_list( ttyos );
 }

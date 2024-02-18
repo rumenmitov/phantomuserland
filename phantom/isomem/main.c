@@ -36,7 +36,6 @@
 #include <kernel/dpc.h>
 #include "svn_version.h"
 #include <video/internal.h>
-#include <video/screen.h>
 #include "vm_map.h"
 #include "pager.h"
 #include <kernel/snap_sync.h>
@@ -63,11 +62,7 @@ static amap_t ram_map;
 #include "snap_internal.h"
 #include "kernel/trap.h"
 
-// Headless video driver
-
 struct drv_video_screen_t        *video_drv = 0;
-
-extern int pvm_video_init(); // We need it only here
 
 // extern void wait_for_continue();
 
@@ -346,22 +341,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 #endif
 #endif
     //pressEnter("will init graphics");
-
-    // Skip. Probably need to be implemented
-    /*
     phantom_start_video_driver();
-    */
-
-    // XXX : Video initialization from pvm_headless. Should be replaced with actual video
-    {
-        pvm_video_init();   // Initializing headless video
-
-        scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
-
-        drv_video_init_windows();
-        init_main_event_q();
-        // init_new_windows();
-    }
 
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );

@@ -15,6 +15,7 @@
 #include <ph_string.h>
 #include <ph_malloc.h>
 #include <phantom_assert.h>
+#include <kernel/init.h>
 
 #include <video/screen.h>
 #include <video/internal.h>
@@ -156,6 +157,13 @@ int pvm_video_init()
     return 0;
 }
 
+void phantom_start_video_driver(void) {
+    pvm_video_init();
+
+    scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
+    drv_video_init_windows();
+    init_main_event_q();
+}
 
 /*
 

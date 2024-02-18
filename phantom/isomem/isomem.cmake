@@ -78,7 +78,8 @@ set (source_all
     test_amap.c 
     genode_gdb_cmd_stub.c 
     genode_net.c 
-    genode_intrdisp.c 
+    genode_intrdisp.c
+    genode_framebuffer.c
     init.c 
     vm_cn_udp.c
     contrib/bcd.c 
