@@ -188,7 +188,7 @@ extern "C"
         va_end(ap);
     }
 
-#ifndef USE_LIBC_SETJMP
+#if USE_LIBC_SETJMP == 0
     int ph_setjmp (jmp_buf b){
         (void)b;
         Genode::error("Unimplemented ph_setjmp()!");

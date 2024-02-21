@@ -56,6 +56,9 @@ typedef _mode_t		mode_t;
 typedef int		_sigset_t;
 typedef _sigset_t	sigset_t;
 
+// for wamr/wasi
+typedef u_int64_t uintmax_t;
+
 #ifndef __cplusplus
 typedef u_int8_t        bool;
 // typedef u_int8_t        Bool; // vmware svga

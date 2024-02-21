@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(PhantomGenode)
 
-# message("CMAKE C FLAGS DEFAULT: ${CMAKE_C_FLAGS}")
-# message("CMAKE EXECUTABLE LINKER FLAGS DEFAULT: ${CMAKE_EXE_LINKER_FLAGS}")
+# disable -rdynamic flag
+set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+set (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 include (phantom/gl/phantom_gl.cmake)
 include (genode_env/genode_env.cmake)
@@ -47,15 +48,10 @@ add_executable(isomem ${ISOMEM_SOURCE})
 
 target_link_libraries (isomem vmlib)
 
-set (CMAKE_C_STANDARD 99)
-
-# disable -rdynamic flag
-set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-set (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+set_property(TARGET isomem PROPERTY C_STANDARD 99)
+set_property(TARGET isomem PROPERTY CXX_STANDARD 17)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
-
-# Checking if we want to run only tests
 
 if (DEFINED PHANTOM_TESTS_ONLY)
   add_definitions(-DPHANTOM_TESTS_ONLY)

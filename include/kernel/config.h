@@ -200,5 +200,8 @@
 
 #endif
 
+#ifndef USE_LIBC_SETJMP
+#define USE_LIBC_SETJMP 1
+#endif
 
 #endif // CONFIG_H

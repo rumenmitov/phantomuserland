@@ -39,11 +39,6 @@ phantom_device_t *driver_genode_disk_probe()
     return dev;
 }
 
-static errno_t genode_disk_asyncIo(struct phantom_disk_partition *p, pager_io_request *rq)
-{
-    _stub_print();
-    return 0;
-}
 static errno_t genode_disk_dequeue(struct phantom_disk_partition *p, pager_io_request *rq)
 {
     _stub_print();

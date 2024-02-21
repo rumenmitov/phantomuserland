@@ -98,7 +98,8 @@ set (source_all
     contrib/strncpy.c 
     contrib/strnlen.c 
     contrib/strrchr.c 
-    contrib/strstr.c 
+    contrib/strstr.c
+    contrib/memchr.c
     contrib/subr_prf.c 
     contrib/subr_scanf.c
 )

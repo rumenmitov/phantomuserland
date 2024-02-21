@@ -40,10 +40,9 @@
 
 
 // TODO check against POSIX
-struct timespec
-{
-	long		seconds;
-	long		nanoseconds;
+struct timespec {
+    long tv_sec;
+    long tv_nsec;
 };
 
 // microseconds!

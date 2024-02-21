@@ -31,6 +31,7 @@ size_t 	ph_strnlen(const char *s, size_t count);
 char *	ph_strrchr(const char *p, int ch);
 char *	ph_strstr(const char *s1, const char *s2);
 char *  ph_strnstrn(char const *s1, int l1, char const *s2, int l2);
+void *  ph_memchr(void const *ptr, int ch, size_t count);
 
 #define ph_index(p, ch) ph_strchr(p, ch)
 

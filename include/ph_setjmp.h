@@ -1,7 +1,9 @@
 #ifndef PHANTOM_SETJMP
 #define PHANTOM_SETJMP
 
-#ifdef USE_LIBC_SETJMP
+#include <kernel/config.h>
+
+#if USE_LIBC_SETJMP != 0
 
 #include <libc/setjmp.h>
 

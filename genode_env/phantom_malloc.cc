@@ -49,6 +49,7 @@ extern "C" void *ph_malloc(size_t size)
 
 extern "C" void ph_free(void *addr)
 {
+    if (addr == NULL) return;
     // addr should be not the beginning of the allocation, but allocation + sizeof(size_t)
 
     size_t *adjusted_addr = (size_t *)addr;
