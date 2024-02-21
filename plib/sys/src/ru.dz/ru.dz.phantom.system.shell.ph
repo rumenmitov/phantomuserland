@@ -22,6 +22,7 @@ import .ru.dz.phantom.system.shell_callback;
 //import .test.suite;
 
 import .ru.dz.demo.wasm;
+import .ru.dz.demo.start;
 
 attribute const * ->!;
 
@@ -52,6 +53,7 @@ class shell extends runnable
     //var mtx : .internal.mutex;
 
     var demo : .ru.dz.demo.wasm;
+    // var demo : .ru.dz.demo.start;
 /*
     void init()
     {
@@ -68,7 +70,6 @@ class shell extends runnable
     void run(var parent_object @const ) [8]
     {
 
-/* XXX : Commented until window system is fixed
         win = new .internal.window();
         win.setWinPosition(50,310);
         win.setTitle("Disk io stats");
@@ -82,21 +83,19 @@ class shell extends runnable
         old_idle = 0;
 
         white = 0xFFFFFFFF;
-*/
 
         console = new .internal.io.tty();
         incr = 1;
 
-/* XXX : Commented until window system and connetctions are fixed
         console.moveWindow(10,10);
         console.setTitle("VM Shell");
-		console.setbgcolor( 0xFFFFFFFF );
-		console.clear();
+        console.setbgcolor( 0xFFFFFFFF );
+        console.clear();
 
-		// test of fio connection
-		//fio = new .internal.connection();
+        // test of fio connection
+        //fio = new .internal.connection();
         //fio.connect("fio:/amnt1/fio_log.txt");
-		//fio.block("written from phantom code", 1);
+        //fio.block("written from phantom code", 1);
 
         // test of connections
         conn = new .internal.connection();
@@ -111,19 +110,10 @@ class shell extends runnable
 
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");
-*/
 
-/* moved to run in boot thread
-		// Run tests in plib/sys/src/test
-		var suite : .test.suite;
-		suite = new .test.suite();
-		suite.run();
-*/
-        
-        console.putws("About to start the demo\n");
-
-		demo = new .ru.dz.demo.wasm();
-		demo.run(console);
+        //demo = new .ru.dz.demo.start();
+        demo = new .ru.dz.demo.wasm();
+        demo.run(console);
 
         while(1)
         {
@@ -172,7 +162,7 @@ class shell extends runnable
             
             
             // if( stat_pos >= win.getXSize()-1 )
-	        // win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
+            // win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
             // else
             //     stat_pos = stat_pos + 1;
             

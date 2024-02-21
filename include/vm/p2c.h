@@ -20,8 +20,8 @@
 
 #define EQ_STRING_P2C(obj,cstring) ((((unsigned)pvm_get_str_len(obj))==ph_strlen((const char *)cstring))&&(0==ph_strncmp((const char *)pvm_get_str_data(obj),(const char *)cstring,pvm_get_str_len(obj))))
 
-#define pvm_get_str_len( o )  ( (int) (((struct data_area_4_string *)&(o->da))->length))
-#define pvm_get_str_data( o )  ( (char *) (((struct data_area_4_string *)&(o->da))->data))
+#define pvm_get_str_len( o )  ( (int) (((struct data_area_4_string *)&((o)->da))->length))
+#define pvm_get_str_data( o )  ( (char *) (((struct data_area_4_string *)&((o)->da))->data))
 
 
 #endif // P2C_H

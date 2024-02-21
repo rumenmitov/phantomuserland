@@ -25,12 +25,81 @@
 #include <vm/internal.h>
 #include <vm/alloc.h>
 #include <kernel/snap_sync.h>
+#include <ph_malloc.h>
 
 #define debug_print 0
 
+typedef struct data_area_4_wasm *pvm_wasm_da_t;
+
 static const u_int32_t stack_size = 8092, heap_size = 8092;
 // XXX fix this :((
-struct data_area_4_wasm *global_wasm;
+pvm_wasm_da_t global_wasm;
+
+static void dump_uarray(pvm_object_t uarray, const char* title) {
+    ph_printf("%s: [", title);
+    u_int32_t *ptr = (u_int32_t*)pvm_get_str_data(uarray);
+    for (int i = 0; i < pvm_get_str_len(uarray) / sizeof(u_int32_t); i++) 
+        ph_printf("%08x", ptr[i]);
+    ph_printf("] [%d]\n", pvm_get_str_len(uarray));
+}
+
+static pvm_object_t create_uarray(int capacity) {
+    int capacity_bytes = capacity * sizeof(uintptr_t);
+    pvm_object_t array = pvm_create_string_object_binary(NULL, capacity_bytes);
+    // creating phantom string from NULL leaves its length at 0, fix ?
+    pvm_data_area(array, string)->length = capacity_bytes;
+    ph_memset(pvm_get_str_data(array), 0, capacity_bytes);
+    return array;
+}
+
+static void append_uarray(pvm_object_t *array_ptr, void *value) {
+    int capacity_bytes = pvm_get_str_len(*array_ptr);
+    int capacity = capacity_bytes / sizeof(uintptr_t);
+    uintptr_t *array = (uintptr_t*) pvm_get_str_data(*array_ptr);
+
+    if (array[capacity - 1] != 0) { // grow array
+        int new_capacity = capacity * 2;
+        int new_bytes = new_capacity * sizeof(uintptr_t);
+        pvm_object_t new_array = pvm_create_string_object_binary(NULL, new_bytes);
+        pvm_data_area(new_array, string)->length = new_bytes;
+        char* new_ptr = (char*) pvm_get_str_data(new_array);
+        ph_memcpy(new_ptr, array, capacity_bytes);
+        ph_memset(new_ptr + capacity_bytes, 0, new_capacity - capacity_bytes);
+        ref_dec_o(*array_ptr);
+        *array_ptr = new_array;
+        array = (uintptr_t*) new_ptr;
+        capacity = new_capacity;
+    }
+
+    for (int i = 0; i < capacity; i++) {
+        if (array[i] == 0) {
+            array[i] = (uintptr_t) value;
+            return;
+        }
+    }
+
+    SHOW_ERROR0(1, "append_uarray: element not appended");
+}
+
+static void pop_uarray(pvm_object_t uarray, void* value) {
+    int capacity = pvm_get_str_len(uarray) / sizeof(uintptr_t);
+    uintptr_t *array = (uintptr_t*) pvm_get_str_data(uarray);
+
+    for (int i = 0; i < capacity; i++) {
+        if (array[i] == (uintptr_t) value) {
+            array[i] = array[capacity - 1];
+            array[capacity - 1] = 0;
+            return;
+        }
+    }
+
+    SHOW_ERROR0(1, "pop_uarray: element not found");
+}
+
+#define foreach_in_uarray(uarray, entry)                                            \
+    for (uintptr_t* entry = (uintptr_t*) pvm_get_str_data(uarray);                  \
+        (char*) entry - (char*) pvm_get_str_data(uarray) < pvm_get_str_len(uarray); \
+        entry++)
 
 // presumably void return type cannot be identified from `wasm_type`
 static pvm_object_t wasm_extract_return_value(uint32 buf[], uint8 wasm_type, int cell_count) {
@@ -56,20 +125,22 @@ static pvm_object_t wasm_extract_return_value(uint32 buf[], uint8 wasm_type, int
 }
 
 static void initialize_wasm(pvm_object_t o) {
-    struct data_area_4_wasm      *da = (struct data_area_4_wasm *)o->da;
+    pvm_wasm_da_t da = pvm_data_area(o, wasm);
 
     global_wasm = da;
     da->runtime_initialized = wasm_runtime_init();
 
-    pvm_add_object_to_restart_list( o );
+    pvm_add_object_to_restart_list(o);
 }
 
-void pvm_internal_init_wasm(pvm_object_t o)
-{
-    struct data_area_4_wasm      *da = (struct data_area_4_wasm *)o->da;
+void pvm_internal_init_wasm(pvm_object_t o) {
+    pvm_wasm_da_t da = pvm_data_area(o, wasm);
 
     da->wasm_runtime_objects_array = pvm_create_array_object();
     da->wasm_instance_objects_array = pvm_create_array_object();
+    da->env_vars_array = pvm_create_array_object();
+    da->wasm_mutex_array = create_uarray(8);
+    da->wasm_cond_array = create_uarray(8);
     da->wasm_code_str = NULL;
     da->module = NULL;
     da->module_instance = NULL;
@@ -79,7 +150,7 @@ void pvm_internal_init_wasm(pvm_object_t o)
     initialize_wasm(o);
 }
 
-static void wasm_destroy_instance(struct data_area_4_wasm *da) {
+static void wasm_destroy_instance(pvm_wasm_da_t da) {
     // I am not sure as to whether we need this complicated destruction when we can just 
     // delete all the objects from the wasm_instance_objects_array
     if (da->exec_env) wasm_runtime_destroy_exec_env(da->exec_env);
@@ -96,19 +167,20 @@ static void wasm_destroy_instance(struct data_area_4_wasm *da) {
 }
 
 // void loadModule(.internal.string module)
-static int si_load_module_wasm_8( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+static int si_load_module_wasm_8(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
 {
     DEBUG_INFO;
-    struct data_area_4_wasm *wasm_da = pvm_data_area( me, wasm );
+    CHECK_PARAM_COUNT(1);
+
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
+    pvm_object_t code_obj = args[0];
+    size_t code_length = pvm_get_str_len(code_obj);
 
     if (!wasm_da->runtime_initialized) SYSCALL_THROW_STRING("Wasm runtime initialization failed");
-
-    CHECK_PARAM_COUNT(1);
     if (wasm_da->function_instance) SYSCALL_THROW_STRING("Loading module while executing! ( how?? )");
-    wasm_destroy_instance(wasm_da); // Unlodad previous module (if any)
 
-    pvm_object_t code_obj = args[0];
-    size_t code_length = pvm_get_str_len( code_obj );
+    // Unlodad previous module (if any)
+    wasm_destroy_instance(wasm_da);
 
     // WAMR modifies code (it shouldn't really but still) when loading it, so we create a copy to avoid
     // original string corruption 
@@ -117,50 +189,72 @@ static int si_load_module_wasm_8( pvm_object_t me, pvm_object_t *ret, struct dat
 
     char error_buf[128];
 
-    // keep in mind that this uses error_buf to form string
-    #define FAIL_SYSCALL(...) do { ph_snprintf(error_buf, sizeof(error_buf), __VA_ARGS__); goto fail; } while (0)
-
     // Parse WASM file and create a WASM module
     wasm_da->module = wasm_runtime_load(code_text, code_length, error_buf, sizeof(error_buf));
-    if (!wasm_da->module) FAIL_SYSCALL("%s [LOAD]", error_buf);
-
-    // Create an instance of WASM module 
-    wasm_da->module_instance = wasm_runtime_instantiate(wasm_da->module, stack_size, heap_size, error_buf, sizeof(error_buf));
-    if (!wasm_da->module_instance) FAIL_SYSCALL("%s [INSTANTIATE]", error_buf);
-
-    // Create execution environment for WASM module instance
-    wasm_da->exec_env = wasm_runtime_create_exec_env(wasm_da->module_instance, stack_size);
-    if (!wasm_da->exec_env) FAIL_SYSCALL("Create wasm execution environment failed");
+    if (!wasm_da->module) {
+        ph_snprintf(error_buf, sizeof(error_buf), "%s [LOAD]", error_buf);
+        goto fail;
+    }
 
     SYS_FREE_O(code_obj);
     SYSCALL_RETURN_NOTHING;
 
-    #undef FAIL_SYSCALL
 fail:
     wasm_destroy_instance(wasm_da);
     
     SYSCALL_THROW_STRING(error_buf);
 }
 
+// Instantiate current wasm module, create exec_env, and lookup function by name
+// Previous instance and exec_env are destroyed. Returns true on success
+static bool wasm_prepare_function(pvm_wasm_da_t da, const char* func_name, char* error_buf, size_t err_buf_size) {
+    // Destroy previous instance & exec_env (if any)
+    if (da->exec_env) wasm_runtime_destroy_exec_env(da->exec_env);
+    if (da->module_instance) wasm_runtime_deinstantiate(da->module_instance);
+
+    da->module_instance = NULL;
+    da->exec_env = NULL;
+
+    // Create an instance of WASM module 
+    da->module_instance = wasm_runtime_instantiate(da->module, stack_size, heap_size, error_buf, err_buf_size);
+    if (!da->module_instance) {
+        ph_snprintf(error_buf, err_buf_size, "%s [INSTANTIATE]", error_buf);
+        return false;
+    }
+
+    // Create execution environment for WASM module instance
+    da->exec_env = wasm_runtime_create_exec_env(da->module_instance, stack_size);
+    if (!da->exec_env) {
+        ph_snprintf(error_buf, err_buf_size, "Create wasm execution environment failed");
+        return false;
+    }
+
+    da->function_instance = wasm_runtime_lookup_function(da->module_instance, func_name, NULL);
+    if (!da->function_instance) {
+        ph_snprintf(error_buf, err_buf_size, "Failed to find wasm function `%s`", func_name);
+        return false;
+    }
+
+    return true;
+}
+
 // .internal.object  invokeWasm(var funcname : string, var args : .internal.object[])
-static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+static int si_invoke_wasm_wasm_9(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
 {
     DEBUG_INFO;
-    struct data_area_4_wasm *wasm_da = pvm_data_area( me, wasm );
+    CHECK_PARAM_COUNT(2);
+
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
+    pvm_object_t func_name_obj = args[0];
+    pvm_object_t wasm_args_obj = args[1];
+
     // XXX are we SURE this is WASMFunctionInstance ???
     WASMFunctionInstance* func = wasm_da->function_instance;
     pvm_object_t return_value = NULL;
     // If param_cell_num wil be passed as -1, it will trigger a restart from snapshot
     int param_cell_num = -1;
 
-    if (!wasm_da->runtime_initialized) SYSCALL_THROW_STRING("Wasm runtime initialization failed");
-    if (!wasm_da->exec_env) SYSCALL_THROW_STRING("No Wasm module loaded");
-
-    CHECK_PARAM_COUNT(2);
-
-    pvm_object_t func_name_obj = args[0];
-    pvm_object_t wasm_args_obj = args[1];
-
+    if (!wasm_da->module) SYSCALL_THROW_STRING("No Wasm module loaded");
     if (wasm_args_obj->_class != pvm_get_array_class()) SYSCALL_THROW_STRING( "`args` should be an array" );
 
     size_t wasm_args_count = pvm_get_array_size(wasm_args_obj);
@@ -173,13 +267,14 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
 
     if (!func) { // if func is NULL, means we are running this syscall the first time (not restart)
         size_t func_name_len = pvm_get_str_len(func_name_obj);
-        if( func_name_len > 256 ) SYSCALL_THROW_STRING( "Function name too long" );
+        if(func_name_len > 256) SYSCALL_THROW_STRING("Function name too long");
         // phantom strings are not null-terminated, so we need a copy
-        char func_name_cstr[func_name_len + 1]; ph_strlcpy( func_name_cstr, pvm_get_str_data(func_name_obj), func_name_len + 1 );
+        char func_name_cstr[func_name_len + 1]; ph_strlcpy(func_name_cstr, pvm_get_str_data(func_name_obj), func_name_len + 1);
+        
+        if (!wasm_prepare_function(wasm_da, func_name_cstr, error_buf, sizeof(error_buf)))
+            goto destroy; // error_buf already set
 
-        func = wasm_runtime_lookup_function(wasm_da->module_instance, func_name_cstr, NULL);
-        if (!func) FAIL_SYSCALL("Failed to find wasm function `%s`", func_name_cstr);
-
+        func = wasm_da->function_instance;
         if (wasm_args_count != func->param_count) 
             FAIL_SYSCALL("Expected %d, received %d parameters", func->param_count, wasm_args_count);
 
@@ -208,12 +303,11 @@ static int si_invoke_wasm_wasm_9( pvm_object_t me, pvm_object_t *ret, struct dat
         }
 
         param_cell_num = func->param_cell_num;
-        wasm_da->function_instance = func;
     }
 
     // Actual execution happens here. This function will sleep thread whenever snapshot flag is set
     if (!wasm_runtime_call_wasm(wasm_da->exec_env, func, param_cell_num, argv))
-        FAIL_SYSCALL("Wasm function call failed: %s\n", wasm_runtime_get_exception(wasm_da->module_instance));
+        FAIL_SYSCALL("Wasm function call failed: %s", wasm_runtime_get_exception(wasm_da->module_instance));
 
     return_value = wasm_extract_return_value(argv, func->param_types[func->param_count], func->ret_cell_num);
     if (!return_value) FAIL_SYSCALL("Unexpected return type");
@@ -230,26 +324,134 @@ destroy:
     SYSCALL_THROW_STRING(error_buf);
 }
 
-void wamr_alloc_callback(pvm_object_t obj) {
-    pvm_append_array(
-        global_wasm->runtime_initialized 
-            ? global_wasm->wasm_instance_objects_array 
-            : global_wasm->wasm_runtime_objects_array,
-        obj
-    );
+// .internal.int 		invokeWasiStart(var args : .internal.object) [10] { }
+static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{   // TODO : reconsider this function's design
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(1);
+
+    struct data_area_4_wasm *wasm_da = pvm_data_area( me, wasm );
+    pvm_object_t wasi_args_obj = args[0];
+    pvm_object_t return_value = NULL;
+    // If param_cell_num wil be passed as -1, it will trigger a restart from snapshot
+    int param_cell_num = -1;
+
+    if (!wasm_da->module) SYSCALL_THROW_STRING("No Wasm module loaded");
+    if (wasi_args_obj->_class != pvm_get_array_class()) SYSCALL_THROW_STRING("`args` should be an array");
+
+    int wasi_argc = pvm_get_array_size(wasi_args_obj);
+    char* wasi_argv[wasi_argc];
+    ph_memset(wasi_argv, 0, sizeof(char*) * wasi_argc);
+
+    int wasi_envcount = pvm_get_array_size(wasm_da->env_vars_array);
+    char* wasi_envs[wasi_envcount];
+
+    char error_buf[128];
+    // keep in mind that this uses error_buf to form strings
+    #define FAIL_SYSCALL(...) do { ph_snprintf(error_buf, sizeof(error_buf), __VA_ARGS__); goto destroy; } while (0)
+
+    if (!wasm_da->function_instance) { // if NULL, means we are running this syscall the first time (not restart)
+        const char *start_func_name = "_start"; // some wasm files may override this (see `start_function` in WASMModule)
+
+        // String in env_vars_array are already zero terminated
+        for (size_t i = 0; i < wasi_envcount; i++) {
+            wasi_envs[i] = pvm_get_str_data(pvm_get_array_ofield(wasm_da->env_vars_array, i));
+        }
+
+        for (size_t i = 0; i < wasi_argc; i++) {
+            pvm_object_t item = pvm_get_array_ofield(wasi_args_obj, i);
+            if (item->_class != pvm_get_string_class()) FAIL_SYSCALL("Expected string arguments");
+            
+            size_t length = pvm_get_str_len(item);
+            wasi_argv[i] = ph_malloc(length + 1);
+            ph_strlcpy(wasi_argv[i], pvm_get_str_data(item), length + 1);
+        }
+
+        wasm_runtime_set_wasi_args(wasm_da->module,
+            NULL, 0, // dir_list, dir_count
+            NULL, 0, // map_dir_list, map_dir_count
+            (const char**)wasi_envs, wasi_envcount, wasi_argv, wasi_argc
+        );
+
+        if (!wasm_prepare_function(wasm_da, start_func_name, error_buf, sizeof(error_buf)))
+            goto destroy; // error_buf already set
+
+        param_cell_num = ((WASMFunctionInstance*)wasm_da->function_instance)->ret_cell_num;
+        if (param_cell_num != 0) FAIL_SYSCALL("Unexpected WASI function to return value");
+    }
+
+    // Actual execution happens here. This function will sleep thread whenever snapshot flag is set
+    if (!wasm_runtime_call_wasm(wasm_da->exec_env, wasm_da->function_instance, param_cell_num, NULL)) {
+        const char *exception = wasm_get_exception((WASMModuleInstance*)wasm_da->module_instance);
+    
+        // thrown if proc_exit is called, and is not a real exception
+        const char *wasi_proc_exit = "Exception: wasi proc exit:";
+        if (strncmp(exception, wasi_proc_exit, strlen(wasi_proc_exit)) == 0) {
+            int32_t exitcode = (int32_t) ph_atol(exception + strlen(wasi_proc_exit));
+            return_value = pvm_create_int_object(exitcode);
+        } else {
+            FAIL_SYSCALL("Wasm function call failed: %s", exception);
+        }
+    } else {
+        return_value = pvm_create_null_object();
+    }
+
+    SYS_FREE_O(wasi_args_obj);
+
+#undef FAIL_SYSCALL
+destroy:
+    wasm_da->function_instance = NULL;
+
+    for (size_t i = 0; i < wasi_argc; i++) ph_free(wasi_argv[i]);
+
+    if (return_value) SYSCALL_RETURN(return_value);
+    
+    SYSCALL_THROW_STRING(error_buf);
 }
 
-void wamr_free_callback(pvm_object_t obj) {
-    pvm_pop_array(global_wasm->wasm_instance_objects_array, obj);
+// void	wasiSetEnvVariables(var envs : .internal.string[]) [11] { }	
+static int si_wasi_set_env_vars_wasm_11(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(1);
+
+    struct data_area_4_wasm *wasm_da = pvm_data_area( me, wasm );
+    pvm_object_t env_vars_obj = args[0];
+
+    if (env_vars_obj->_class != pvm_get_array_class()) SYSCALL_THROW_STRING("`envs` should be an array");
+    
+    // delete previous env vars
+    while (pvm_get_array_size(wasm_da->env_vars_array) > 0) {
+        pvm_object_t obj = pvm_get_array_ofield(wasm_da->env_vars_array, 0);
+        pvm_pop_array(wasm_da->env_vars_array, obj);
+        ref_dec_o(obj);
+    }
+
+    // copy env vars into our internal array
+    for (size_t i = 0; i < pvm_get_array_size(env_vars_obj); i++) {
+        pvm_object_t item = pvm_get_array_ofield(env_vars_obj, i);
+        if (item->_class != pvm_get_string_class()) SYSCALL_THROW_STRING("Expected string arguments");
+        
+        // create a copy and zero terminate it (will be useful later on)
+        pvm_object_t copy = pvm_create_string_object_binary(pvm_get_str_data(item), pvm_get_str_len(item) + 1);
+        pvm_get_str_data(copy)[pvm_get_str_len(item)] = '\0';
+        pvm_append_array(wasm_da->env_vars_array, copy);
+    }
+
+    SYS_FREE_O(env_vars_obj);
+    SYSCALL_RETURN_NOTHING;
 }
 
 void pvm_gc_iter_wasm(gc_iterator_call_t func, pvm_object_t self, void *arg)
 {
-    struct data_area_4_wasm *da = (struct data_area_4_wasm *)self->da;
+    pvm_wasm_da_t da = pvm_data_area(self, wasm);
 
     func(da->wasm_runtime_objects_array, arg);
     func(da->wasm_instance_objects_array, arg);
     func(da->wasm_code_str, arg);
+    func(da->env_vars_array, arg);
+    func(da->wasm_mutex_array, arg);
+    func(da->wasm_cond_array, arg);
 }
 
 syscall_func_t  syscall_table_4_wasm[16] =
@@ -260,7 +462,7 @@ syscall_func_t  syscall_table_4_wasm[16] =
     &si_void_6_toXML,                   &si_void_7_fromXML,
     // 8
     &si_load_module_wasm_8,             &si_invoke_wasm_wasm_9,
-    &invalid_syscall,                   &invalid_syscall,
+    &si_wasi_invoke_start_wasm_10,      &si_wasi_set_env_vars_wasm_11,
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall
 };
@@ -270,6 +472,75 @@ DECLARE_SIZE(wasm); // create variable holding size of syscall table
 // XXX : wasm_runtime_init is run even on restart. it allocates already allocated objects
 void pvm_restart_wasm(pvm_object_t o)
 {
+    pvm_wasm_da_t wasm_da = pvm_data_area(o, wasm);
+
     // XXX: do we reinitialize runtime if `runtime_initalized` is false?
     initialize_wasm(o);
+
+    foreach_in_uarray(wasm_da->wasm_mutex_array, entry) {
+        if (*entry) {
+            if (hal_mutex_init((hal_mutex_t*) *entry, NULL) < 0)
+                SHOW_ERROR0(1, "Failed to restart mutex");
+        }
+    }
+
+    foreach_in_uarray(wasm_da->wasm_cond_array, entry) {
+        if (*entry) {
+            if (hal_cond_init((hal_cond_t*) *entry, NULL) < 0)
+                SHOW_ERROR0(1, "Failed to restart cond");
+        }
+    }
+}
+
+// ######################################################
+// #############     CALLBACKS FOR WAMR     #############
+// ######################################################
+
+void wamr_phantom_alloc_callback(pvm_object_t obj) {
+    pvm_append_array(
+        global_wasm->runtime_initialized 
+            ? global_wasm->wasm_instance_objects_array 
+            : global_wasm->wasm_runtime_objects_array,
+        obj
+    );
+}
+
+void wamr_phantom_free_callback(pvm_object_t obj) {
+    pvm_pop_array(global_wasm->wasm_instance_objects_array, obj);
+}
+
+int wamr_phantom_create_mutex(hal_mutex_t *mutex, const char *name) {
+    int ret = hal_mutex_init(mutex, name);
+    if (ret < 0) return ret;
+
+    append_uarray(&global_wasm->wasm_mutex_array, mutex);
+
+    return 0;
+}
+
+int wamr_phantom_destroy_mutex(hal_mutex_t *mutex) {
+    int ret = hal_mutex_destroy(mutex);
+    if (ret < 0) return ret;
+
+    pop_uarray(global_wasm->wasm_mutex_array, mutex);
+
+    return 0;
+}
+
+int wamr_phantom_create_cond(hal_cond_t *mutex, const char *name) {
+    int ret = hal_cond_init(mutex, name);
+    if (ret < 0) return ret;
+
+    append_uarray(&global_wasm->wasm_cond_array, mutex);
+
+    return 0;
+}
+
+int wamr_phantom_destroy_cond(hal_cond_t *mutex) {
+    int ret = hal_cond_destroy(mutex);
+    if (ret < 0) return ret;
+
+    pop_uarray(global_wasm->wasm_cond_array, mutex);
+
+    return 0;
 }

@@ -8,9 +8,9 @@ struct data_area_4_wasm
     // has wasm runtime been initialized successfully ?
     bool         runtime_initialized;
 
-    // binary array (runtime objects) 
+    // array (runtime objects) 
     pvm_object_t wasm_runtime_objects_array;
-    // binary array (instance objects)
+    // array (instance objects)
     pvm_object_t wasm_instance_objects_array;
 
     wasm_module_t module;
@@ -19,6 +19,13 @@ struct data_area_4_wasm
     wasm_function_inst_t function_instance;
 
     pvm_object_t wasm_code_str;
+    
+    // array of strings (environment variables)
+    pvm_object_t env_vars_array;
+
+    // arrays of hal mutexes / conds created by WAMR
+    pvm_object_t wasm_mutex_array;
+    pvm_object_t wasm_cond_array;
 };
 
 #endif // _I_WASM
