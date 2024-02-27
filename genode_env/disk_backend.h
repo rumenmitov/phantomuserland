@@ -35,6 +35,7 @@ class Phantom::Disk_backend
 {
 protected:
     bool _debug = false;
+    int _jobs_pending = 0;
 
     Genode::Env &_env;
     Genode::Heap &_heap;
@@ -135,6 +136,8 @@ public:
      */
     void completed(DJob &job, bool success)
     {
+        _jobs_pending--;
+
         if (_debug)
             Genode::log("Completed req=", job._req);
 
@@ -188,10 +191,30 @@ public:
             Genode::log("Starting async job req=", req);
             Genode::log(op);
         }
+        _jobs_pending++;
         // Allocating DJob in the heap. Should be destroyed on completed() callback
         new (_heap) DJob(_block, op, req);
 
         _block.update_jobs(*this);
+    }
+
+    // XXX : No clue if this is functional, timeout added just in case
+    //      but yeah idk if this will actually do the job :/
+    int waitForPendingJobs() {
+        int elapsedMs = 0;
+        
+        while (_jobs_pending > 0)
+        {
+            elapsedMs += 25;
+            hal_sleep_msec(25);
+
+            if (elapsedMs > 1500) {
+                Genode::error("Disk fence: timeout");
+                return -1;
+            }
+        }
+
+        return 0;
     }
 
     /*

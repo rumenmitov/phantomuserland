@@ -26,7 +26,13 @@
 //void 		pager_stop_io(); // called after io is complete
 void        pager_free_io_resources(pager_io_request *req);
 
+// Load superblock from disk (from default disk block, see DISK_STRUCT_SB_OFFSET_LIST)
+// Panics if failed to load good superblock and failed to repair it
 void        pager_get_superblock(void);
+// Try to load root superblock from the specified disk block
+// Return 0 if root superblock and its copies are fine, or if repair was successful
+int 		pager_try_get_superblock_from(disk_page_no_t root_block);
+// Write superblock and its copies to disk
 void        pager_update_superblock(void);
 
 void        pager_fix_incomplete_format(void);

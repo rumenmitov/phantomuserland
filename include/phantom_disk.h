@@ -55,8 +55,13 @@ extern "C" {
 
 #define DISK_STRUCT_N_MODULES                   30
 
-// Numbers of blocks to look for superblock copies in - usually first 3 are used
-#define DISK_STRUCT_SB_OFFSET_LIST { 0x10, 0x100, 0x220, 0x333 }
+// Numbers of blocks to look for superblock copies in
+// By default: 0x10 is root superblock; 0x333 - secondary superblock
+//    others are for superblock copies
+// 
+// When starting up - load root first, if failed - load secondary
+// P.s. this layout requires disk with volume of at least 6.4 Mb... Yikes
+#define DISK_STRUCT_SB_OFFSET_LIST { 0x10, 0x100, 0x220, 0x333, 0x500, 0x666 }
 
 
 // TODO: replace long with 64 bit int
@@ -127,6 +132,7 @@ typedef struct phantom_disk_superblock
     unsigned char               prev_long_journal_flags; //  - NOT IMPL
 
 } __attribute__((__packed__)) phantom_disk_superblock;
+// XXX : packed attribute causes warnings - do we need it?
 
 void phantom_disk_format( struct phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname );
 int phantom_calc_sb_checksum( struct phantom_disk_superblock *sb );

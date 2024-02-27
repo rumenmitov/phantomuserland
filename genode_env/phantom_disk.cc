@@ -99,4 +99,9 @@ extern "C"
 
         return 0;
     }
+
+    errno_t driver_genode_disk_fence(struct phantom_disk_partition *p)
+    {
+        return main_obj->_disk.waitForPendingJobs();
+    }
 }

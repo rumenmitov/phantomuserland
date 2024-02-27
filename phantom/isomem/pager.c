@@ -34,6 +34,7 @@
 #include <disk.h>
 #endif
 
+// TODO : killme ? probably, recheck and execute 
 #define USE_SYNC_IO 0
 
 #define free_reserve_size  32
@@ -167,6 +168,8 @@ void partition_pager_init(phantom_disk_partition_t *p)
         pager_long_fsck();
     }
 
+    // TODO : REMOVE!!!
+    superblock.disk_page_count = 0x50000;
 
     //superblock.fs_is_clean = 0; // mark as dirty
     pager_update_superblock();
@@ -711,11 +714,18 @@ int find_superblock(
     return 0;
 }
 
+// Does `sb_default_page_numbers` contain the given disk block?
+static int is_default_sb_block(disk_page_no_t page) {
+    for (int i = 0; i < __countof(sb_default_page_numbers); i++) {
+        if (sb_default_page_numbers[i] == page) return 1;
+    }
+
+    return 0;
+}
+
 void
 pager_fix_incomplete_format()
 {
-    //int n_sb_default_page_numbers = sizeof(sb_default_page_numbers)/sizeof(disk_page_no_t);
-
     disk_page_no_t     sb2a, sb3a, free, max;
 
     // TODO: Use some more sophisticated selection alg.
@@ -727,14 +737,11 @@ pager_fix_incomplete_format()
 
     // find a block for freelist
     free = pager_superblock_ptr()->disk_start_page;
-    while( free == sb_default_page_numbers[0] ||
-           free == sb_default_page_numbers[1] ||
-           free == sb_default_page_numbers[2] ||
-           free == sb_default_page_numbers[3]
-         )
-        free++;
+    while(is_default_sb_block(free)) free++;
 
-    max = sb2a > sb3a ? sb2a : sb3a;
+    max = sb_default_page_numbers[0];
+    for (int j = 0; j < __countof(sb_default_page_numbers); j++)
+        max = max > sb_default_page_numbers[j] ? max : sb_default_page_numbers[j];
     max = max > free ? max : free;
     max++; // cover upper block itself. now max is one page above
 
@@ -747,17 +754,11 @@ pager_fix_incomplete_format()
 
     disk_page_no_t i;
     for( i = pager_superblock_ptr()->disk_start_page; i < max; i++ )
-        {
-        if( i == free ||
-            i == sb_default_page_numbers[0] ||
-            i == sb_default_page_numbers[1] ||
-            i == sb_default_page_numbers[2] ||
-            i == sb_default_page_numbers[3]
-             )
-            continue;
+    {
+        if(i == free || is_default_sb_block(i)) continue;
 
         pager_put_to_free_list(i);
-        }
+    }
 
     if( 0 == superblock.object_space_address )
         superblock.object_space_address = PHANTOM_AMAP_START_VM_POOL;
@@ -769,9 +770,19 @@ pager_fix_incomplete_format()
 void
 pager_get_superblock()
 {
-    //disk_page_no_t     sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
-    int n_sb_default_page_numbers = sizeof(sb_default_page_numbers)/sizeof(disk_page_no_t);
+    if (pager_try_get_superblock_from(sb_default_page_numbers[0]) == 0) return;
 
+    SHOW_INFO0(3, "Failed to load default root superblock, trying secondary");
+
+    if (pager_try_get_superblock_from(sb_default_page_numbers[3]) == 0) return;
+
+    panic("Failed to load superblock");
+}
+
+#if !USE_SYNC_IO
+int
+pager_try_get_superblock_from(disk_page_no_t root_block)
+{
     disk_page_no_t     sb_found_page_numbers[4];
 
     phantom_disk_superblock     root_sb;
@@ -783,31 +794,11 @@ pager_get_superblock()
     phantom_disk_superblock     sb2;
     int                         sb2_ok = 0;
 
-    SHOW_FLOW0( 4, "Checking superblock...");
-    //getchar();
+    SHOW_FLOW( 4, "Trying to load superblock at %d...", root_block);
 
-#if USE_SYNC_IO
-    // TODO check rc
-    //phantom_sync_read_block( pp, &root_sb, sb_default_page_numbers[0], 1 );
-    assert(! read_uncheck_superblock( &root_sb, sb_default_page_numbers[0] ) );
+    errno_t rc = read_uncheck_superblock(&root_sb, root_block);
+    if (rc) SHOW_ERROR( 0, "sb read err @%d", root_block);
 
-#else
-    {
-        disk_page_io                sb0;
-
-        disk_page_io_init(&sb0);
-
-        //if(_DEBUG) hal_printf(" Load root sb");
-        // TODO check rc
-        errno_t rc = disk_page_io_load_sync(&sb0,sb_default_page_numbers[0]); // read block 0x10
-        if( rc ) SHOW_ERROR( 0, "sb read err @%d", sb_default_page_numbers[0]);
-        //if(_DEBUG) hal_printf(" ...DONE\n");
-
-        root_sb = * ((phantom_disk_superblock *) disk_page_io_data(&sb0));
-
-        disk_page_io_finish(&sb0);
-    }
-#endif
     root_sb_cs_ok = phantom_calc_sb_checksum( &root_sb );
 
     SHOW_FLOW( 0, "root sb sys name = '%.*s', checksum %s\n",
@@ -817,25 +808,18 @@ pager_get_superblock()
 
 
     sb_found_page_numbers[0] = root_sb.sb2_addr;
-
     sb_found_page_numbers[1] = root_sb.sb3_addr;
-
 
     disk_page_no_t     found_sb1;
     disk_page_no_t     found_sb2;
 
     SHOW_FLOW0( 2, "Find sb1");
-
     sb1_ok = find_superblock( &sb1, sb_found_page_numbers, 2, 0, &found_sb1 );
-
-    //if(_DEBUG) hal_printf(" ...DONE\n");
 
     if( sb1_ok )
     {
         SHOW_FLOW0( 2, "Find sb2");
-        //if(_DEBUG) hal_printf("Find sb2");
         sb2_ok = find_superblock( &sb2, sb_found_page_numbers, 2, found_sb1, &found_sb2  );
-        //if(_DEBUG) hal_printf(" ...DONE\n");
     }
 
     SHOW_FLOW( 7, "sb1 status %d, sb2 - %d, sb3 - %d\n", root_sb_cs_ok, sb1_ok, sb2_ok );
@@ -859,9 +843,8 @@ pager_get_superblock()
 
         phantom_fsck( 0 );
 
-        return;
+        return 0;
     }
-
 
     if(
        root_sb_cs_ok && sb1_ok && sb2_ok &&
@@ -872,13 +855,13 @@ pager_get_superblock()
         if( (root_sb.version >> 16) != DISK_STRUCT_VERSION_MAJOR )
         {
             hal_printf("Disk FS major version number is incorrect: 0x%X\n", root_sb.version >> 16 );
-            panic( "Can't work with this FS" );
+            return -1;
         }
 
         if( (root_sb.version & 0xFFFF) > DISK_STRUCT_VERSION_MINOR )
         {
             hal_printf("Disk FS minor version number is too big: 0x%X\n", root_sb.version & 0xFFFF );
-            panic( "Can't work with this FS" );
+            return -1;
         }
 
         if( (root_sb.version & 0xFFFF) < DISK_STRUCT_VERSION_MINOR )
@@ -895,17 +878,21 @@ pager_get_superblock()
         else
         {
             phantom_fsck( 0 );
-            return;
+            return 0;
         }
     }
 
-    // Something is wrong.
+    // Note: might as well return -1 here, but decided to leave the segment below
+    //      in case it could be actually used for something
 
+    // something is wrong
     need_fsck = 1;
     SHOW_ERROR0( 0, " (need fsck)...");
     SHOW_ERROR0( 0, " default superblock copies are wrong, looking for more...");
 
-#if 1
+    // XXX : what exactly is this for? it either fails or fails... sad
+
+    size_t n_sb_default_page_numbers = sizeof(sb_default_page_numbers)/sizeof(disk_page_no_t); 
     if( !sb1_ok )
         sb1_ok = find_superblock( &sb1, sb_default_page_numbers,
                                   n_sb_default_page_numbers, 0, &found_sb1 );
@@ -922,12 +909,34 @@ pager_get_superblock()
     }
 
     (void) sb2_ok;
-#endif
-    panic("I don't have any fsck yet. I must die.\n");
+
+    return -1;
 }
+#endif
 
+static void get_copy_dests(disk_page_no_t sb1, disk_page_no_t sb2, 
+    disk_page_no_t *sb1_out, disk_page_no_t *sb2_out)
+{
+    disk_page_no_t free_slots[2];
+    size_t n_sb_default_page_numbers = sizeof(sb_default_page_numbers)/sizeof(disk_page_no_t); 
+    int free_cnt = 0;
 
+    for (int i = 0; i < n_sb_default_page_numbers; i++) {
+        if (i == 0 || i == 3) continue; // root and secondary
 
+        if (sb_default_page_numbers[i] != sb1 && sb_default_page_numbers[i] != sb2)
+            free_slots[free_cnt++] = sb_default_page_numbers[i];
+
+        if (free_cnt >= 2) break;
+    }
+
+    assert(free_cnt == 2);
+
+    SHOW_INFO(0, "New selected sb copy dests: %d and %d", free_slots[0], free_slots[1]);
+
+    *sb1_out = free_slots[0];
+    *sb2_out = free_slots[1];
+}
 
 void
 pager_update_superblock()
@@ -940,9 +949,8 @@ pager_update_superblock()
     assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
 #endif
 
-    // TODO : REMOVE!!!
-    superblock.disk_page_count=0x50000;
-
+    // change destinations for copy superblocks
+    get_copy_dests(superblock.sb2_addr, superblock.sb3_addr, &superblock.sb2_addr, &superblock.sb3_addr);
     phantom_calc_sb_checksum( &superblock );
 
 #if USE_SYNC_IO
@@ -966,20 +974,26 @@ pager_update_superblock()
     }
 #else
     *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
-    rc = disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save root copy
-    if( rc ) panic( "Superblock 0 write error!" );
-
-    if( need_fsck )
-    {
-        SHOW_ERROR0( 0, " disk is insane, will update root copy only (who called me here, btw?)...\n");
-    }
-    else
-    {
+    
+    if (!need_fsck) { // XXX : why is this?
         rc = disk_page_io_save_sync(&superblock_io, superblock.sb2_addr);
         if( rc ) panic( "Superblock 1 write error!" );
         rc = disk_page_io_save_sync(&superblock_io, superblock.sb3_addr);
         if( rc ) panic( "Superblock 2 write error!" );
-        SHOW_FLOW0( 0, " saved all 3");
+    }
+
+    // if secondary write is interrupted, root superblock is still good
+    rc = disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[3]); // save secondary copy
+    if( rc ) panic( "Superblock secondary write error!" );
+
+    // if root write is interrupted, we already have secondary + 2 copies
+    rc = disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save secondary copy
+    if( rc ) panic( "Superblock root write error!" );
+    SHOW_FLOW0( 0, " saved all 3");
+
+    if( need_fsck ) // XXX : what is this?
+    {
+        SHOW_ERROR0( 0, " disk is insane, will update root copy only (who called me here, btw?)...\n");
     }
 
 #endif
@@ -1297,7 +1311,7 @@ pager_free_page( disk_page_no_t page_no )
             SHOW_ERROR( 0, "tried to free possible superblock @%d", page_no );
     }
 #endif
-    if(
+    if( // XXX : check against `sb_default_page_numbers` instead ?
        ((pager_superblock_ptr()->sb2_addr != 0) && (page_no == pager_superblock_ptr()->sb2_addr) )
        ||
        ((pager_superblock_ptr()->sb3_addr != 0) && (page_no == pager_superblock_ptr()->sb3_addr) )

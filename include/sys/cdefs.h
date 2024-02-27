@@ -108,6 +108,9 @@
 
 #endif /* __GNUC__ || __INTEL_COMPILER */
 
+/* Size of the C array. XXX : move definition elsewhere? */
+#define __countof(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
+
 /*
  * Macro to test if we're using a specific version of gcc or later.
  */

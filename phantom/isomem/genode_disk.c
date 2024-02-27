@@ -49,11 +49,6 @@ static errno_t genode_disk_raise(struct phantom_disk_partition *p, pager_io_requ
     // _stub_print();
     return 0;
 }
-static errno_t genode_disk_fence(struct phantom_disk_partition *p)
-{
-    _stub_print();
-    return 0;
-}
 static errno_t genode_disk_trim(struct phantom_disk_partition *p, pager_io_request *rq)
 {
     _stub_print();
@@ -81,7 +76,7 @@ static phantom_disk_partition_t *phantom_create_genode_partition_struct(long siz
 
     ret->dequeue = genode_disk_dequeue;
     ret->raise = genode_disk_raise;
-    ret->fence = genode_disk_fence;
+    ret->fence = driver_genode_disk_fence;
     ret->trim = genode_disk_trim;
 
     // ph_strlcpy( ret->name, "virtio", PARTITION_NAME_LEN );

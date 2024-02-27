@@ -471,7 +471,7 @@ void dumpo( addr_t addr )
 {
     pvm_object_t o = (pvm_object_t)addr;
 
-    if( o == 0)
+    if(o == NULL)
     {
         ph_printf("dumpo(0)\n");
         return;
@@ -482,32 +482,41 @@ void dumpo( addr_t addr )
     ph_printf("', ");
     //ph_printf("', da size: %ld, ", (long)(o->_da_size) );
 
-
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
-        ph_printf("String: '");
+        ph_printf("String: ");
 
         struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);
-        int len = da->length;
-        unsigned const char *sp = da->data;
-        while( len-- )
-        {
-            ph_putchar(*sp++);
+        if (da) {
+            ph_printf("'");
+            int len = da->length;
+            unsigned const char *sp = da->data;
+            while( len-- )
+            {
+                ph_putchar(*sp++);
+            }
+            ph_printf("'");
+        } else {
+            ph_printf("<no data area>");
         }
-        ph_printf("'");
-    }
-    if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
+    } else if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
         struct data_area_4_class *da = (struct data_area_4_class *)&(o->da);
-        ph_printf("Is class: '"); pvm_object_print( da->class_name ); ph_printf("' @%p", o);
-        if(
-            (!pvm_isnull(da->class_parent)) &&
-            (pvm_get_null_class() != da->class_parent )
-            )
-        {
-            ph_printf(" Parent: "); pvm_object_dump( da->class_parent ); 
-            //ph_printf(" Parent: '"); pvm_object_print( da->class_parent ); 
-            //ph_printf("' @%p", da->class_parent );
+        ph_printf("Is class: "); 
+
+        if (da) {
+            ph_printf("'"); pvm_object_print( da->class_name ); ph_printf("' @%p", o);
+            if(
+                (!pvm_isnull(da->class_parent)) &&
+                (pvm_get_null_class() != da->class_parent )
+                )
+            {
+                ph_printf(" Parent: "); pvm_object_dump( da->class_parent ); 
+                //ph_printf(" Parent: '"); pvm_object_print( da->class_parent ); 
+                //ph_printf("' @%p", da->class_parent );
+            }
+        } else {
+            ph_printf("<no data area>");
         }
     }
     else
@@ -516,10 +525,19 @@ void dumpo( addr_t addr )
         //ph_printf("Class: { "); dumpo( (addr_t)(o->_class) ); ph_printf("}\n");
         //pvm_object_print( o->_class );
         pvm_object_t cl = o->_class;
-        struct data_area_4_class *cda = (struct data_area_4_class *)&(cl->da);
-        //ph_printf("Class: '"); pvm_object_print( cda->class_name ); ph_printf(" @%p'", o);
-        ph_printf("Class: '"); pvm_object_print( cda->class_name ); ph_printf("' o@%p class@%p", o, cl );
+        ph_printf("Class: ");
+
+        if (cl) { 
+            struct data_area_4_class *cda = (struct data_area_4_class *)&(cl->da);
+            
+            if (cda) {
+                ph_printf("'"); pvm_object_print( cda->class_name ); ph_printf("' o@%p class@%p", o, cl );
+            } else {
+                ph_printf("<no data area>");
+            }
+        } else ph_printf("<freed>");
     }
+
     ph_printf("\n");
 }
 

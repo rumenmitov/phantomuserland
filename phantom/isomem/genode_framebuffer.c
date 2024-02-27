@@ -1,7 +1,6 @@
 #include <kernel/init.h>
 #include <video/internal.h>
 #include <video/screen.h>
-#include <debug_ext.h>
 #include <ph_io.h>
 #include <ph_string.h>
 
@@ -9,6 +8,7 @@
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
+#include <debug_ext.h>
 
 // functions linked from C++ code
 extern char *ph_framebuffer_get_screen();
