@@ -5,11 +5,8 @@
 
 struct data_area_4_wasm
 {
-    // has wasm runtime been initialized successfully ?
-    bool         runtime_initialized;
-
-    // array (runtime objects) 
-    pvm_object_t wasm_runtime_objects_array;
+    // array (currently stores objects with native symbols info) 
+    pvm_object_t wasm_global_objects_array;
     // array (instance objects)
     pvm_object_t wasm_instance_objects_array;
 
@@ -17,6 +14,7 @@ struct data_area_4_wasm
     wasm_module_inst_t module_instance;
     wasm_exec_env_t exec_env;
     wasm_function_inst_t function_instance;
+    void* natives_list_ptr;
 
     pvm_object_t wasm_code_str;
     

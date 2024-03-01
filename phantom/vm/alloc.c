@@ -40,7 +40,7 @@ static void init_free_object_header( pvm_object_storage_t *op, unsigned int size
 
 // TODO Object alloc - gigant lock for now. This is to be redone with separate locks for buckets/arenas.
 static hal_mutex_t  _vm_alloc_mutex;
-hal_mutex_t  *vm_alloc_mutex; // used in gc.c
+hal_mutex_t  *vm_alloc_mutex; // used in gc.c and i_wasm.c
 
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena

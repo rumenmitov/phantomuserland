@@ -138,7 +138,7 @@ static void process_generic_restarts(pvm_object_t root)
     pvm_object_t prev_restart_list = pvm_root.restart_list;
     ref_inc_o( prev_restart_list ); // Below we set array slot, erasing ptr to prev_restart_list, which leads to ref dec to us
 
-    pvm_root.restart_list = pvm_create_object( pvm_get_array_class() );
+    pvm_root.restart_list = pvm_create_array_object();
     pvm_set_field( root, PVM_ROOT_OBJECT_RESTART_LIST, pvm_root.restart_list );
 
 
@@ -250,6 +250,7 @@ static void pvm_create_root_objects()
 
     // and make sure it is really the first
     assert(root == roota);
+    (void)root; (void)roota;
 
     // TODO set class later
 

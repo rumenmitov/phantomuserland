@@ -233,7 +233,7 @@ taskbar_handle_t w_add_to_task_bar_ext( window_handle_t w, drv_video_bitmap_t *i
     e->w = w;
     e->c = bh;
 
-    w_control_set_callback( task_bar_window, bh, task_bar_callback, (void *)h );
+    w_control_set_callback( task_bar_window, bh, task_bar_callback, (void*)((intptr_t)h) );
 
     pool_release_el( task_bar, h );
 

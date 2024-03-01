@@ -220,6 +220,8 @@ pvm_object_t     pvm_get_io_class(void);
 pvm_object_t     pvm_get_ui_control_class(void);
 pvm_object_t     pvm_get_ui_font_class(void);
 
+pvm_object_t     pvm_get_wasm_class(void);
+
 
 
 
