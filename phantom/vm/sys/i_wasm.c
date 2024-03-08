@@ -33,19 +33,27 @@
 // Release assert - works both in debug and release builds
 #define r_assert(e)     ((e) ? (void)0 : panic( __FILE__ ":%u, %s: assertion '" #e "' failed" , __LINE__, __func__ ))
 
+// ev_assert - always evaluates but only panics in debug
+#ifdef NDEBUG
+#define	ev_assert(e)	(e)
+#else
+#define	ev_assert(e)    r_assert(e)
+#endif
+
 typedef struct data_area_4_wasm *pvm_wasm_da_t;
 
 static const u_int32_t stack_size = 8092, heap_size = 8092;
 
-// We actually only need a single instance of this class
-static pvm_wasm_da_t singleton_wasm = NULL;
+// for wamr malloc / free / mutex / cond callbacks (rework?)
+static pvm_wasm_da_t master_instance = NULL;
 // We only need mutex for first initialization, so might as well use someone else's
 extern hal_mutex_t  *vm_alloc_mutex;
 
-#define CHECK_WASM_INITIALIZED() do {                                                       \
-    if (singleton_wasm == NULL) SYSCALL_THROW_STRING("Wasm runtime initialization failed"); \
-    assert(pvm_object_is_allocated(pvm_da_to_object(singleton_wasm)));                      \
-    assert(pvm_da_to_object(singleton_wasm)->_class == pvm_get_wasm_class());               \
+// To use in syscalls. Throws exception if wasm not initialized
+#define CHECK_WASM_INITIALIZED() do {                                                           \
+    if (master_instance == NULL) SYSCALL_THROW_STRING("Wasm runtime initialization failed");    \
+    assert(pvm_object_is_allocated(pvm_da_to_object(master_instance)));                         \
+    assert(pvm_da_to_object(master_instance)->_class == pvm_get_wasm_class());                  \
     } while (0)
 
 // ######################################################
@@ -150,26 +158,26 @@ static pvm_object_t wasm_extract_return_value(uint32 buf[], uint8 wasm_type, int
     return NULL;
 }
 
-// Initializes WAMR's non-persistent state as well as sets `singleton_wasm`
+// Initializes WAMR's non-persistent state as well as sets `master_instance`
 static bool initialize_wasm(pvm_object_t o) {
     pvm_wasm_da_t da = pvm_data_area(o, wasm);
 
     hal_mutex_lock(vm_alloc_mutex);
-    if ( // if singleton existed but got destroyed, no one clears `singleton_wasm`
-        singleton_wasm == NULL                                      ||
-        !pvm_object_is_allocated(pvm_da_to_object(singleton_wasm))  ||
-        (pvm_da_to_object(singleton_wasm))->_class != pvm_get_wasm_class()
-        ) 
+    if ( // if singleton existed but got destroyed, no one clears `master_instance`
+        master_instance == NULL                                      ||
+        !pvm_object_is_allocated(pvm_da_to_object(master_instance))  ||
+        (pvm_da_to_object(master_instance))->_class != pvm_get_wasm_class()
+        )
     {
-        singleton_wasm = da;
+        master_instance = da;
     }
     hal_mutex_unlock(vm_alloc_mutex);
     
-    if (da != singleton_wasm) return true; // singleton already initialized, return
+    if (da != master_instance) return true; // wasm already initialized, return
 
     // the following code (roughly) performs functions of `wasm_runtime_init()`
-    r_assert(wasm_runtime_memory_init(Alloc_With_System_Allocator, NULL));
-    r_assert(bh_platform_init() == 0); // TODO: need it? is empty anyways..
+    ev_assert(wasm_runtime_memory_init(Alloc_With_System_Allocator, NULL));
+    ev_assert(bh_platform_init() == 0); // TODO: need it? is empty anyways..
     if (da->natives_list_ptr) wasm_set_natives_list(da->natives_list_ptr);
     else {
         // we need this *before* we initialize natives
@@ -181,13 +189,16 @@ static bool initialize_wasm(pvm_object_t o) {
             SHOW_ERROR0(0, "Failed to initialize WASM native symbols");
 
             hal_mutex_lock(vm_alloc_mutex);
-            singleton_wasm = NULL;
+            master_instance = NULL;
             hal_mutex_unlock(vm_alloc_mutex);
 
             ref_dec_o(da->wasm_global_objects_array);
             return false;
         }
         da->natives_list_ptr = wasm_get_natives_list();
+        da->wasm_instance_objects_array = pvm_create_array_object();
+        da->wasm_mutex_array = create_uarray(8);
+        da->wasm_cond_array = create_uarray(8);
     }
 
     pvm_add_object_to_restart_list(o);
@@ -201,17 +212,15 @@ void pvm_internal_init_wasm(pvm_object_t o) {
 
     if (!initialize_wasm(o)) return;
 
-    // non-singleton instances rely on singleton, need to ref it
-    if (da != singleton_wasm) ref_inc_o(pvm_da_to_object(singleton_wasm));
-    da->wasm_instance_objects_array = pvm_create_array_object();
+    // non-master instances rely on master, need to ref it
+    if (da != master_instance) ref_inc_o(pvm_da_to_object(master_instance));
     da->env_vars_array = pvm_create_array_object();
-    da->wasm_mutex_array = create_uarray(8);
-    da->wasm_cond_array = create_uarray(8);
 }
 
 static void wasm_destroy_instance(pvm_wasm_da_t da) {
     // I am not sure as to whether we need this complicated destruction when we can just 
     // delete all the objects from the wasm_instance_objects_array
+    // ...well right now the array is global for all instances, so that's not an option
     if (da->exec_env) wasm_runtime_destroy_exec_env(da->exec_env);
     if (da->module_instance) wasm_runtime_deinstantiate(da->module_instance);
     if (da->module) wasm_runtime_unload(da->module);
@@ -232,7 +241,7 @@ static int si_load_module_wasm_8(pvm_object_t me, pvm_object_t *ret, struct data
     CHECK_PARAM_COUNT(1);
     CHECK_WASM_INITIALIZED();
 
-    pvm_wasm_da_t wasm_da = singleton_wasm;
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
     pvm_object_t code_obj = args[0];
     size_t code_length = pvm_get_str_len(code_obj);
 
@@ -304,7 +313,7 @@ static int si_invoke_wasm_wasm_9(pvm_object_t me, pvm_object_t *ret, struct data
     CHECK_PARAM_COUNT(2);
     CHECK_WASM_INITIALIZED();
 
-    pvm_wasm_da_t wasm_da = singleton_wasm;
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
     pvm_object_t func_name_obj = args[0];
     pvm_object_t wasm_args_obj = args[1];
 
@@ -391,7 +400,7 @@ static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, stru
     CHECK_PARAM_COUNT(1);
     CHECK_WASM_INITIALIZED();
 
-    pvm_wasm_da_t wasm_da = singleton_wasm;
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
     pvm_object_t wasi_args_obj = args[0];
     pvm_object_t return_value = NULL;
     // If param_cell_num wil be passed as -1, it will trigger a restart from snapshot
@@ -475,9 +484,8 @@ static int si_wasi_set_env_vars_wasm_11(pvm_object_t me, pvm_object_t *ret, stru
 {
     DEBUG_INFO;
     CHECK_PARAM_COUNT(1);
-    CHECK_WASM_INITIALIZED();
 
-    pvm_wasm_da_t wasm_da = singleton_wasm;
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
     pvm_object_t env_vars_obj = args[0];
 
     if (env_vars_obj->_class != pvm_get_array_class()) SYSCALL_THROW_STRING("`envs` should be an array");
@@ -505,19 +513,20 @@ static int si_wasi_set_env_vars_wasm_11(pvm_object_t me, pvm_object_t *ret, stru
 }
 
 void pvm_gc_iter_wasm(gc_iterator_call_t func, pvm_object_t self, void *arg) {
-    ph_printf("### WASM GC CALL ###\n");
-    // non-singleton instances only reference the singleton itself
-    if (pvm_data_area(self, wasm) != singleton_wasm) {
-        func(pvm_da_to_object(singleton_wasm), arg);
+    pvm_wasm_da_t wasm_da = pvm_data_area(self, wasm);
+
+    func(wasm_da->wasm_code_str, arg);
+    func(wasm_da->env_vars_array, arg);
+
+    if (wasm_da != master_instance) {
+        func(pvm_da_to_object(master_instance), arg);
         return;
     }
 
-    func(singleton_wasm->wasm_global_objects_array, arg);
-    func(singleton_wasm->wasm_instance_objects_array, arg);
-    func(singleton_wasm->wasm_code_str, arg);
-    func(singleton_wasm->env_vars_array, arg);
-    func(singleton_wasm->wasm_mutex_array, arg);
-    func(singleton_wasm->wasm_cond_array, arg);
+    func(master_instance->wasm_global_objects_array, arg);
+    func(master_instance->wasm_instance_objects_array, arg);
+    func(master_instance->wasm_mutex_array, arg);
+    func(master_instance->wasm_cond_array, arg);
 }
 
 syscall_func_t  syscall_table_4_wasm[16] =
@@ -537,24 +546,25 @@ DECLARE_SIZE(wasm); // create variable holding size of syscall table
 
 void pvm_restart_wasm(pvm_object_t o) {
     ph_printf("restarting wasm...\n");
-    r_assert(initialize_wasm(o));
-    ph_printf("initialized wasm...\n");
 
-    pvm_wasm_da_t wasm_da = singleton_wasm;
+    // we should only have a single wasm object in restart list
+    assert(master_instance == NULL);
+    r_assert(initialize_wasm(o)); // sets master_instance
 
-    foreach_in_uarray(wasm_da->wasm_mutex_array, entry) {
+    foreach_in_uarray(master_instance->wasm_mutex_array, entry) {
         if (*entry) {
             if (hal_mutex_init((hal_mutex_t*) *entry, NULL) < 0)
                 SHOW_ERROR0(1, "Failed to restart mutex");
         }
     }
 
-    foreach_in_uarray(wasm_da->wasm_cond_array, entry) {
+    foreach_in_uarray(master_instance->wasm_cond_array, entry) {
         if (*entry) {
             if (hal_cond_init((hal_cond_t*) *entry, NULL) < 0)
                 SHOW_ERROR0(1, "Failed to restart cond");
         }
     }
+
     ph_printf("restarted wasm!\n");
 }
 
@@ -564,22 +574,22 @@ void pvm_restart_wasm(pvm_object_t o) {
 
 void wamr_phantom_alloc_callback(pvm_object_t obj) {
     pvm_append_array(
-        singleton_wasm->wasm_instance_objects_array 
-            ? singleton_wasm->wasm_instance_objects_array 
-            : singleton_wasm->wasm_global_objects_array,
+        master_instance->wasm_instance_objects_array 
+            ? master_instance->wasm_instance_objects_array 
+            : master_instance->wasm_global_objects_array,
         obj
     );
 }
 
 void wamr_phantom_free_callback(pvm_object_t obj) {
-    pvm_pop_array(singleton_wasm->wasm_instance_objects_array, obj);
+    pvm_pop_array(master_instance->wasm_instance_objects_array, obj);
 }
 
 int wamr_phantom_create_mutex(hal_mutex_t *mutex, const char *name) {
     int ret = hal_mutex_init(mutex, name);
     if (ret < 0) return ret;
 
-    append_uarray(&singleton_wasm->wasm_mutex_array, mutex);
+    append_uarray(&master_instance->wasm_mutex_array, mutex);
 
     return 0;
 }
@@ -588,7 +598,7 @@ int wamr_phantom_destroy_mutex(hal_mutex_t *mutex) {
     int ret = hal_mutex_destroy(mutex);
     if (ret < 0) return ret;
 
-    pop_uarray(singleton_wasm->wasm_mutex_array, mutex);
+    pop_uarray(master_instance->wasm_mutex_array, mutex);
 
     return 0;
 }
@@ -597,7 +607,7 @@ int wamr_phantom_create_cond(hal_cond_t *mutex, const char *name) {
     int ret = hal_cond_init(mutex, name);
     if (ret < 0) return ret;
 
-    append_uarray(&singleton_wasm->wasm_cond_array, mutex);
+    append_uarray(&master_instance->wasm_cond_array, mutex);
 
     return 0;
 }
@@ -606,7 +616,7 @@ int wamr_phantom_destroy_cond(hal_cond_t *mutex) {
     int ret = hal_cond_destroy(mutex);
     if (ret < 0) return ret;
 
-    pop_uarray(singleton_wasm->wasm_cond_array, mutex);
+    pop_uarray(master_instance->wasm_cond_array, mutex);
 
     return 0;
 }
