@@ -204,4 +204,8 @@
 #define USE_LIBC_SETJMP 1
 #endif
 
+#ifndef PHANTOM_NO_DISPLAY
+#define PHANTOM_NO_DISPLAY 0
+#endif
+
 #endif // CONFIG_H

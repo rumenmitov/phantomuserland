@@ -35,7 +35,7 @@
 
 // ev_assert - always evaluates but only panics in debug
 #ifdef NDEBUG
-#define	ev_assert(e)	(e)
+#define	ev_assert(e)	(void)(e)
 #else
 #define	ev_assert(e)    r_assert(e)
 #endif

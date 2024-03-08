@@ -79,7 +79,6 @@ set (source_all
     genode_gdb_cmd_stub.c 
     genode_net.c 
     genode_intrdisp.c
-    genode_framebuffer.c
     init.c 
     vm_cn_udp.c
     contrib/bcd.c 
@@ -103,6 +102,10 @@ set (source_all
     contrib/subr_prf.c 
     contrib/subr_scanf.c
 )
+
+if (NOT PHANTOM_BUILD_NO_DISPLAY)
+  set(source_all ${source_all} genode_framebuffer.c)
+endif ()
 
 # convert filenames to absolute paths
 list(TRANSFORM source_all PREPEND ${PHANTOM_ISOMEM_DIR}/)

@@ -98,7 +98,9 @@ static int putws_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
 
     SYS_FREE_O(_text);
 
-    //printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
+#if PHANTOM_NO_DISPLAY != 0
+    ph_printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
+#endif
 
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;

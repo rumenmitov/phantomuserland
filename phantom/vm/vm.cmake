@@ -48,6 +48,10 @@ set (PHANTOM_PVM_SOURCE
     sys/i_wasm.c
 )
 
+if (PHANTOM_BUILD_NO_DISPLAY)
+  set(PHANTOM_PVM_SOURCE ${PHANTOM_PVM_SOURCE} headless_screen.c)
+endif ()
+
 set (${WAMR_SOURCES} "")
 include (${PHANTOM_PVM_DIR}/wamr.cmake)
 
