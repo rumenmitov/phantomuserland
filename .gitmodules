@@ -1,4 +1,3 @@
-[submodule "phantom/vm/wasm-micro-runtime"]
-	path = phantom/vm/wasm-micro-runtime
-	url = https://github.com/Sambura/wamr-genode
-	branch = dev
+[submodule "src/phantom/vm/wasm-micro-runtime"]
+	path = src/phantom/vm/wasm-micro-runtime
+	url = https://github.com/Phantom-OS/phantom-wasm-micro-runtime
