@@ -456,7 +456,7 @@ static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, stru
     
         // thrown if proc_exit is called, and is not a real exception
         const char *wasi_proc_exit = "Exception: wasi proc exit:";
-        if (strncmp(exception, wasi_proc_exit, strlen(wasi_proc_exit)) == 0) {
+        if (ph_strncmp(exception, wasi_proc_exit, strlen(wasi_proc_exit)) == 0) {
             int32_t exitcode = (int32_t) ph_atol(exception + strlen(wasi_proc_exit));
             return_value = pvm_create_int_object(exitcode);
         } else {

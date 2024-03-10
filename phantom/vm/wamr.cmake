@@ -1,4 +1,4 @@
-set (WAMR_BUILD_PLATFORM "genode")
+set (WAMR_BUILD_PLATFORM "phantom-genode")
 set (WAMR_BUILD_TARGET "X86_64")
 set (WAMR_BUILD_LIBC_BUILTIN 1)
 set (WAMR_BUILD_INTERP 1)

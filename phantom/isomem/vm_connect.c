@@ -436,6 +436,10 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
                 return ENOMEM;
             }
 
+            // XXX : the object is created at each re-connect, so added refdec to free
+            //  old objects. The real question : why do we recreate it in the first place?
+            // also probably worth to make sure contents of objects are not used anywhere... although it is not incref'ed so...
+            ref_dec_o(da->p_kernel_state_object);
             da->p_kernel_state_object = bo;
             struct data_area_4_binary *bda = pvm_object_da( bo, binary );
 

@@ -18,7 +18,7 @@ class wasm
 {
     void run(var console : .internal.io.tty)
     {
-	console.putws("Started demo WebAssembly scenario\n");
+        console.putws("Started demo WebAssembly scenario\n");
 
         var wamr : .internal.wasm;
         var result : .internal.object;
