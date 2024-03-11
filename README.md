@@ -90,7 +90,7 @@ Here are the instructions you should follow before proceeding to building and ru
 ### Cloning required repositories
 
 ```bash
-git clone --recurse-submodules https://github.com/Phantom-OS/phantomuserland
+git clone -b dev --recurse-submodules https://github.com/Phantom-OS/phantomuserland
 
 cd phantomuserland
 
@@ -141,22 +141,22 @@ This section contains commands that would prepare the environment to build Phant
 
 > Following commands should be executed inside the container!
 
-[//]: # ( remove -no-kvm?? )
-[//]: # ( `QEMU_OPT += -no-kvm` from build/x86_64/etc/build.conf )
-
 ```bash
 cd ./genode/
+
+# Switch to supported version
+git checkout 24.02
 
 # Creating build directory
 ./tool/create_builddir x86_64
 
-# Preparing ports required for building system image
-./tool/ports/perpare_port jitterentropy linux x86emu
-# Preparing other required ports (?)
-./tool/ports/prepare_port libc nova grub2 gdb stdcxx
+# Preparing ports required for building the system 
+./tool/ports/prepare_port jitterentropy linux x86emu grub2
 
 # Enable optional repositories in build configuration
 sed -i 's/#REPOSITORIES/REPOSITORIES/g' build/x86_64/etc/build.conf
+# Remove `-no-kvm` qemu option
+sed -i '/QEMU_OPT += -no-kvm/d' build/x86_64/etc/build.conf
 
 # go back
 cd ../
@@ -229,6 +229,8 @@ This command will permanently change build configuration. In this particular cas
 
 After you have built the main phantom binary, run the following command in order to build system image and run phantom using QEMU with graphics enabled:
 
+> Note: running this command might fail with message: `Error: missing depot archives`. In this case execute the command suggested below the error message to create the required archives.
+
 `make -C genode/build/x86_64/ KERNEL=hw BOARD=pc run/phantom`
 
 If you have disabled graphics with `PHANTOM_BUILD_NO_DISPLAY=1`, use the following command instead:
@@ -238,4 +240,5 @@ If you have disabled graphics with `PHANTOM_BUILD_NO_DISPLAY=1`, use the followi
 ## Contacts
 
 a.antonov@innopolis.ru - Anton Antonov, author of the port \
+k.samburskiy@innopolis.university - Kirill Samburskiy, author of WAMR port \
 dz@dz.ru - Dmitry Zavalishin, author of Phantom OS
