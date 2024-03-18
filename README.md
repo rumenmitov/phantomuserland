@@ -212,7 +212,7 @@ When building phantom you may want to configure some of the options:
 
 You can specify build options by setting environment variables passed to goa, e.g.:
 
-`PHANTOM_BUILD_NO_VIDEO=1 goa build` 
+`PHANTOM_BUILD_NO_DISPLAY=1 goa build` 
 
 This command will build phantom with graphics disabled. Note that you have to specify your custom build options every time you issue `goa build` command. Alternatively, run the following command (note: you should run `goa build` at least once before using the following command, in order to create CMake build directory):
 

@@ -263,16 +263,16 @@ amap_check_modify( amap_t *map, amap_elem_addr_t from, amap_elem_size_t n_elem, 
 {
     if(modified) *modified = 0;
 
-    if( from >= map->start+map->n_elem )
+    if( from >= map->start + map->n_elem )
         return E2BIG;
 
-    if( map->start >= from+n_elem )
+    if( map->start >= from + n_elem )
         return E2BIG;
 
     if( from < map->start )
         return E2BIG;
 
-    if( map->start+map->n_elem < from+n_elem )
+    if( map->start + map->n_elem < from + n_elem )
         return E2BIG;
 
     amap_entry_t *e = find( map, from );
@@ -295,7 +295,7 @@ amap_check_modify( amap_t *map, amap_elem_addr_t from, amap_elem_size_t n_elem, 
         amap_elem_addr_t e_finish = e->start+e->n_elem; // One AFTER el end
 
         // Completely within
-        if( e->start >= from && e_finish <= finish )
+        if( from <= e->start && e_finish <= finish )
         {
             e->flags = flags;
             goto next;

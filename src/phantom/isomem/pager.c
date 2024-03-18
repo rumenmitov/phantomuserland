@@ -1303,21 +1303,9 @@ pager_free_page( disk_page_no_t page_no )
     if( ((unsigned long)page_no) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
         panic("Free: freeing block below disk start: %ld < %ld", (unsigned long)page_no, (unsigned long)pager_superblock_ptr()->disk_start_page );
 
-#if 0
-    int i;
-    for( i = 0; i < (sizeof(sb_default_page_numbers)/sizeof(sb_default_page_numbers[0])); i ++ )
+    if (is_default_sb_block(page_no))
     {
-        if(page_no == sb_default_page_numbers[i])
-            SHOW_ERROR( 0, "tried to free possible superblock @%d", page_no );
-    }
-#endif
-    if( // XXX : check against `sb_default_page_numbers` instead ?
-       ((pager_superblock_ptr()->sb2_addr != 0) && (page_no == pager_superblock_ptr()->sb2_addr) )
-       ||
-       ((pager_superblock_ptr()->sb3_addr != 0) && (page_no == pager_superblock_ptr()->sb3_addr) )
-      )
-    {
-        SHOW_ERROR( 0, "tried to free superblock @%d", page_no );
+        SHOW_ERROR( 0, "tried to free possible superblock @%d", page_no );
         panic("tried to free superblock");
     }
 

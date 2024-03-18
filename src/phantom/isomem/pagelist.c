@@ -150,6 +150,8 @@ pagelist_clear(pagelist *me)
     while( curr_page )
         {
         disk_page_cache_seek_sync( &me->curr_p, curr_page );
+        // XXX : we first free page and THEN read it? really not safe
+        //      although this function right now is used only on empty pagelists :/
         if(me->curr->head.next) pager_free_page(me->curr->head.next);
         curr_page = me->curr->head.next;
         }

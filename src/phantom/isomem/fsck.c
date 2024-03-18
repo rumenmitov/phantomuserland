@@ -156,7 +156,7 @@ static int fsck_mark_as_free( disk_page_no_t disk_block_num )
 
 static int fsck_just_mark_as_free( disk_page_no_t disk_block_num )
 {
-    amap_modify(&map, disk_block_num, 1, MAP_FREE );
+    amap_modify( &map, disk_block_num, 1, MAP_FREE );
     return 0;
 }
 
@@ -170,7 +170,7 @@ static int fsck_just_mark_as_free( disk_page_no_t disk_block_num )
 
 static void fsck_set_map_free()
 {
-    amap_modify(&map, 0, ~0, MAP_FREE );
+    amap_modify( &map, 0, ~0, MAP_FREE );
 }
 
 
@@ -185,7 +185,7 @@ static void fsck_set_map_free()
 static void fsck_set_map_used()
 //__attribute__ ((unused))
 {
-    amap_modify(&map, 0, ~0, MAP_USED );
+    amap_modify( &map, 0, ~0, MAP_USED );
 }
 
 
