@@ -425,17 +425,7 @@ vm_map_init(unsigned long page_count)
 
     vm_map_vm_page_count = page_count;
 
-    int mapsize = vm_map_vm_page_count*sizeof(vm_page);
-
-    vm_map_map = (vm_page *)ph_malloc( mapsize );
-    ph_memset( vm_map_map, 0, mapsize );
-    /*
-    unsigned int i;
-    for( i = 0; i < page_count; i++ )
-    {
-        ph_memset( vm_map_map+i, 0, sizeof(vm_page) );
-    }*/
-
+    vm_map_map = (vm_page *)ph_calloc( vm_map_vm_page_count, sizeof(vm_page) );
     vm_map_map_end = vm_map_map + page_count;
 
     vm_map_start_of_virtual_address_space = (void *)hal_object_space_address();
@@ -1440,7 +1430,7 @@ static void wait_commit_snap(vm_page *p)
 }
 
 // TODO if we page out page, which is unchanged since THE SNAP and page fault comes (somebody wants to write to that
-// page) we need to do COW too!
+// page) we need to do COW too! (but why?)
 
 void do_snapshot(void)
 {
@@ -1582,6 +1572,7 @@ void do_snapshot(void)
 
     pager_superblock_ptr()->prev_snap = pager_superblock_ptr()->last_snap;
     pager_superblock_ptr()->last_snap = new_snap_head;
+    pager_flush_free_list();
     pager_update_superblock();
 
 
