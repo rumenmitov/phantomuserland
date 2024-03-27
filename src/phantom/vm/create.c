@@ -82,7 +82,9 @@ pvm_object_create_dynamic( pvm_object_t object_class, int das )
 pvm_object_t     pvm_create_object(pvm_object_t type)
 {
 	struct data_area_4_class *cda = pvm_data_area(type,class);
-
+    
+    // XXX : shouldn't we check that this is indeed a class object? 
+    //      remember we cannot and should not rely on compiler to ensure it is the case
 	pvm_object_t ret = pvm_object_create_fixed(type);
 
 	if( cda->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )

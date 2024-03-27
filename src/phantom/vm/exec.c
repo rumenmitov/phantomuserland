@@ -44,7 +44,6 @@
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
-static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index );
 static int pvm_exec_find_catch( struct data_area_4_exception_stack* stack, unsigned int *jump_to, pvm_object_t thrown_obj );
 
 static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type);
@@ -2363,7 +2362,7 @@ void pvm_exec(pvm_object_t current_thread)
 
 
 
-static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index )
+syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index )
 {
     if(!(_class->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
         pvm_exec_panic0( "pvm_exec_find_syscall: not a class object" );

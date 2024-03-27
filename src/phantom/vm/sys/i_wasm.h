@@ -5,10 +5,10 @@
 
 struct data_area_4_wasm
 {
-    // array (currently stores objects with native symbols info) 
-    pvm_object_t wasm_global_objects_array;
-    // array (instance objects)
-    pvm_object_t wasm_instance_objects_array;
+    // .internal.array, stores objects containing description of wasm native symbols 
+    pvm_object_t wasm_native_symbols;
+    // .internal.array, stores objects allocated by wasm runtime using malloc
+    pvm_object_t wasm_runtime_objects;
 
     wasm_module_t module;
     wasm_module_inst_t module_instance;
@@ -24,6 +24,16 @@ struct data_area_4_wasm
     // arrays of hal mutexes / conds created by WAMR
     pvm_object_t wasm_mutex_array;
     pvm_object_t wasm_cond_array;
+
+    // Directory containing IDs and corresponding phantom objects accessible by wasm program.
+    pvm_object_t wasm_sandboxed_objects;
+    // The next value of sandboxed object id
+    uint64_t next_object_id;
+
+    // wasm function was called by this thread
+    pvm_object_t owner_thread;
+    // object thrown by wasm program
+    pvm_object_t inner_exception;
 };
 
 #endif // _I_WASM

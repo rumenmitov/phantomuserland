@@ -11,9 +11,9 @@
 #include <wasm_export.h>
 #include <wasm_runtime.h>
 #include <wasm_memory.h>
+ // we don't need wasm's LOG_ERROR here, it is redefined by debug_ext.h
 #undef LOG_ERROR
 
- // we don't need wasm's LOG_ERROR here, it is redefined by debug_ext.h
 #define DEBUG_MSG_PREFIX "vm.dir"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -27,6 +27,8 @@
 #include <vm/alloc.h>
 #include <kernel/snap_sync.h>
 #include <ph_malloc.h>
+#include <vm/exec.h>
+#include <vm/object_flags.h>
 
 #define debug_print 0
 
@@ -62,7 +64,6 @@ extern hal_mutex_t  *vm_alloc_mutex;
 
 /* unmanaged array: can store pointers, but does not report them to gc */
 
-
 static void dump_uarray(pvm_object_t uarray, const char* title) __attribute__((__unused__));
 static void dump_uarray(pvm_object_t uarray, const char* title)
 {
@@ -86,6 +87,7 @@ static void append_uarray(pvm_object_t *array_ptr, void *value) {
     int capacity_bytes = pvm_get_str_len(*array_ptr);
     int capacity = capacity_bytes / sizeof(uintptr_t);
     uintptr_t *array = (uintptr_t*) pvm_get_str_data(*array_ptr);
+    int scan_start = 0;
 
     if (array[capacity - 1] != 0) { // grow array
         int new_capacity = capacity * 2;
@@ -98,10 +100,11 @@ static void append_uarray(pvm_object_t *array_ptr, void *value) {
         ref_dec_o(*array_ptr);
         *array_ptr = new_array;
         array = (uintptr_t*) new_ptr;
+        scan_start = capacity;
         capacity = new_capacity;
     }
 
-    for (int i = 0; i < capacity; i++) {
+    for (int i = scan_start; i < capacity; i++) {
         if (array[i] == 0) {
             array[i] = (uintptr_t) value;
             return;
@@ -130,6 +133,291 @@ static void pop_uarray(pvm_object_t uarray, void* value) {
     for (uintptr_t* entry = (uintptr_t*) pvm_get_str_data(uarray);                  \
         (char*) entry - (char*) pvm_get_str_data(uarray) < pvm_get_str_len(uarray); \
         entry++)
+
+// ######################################################
+// #######   PHANTOM TO WAMR SYSCALL INTERFACE   ########
+// ######################################################
+
+/*
+    WAMR OBJECT POOL LAYOUT
+
+    [0 : 999] - reserved:
+        0 - not an object (can be used as an error return value)
+        [1 : PVM_ROOT_LAST_CLASS_INDEX + 1] - ids reserved for class objects.
+            Ids of class objects are the same as defined in root.h, but incremented by 1
+        999 - this id is for the null object
+        998 - this id is for the current thread object
+        the rest are not defined yet
+    1000+ - these id can be used by actual objects
+*/
+
+#define OBJECT_POOL_START_ID 1000
+#define OBJECT_POOL_NULL_OBJECT_ID 999
+#define OBJECT_POOL_CURRENT_THREAD_ID 998
+#if OBJECT_POOL_CURRENT_THREAD_ID <= PVM_ROOT_LAST_CLASS_INDEX + 1
+#error ran out of special IDs in wasm object pool
+#endif
+
+/*
+    Adds the specified object to the WAMR object pool. Returns the id assigned
+    to the object. Refcount of the object stays unchanged. If given object is a
+    NULL pointer, returns 0 without adding object to the pool
+*/
+static uint64_t wasm_add_to_object_pool(pvm_wasm_da_t wasm, pvm_object_t object) {
+    hashdir_t *hashmap = pvm_data_area(wasm->wasm_sandboxed_objects, directory);
+    uint64_t id;
+
+    if (object == NULL) return 0;
+    
+    /* the loop is just in case int64 somehow overflows and we start inserting exising keys */
+    do { // use binary representation of id instead of a string as a key
+        id = wasm->next_object_id++;
+        if (id < OBJECT_POOL_START_ID) id = wasm->next_object_id = OBJECT_POOL_START_ID;
+    } while (hdir_add(hashmap, (void*) &id, sizeof(uint64_t), object));
+    ref_dec_o(object); // hashmap ref-incs, we give up ownership
+
+    return id;
+}
+
+/*
+    Returns phantom object given its id in the WAMR object pool, or NULL if no
+    such object was found. Object refcount does not change
+*/
+static pvm_object_t wasm_object_id_to_object(pvm_wasm_da_t wasm, uint64_t object_id) {
+    hashdir_t *hashmap = pvm_data_area(wasm->wasm_sandboxed_objects, directory);
+    pvm_object_t out;
+
+    // Handle special object ids
+    if (object_id < OBJECT_POOL_START_ID) {
+        if (object_id == 0 || 
+            object_id == PVM_ROOT_OBJECT_CLASS_LOADER + 1 || 
+            object_id == PVM_ROOT_OBJECT_DRIVER_CLASS + 1) return NULL;
+
+        if (object_id <= PVM_ROOT_LAST_CLASS_INDEX + 1) // class objects
+            return pvm_get_field(get_root_object_storage(), object_id - 1);
+        if (object_id == OBJECT_POOL_NULL_OBJECT_ID)
+            return pvm_create_null_object(); // just returns existing null object
+        if (object_id == OBJECT_POOL_CURRENT_THREAD_ID)
+            return wasm->owner_thread;
+
+        // reserved id, return nothing
+        return NULL;
+    }
+
+    if (hdir_find(hashmap, (void*) &object_id, sizeof(uint64_t), &out, /* delete entry = */ 0))
+        return NULL;
+    ref_dec_o(out); // hdir_find performs ref_inc on the object
+    
+    return out;
+}
+
+/*
+    Removes the object with the specified id from the WAMR object pool. Object's refcount
+    is decremented. Returns 0 on success, or -1 if object was not found
+*/
+static int wasm_remove_from_object_pool(pvm_wasm_da_t wasm, uint64_t object_id) {
+    hashdir_t *hashmap = pvm_data_area(wasm->wasm_sandboxed_objects, directory);
+    pvm_object_t out;
+
+    if (object_id < OBJECT_POOL_START_ID) return -2; // do not release special ids
+
+    if (hdir_find(hashmap, (void*) &object_id, sizeof(uint64_t), &out, /* delete entry = */ 1))
+        return -1;
+
+    // hashmap & array refcount strategies are messed up, but pretty sure need to refdec here 
+    ref_dec_o(out);
+
+    return 0;
+}
+
+/*
+    Native Wasm function. Creates a phantom string with refcount of 1. Null bytes are allowed.
+    Returns object pool id
+*/
+static uint64_t wasm_phantom_create_string(wasm_exec_env_t exec_env, const char* data, uint32_t len) {
+    pvm_wasm_da_t wasm = wasm_runtime_get_user_data(exec_env);
+
+    pvm_object_t string = pvm_create_string_object_binary(data, len);
+    
+    return wasm_add_to_object_pool(wasm, string);
+}
+
+/*
+    Defines 3 native Wasm functions: for creating, setting and getting a value of numeric phantom objects
+    The functions are:
+
+    wasm_phantom_create_<type> : 
+        creates a corresponding numeric object with specified initial value and with refcount of 1, and
+        adds the object to the object pool. Returns the id of the created object.
+    
+    wasm_phantom_set_<type> :
+        sets a new value to the numeric object with the specified id. Returns 0 on success, or -1 if
+        the object id is inavlid, or the object type does not match
+    
+    wasm_phantom_get_<type> :
+        Reads numerical object's value in the specified location, given the object id. Returns 0 on 
+        success, or -1 if the object id is inavlid, or the object type does not match
+*/
+#define DEFINE_NUMERIC_NATIVE_FUNCTIONS(phantom_type, ctype)                                            \
+    static uint64_t wasm_phantom_create_##phantom_type(wasm_exec_env_t exec_env, ctype value)           \
+    {                                                                                                   \
+        return wasm_add_to_object_pool(                                                                 \
+            wasm_runtime_get_user_data(exec_env),                                                       \
+            pvm_create_##phantom_type##_object(value)                                                   \
+        );                                                                                              \
+    }                                                                                                   \
+    static int wasm_phantom_set_##phantom_type(wasm_exec_env_t exec_env, uint64_t obj_id, ctype value)  \
+    {                                                                                                   \
+        pvm_object_t obj = wasm_object_id_to_object(wasm_runtime_get_user_data(exec_env), obj_id);      \
+        if (obj == NULL || obj->_class != pvm_get_##phantom_type##_class()) return -1;                   \
+        pvm_data_area(obj, phantom_type)->value = value;                                                \
+        return 0;                                                                                       \
+    }                                                                                                   \
+    static int wasm_phantom_get_##phantom_type(wasm_exec_env_t exec_env, uint64_t obj_id, ctype *out)   \
+    {                                                                                                   \
+        if (!wasm_runtime_validate_native_addr(exec_env->module_inst, out, sizeof(ctype))) return -1;   \
+        pvm_object_t obj = wasm_object_id_to_object(wasm_runtime_get_user_data(exec_env), obj_id);      \
+        if (obj == NULL || obj->_class != pvm_get_##phantom_type##_class()) return -1;                   \
+        *out = pvm_data_area(obj, phantom_type)->value;                                                 \
+        return 0;                                                                                       \
+    }
+
+/* Used to add native numeric functions to `phantom_native_symbols` */
+#define DECLARE_NUMERIC_NATIVE_FUNCTIONS(phantom_type, sig_letter)                          \
+    { "phantom_"#phantom_type, wasm_phantom_create_##phantom_type, "("sig_letter")I" },     \
+    { "phantom_set_"#phantom_type, wasm_phantom_set_##phantom_type, "(I"sig_letter")i" },   \
+    { "phantom_get_"#phantom_type, wasm_phantom_get_##phantom_type, "(I*)i" }
+
+DEFINE_NUMERIC_NATIVE_FUNCTIONS(int, int32_t)
+DEFINE_NUMERIC_NATIVE_FUNCTIONS(float, float)
+DEFINE_NUMERIC_NATIVE_FUNCTIONS(long, int64_t)
+DEFINE_NUMERIC_NATIVE_FUNCTIONS(double, double)
+
+
+static uint64_t wasm_phantom_new(wasm_exec_env_t exec_env, uint64_t class_id)
+{
+    pvm_wasm_da_t wasm = (pvm_wasm_da_t) wasm_runtime_get_user_data(exec_env);
+
+    // TODO : pvm_create_object() should check for itself as to whether the
+    //        parameter object is a class or not
+    if (class_id > PVM_ROOT_LAST_CLASS_INDEX + 1) return 0;
+    pvm_object_t class = wasm_object_id_to_object(wasm, class_id);
+    if (class == NULL) return 0;
+
+    if (!(class->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)) return 0;
+
+    return wasm_add_to_object_pool(wasm, pvm_create_object(class));
+}
+
+/**
+ * Native Wasm function. Executes an internal method of a phantom object with the specified
+ * ID and syscall index.
+ * 
+ * @param me_id Object pool id of a target phantom object
+ * @param ret_id Destination for the id of the object retuned from the syscall. Refer to
+ *      @return for details
+ * @param thread_id Object pool id of a current thread object
+ * @param syscall_index Index of the method to call on `me_id` object
+ * @param arg_ids Pointer to an array of object IDs that will be passed as syscall arguments
+ * @param args_size Number of 32 bit cells holding the `arg_ids` array. Should be equal
+ *      to 2 * <arg_count>
+ * 
+ * @return Options:
+ *      - Returns -1 if `ret_id` pointer is invalid, nothing is assigned to `ret_id`
+ *      - Returns 0 on success with `ret_id` containing the return value of the syscall
+ *      - Returns 1 if the syscall had thrown an exception, with `ret_id` containing the 
+ *        thrown object.
+ *      - Returns 2 on any other issue, with `ret_id` containing a phantom string with
+ *        error message:
+ *              * "odd args size" if `args_size` is an odd number
+ *              * "invalid id" if either `me_id` or `thread_id` are invalid object IDs
+ *              * "no syscall" if the specified syscall index does not exist
+ *              * "invalid arg id" if one of the arguments in `arg_ids` has an invalid ID
+*/
+static int wasm_phantom_syscall(wasm_exec_env_t exec_env, uint64_t me_id, uint64_t *ret_id, 
+    uint64_t thread_id, int syscall_index, uint64_t *arg_ids, uint32_t args_size)
+{
+    pvm_wasm_da_t wasm = wasm_runtime_get_user_data(exec_env);
+
+    // ret_id is not validated by wamr automatically; see export_native_api.md for details
+    if (!wasm_runtime_validate_native_addr(exec_env->module_inst, ret_id, sizeof(uint64_t))) 
+        return -1;
+
+    const char *error_str = NULL;
+
+    assert(args_size <= 64); // see `pvm_exec_sys()`
+    int arg_count = args_size / 2;
+    pvm_object_t args[arg_count]; // VLA should be before goto's
+    if (args_size % 2) { error_str = "odd args size"; goto failure; }
+
+    pvm_object_t me = wasm_object_id_to_object(wasm, me_id);
+    pvm_object_t thread = wasm_object_id_to_object(wasm, thread_id);
+    if (me == NULL || thread == NULL) { error_str = "invalid id"; goto failure; }
+
+    syscall_func_t syscall = pvm_exec_find_syscall(me->_class, syscall_index);
+    if (syscall == NULL) { error_str = "no syscall"; goto failure; }
+
+    for (int i = 0; i < arg_count; i++) {
+        args[i] = wasm_object_id_to_object(wasm, arg_ids[i]);
+        if (args[i] == NULL) { error_str = "invalid arg id"; goto failure; }
+    }
+    for (int i = 0; i < arg_count; i++) ref_inc_o(args[i]);
+
+    pvm_object_t retobj = NULL;
+    int retval = syscall(me, &retobj, pvm_data_area(thread, thread), arg_count, args);
+
+    if (retobj) {
+        *ret_id = wasm_add_to_object_pool(wasm, retobj);
+    }
+
+    return retval ? 0 : 1;
+
+failure:
+    *ret_id = wasm_add_to_object_pool(wasm, pvm_create_string_object(error_str));
+    return 2;
+}
+
+/*
+    Native Wasm function. Reduces refcount of the object with the specified ID by 1
+    and removes the object from the object pool. Returns 0 on success, or -1 if
+    the specified object ID is not in the pool.
+*/
+static int wasm_phantom_release_object(wasm_exec_env_t exec_env, uint64_t object_id)
+{
+    pvm_wasm_da_t wasm = wasm_runtime_get_user_data(exec_env);
+    return wasm_remove_from_object_pool(wasm, object_id);
+}
+
+/*
+    Native Wasm function. Terminates Wasm program execution and throws a phantom object 
+    for caller to catch. Returns 0 on success or -1 if specified object id is invalid.
+
+    Note that the thrown object's refcount is incremented by 1
+*/
+static int wasm_phantom_throw(wasm_exec_env_t exec_env, uint64_t object_id) {
+    pvm_wasm_da_t wasm = wasm_runtime_get_user_data(exec_env);
+    
+    wasm->inner_exception = wasm_object_id_to_object(wasm, object_id);
+    if (wasm->inner_exception == NULL) return -1;
+    // empty exception, the actual exception is in `wasm->inner_exception`
+    wasm_set_exception((struct WASMModuleInstance*) exec_env->module_inst, "");
+    ref_inc_o(wasm->inner_exception);
+
+    return 0;
+}
+
+static NativeSymbol phantom_native_symbols[] = 
+{
+    { "phantom_create_string", wasm_phantom_create_string, "(*~)I" },
+    DECLARE_NUMERIC_NATIVE_FUNCTIONS(int, "i"),
+    DECLARE_NUMERIC_NATIVE_FUNCTIONS(float, "f"),
+    DECLARE_NUMERIC_NATIVE_FUNCTIONS(long, "I"),
+    DECLARE_NUMERIC_NATIVE_FUNCTIONS(double, "F"),
+    { "phantom_create_object", wasm_phantom_new, "(I)I" },
+    { "phantom_syscall", wasm_phantom_syscall, "(I*Ii*~)i" },
+    { "phantom_release_object", wasm_phantom_release_object, "(I)" },
+    { "phantom_throw", wasm_phantom_throw, "(I)i" },
+};
 
 // ######################################################
 // ################     WASM RELATED    #################
@@ -180,23 +468,30 @@ static bool initialize_wasm(pvm_object_t o) {
     ev_assert(bh_platform_init() == 0); // TODO: need it? is empty anyways..
     if (da->natives_list_ptr) wasm_set_natives_list(da->natives_list_ptr);
     else {
-        // we need this *before* we initialize natives
-        da->wasm_global_objects_array = pvm_create_array_object();
+        // Initialization of natives allocates memory, hence need this array
+        da->wasm_runtime_objects = pvm_create_array_object();
         
         // TODO : native symbols are stored as a linked list. 
         //      maybe compact natives in a single pvm object with all nodes?
-        if (!wasm_native_init()) { 
+        if (!wasm_native_init() || 
+            !wasm_runtime_register_natives("env",
+                                           phantom_native_symbols, 
+                                           __countof(phantom_native_symbols))
+            )
+        {
             SHOW_ERROR0(0, "Failed to initialize WASM native symbols");
 
             hal_mutex_lock(vm_alloc_mutex);
             master_instance = NULL;
             hal_mutex_unlock(vm_alloc_mutex);
 
-            ref_dec_o(da->wasm_global_objects_array);
+            ref_dec_o(da->wasm_runtime_objects);
             return false;
         }
+
         da->natives_list_ptr = wasm_get_natives_list();
-        da->wasm_instance_objects_array = pvm_create_array_object();
+        da->wasm_native_symbols = da->wasm_runtime_objects;
+        da->wasm_runtime_objects = pvm_create_array_object();
         da->wasm_mutex_array = create_uarray(8);
         da->wasm_cond_array = create_uarray(8);
     }
@@ -215,11 +510,12 @@ void pvm_internal_init_wasm(pvm_object_t o) {
     // non-master instances rely on master, need to ref it
     if (da != master_instance) ref_inc_o(pvm_da_to_object(master_instance));
     da->env_vars_array = pvm_create_array_object();
+    da->wasm_sandboxed_objects = pvm_create_object(pvm_get_directory_class());
 }
 
 static void wasm_destroy_instance(pvm_wasm_da_t da) {
     // I am not sure as to whether we need this complicated destruction when we can just 
-    // delete all the objects from the wasm_instance_objects_array
+    // delete all the objects from the wasm_runtime_objects
     // ...well right now the array is global for all instances, so that's not an option
     if (da->exec_env) wasm_runtime_destroy_exec_env(da->exec_env);
     if (da->module_instance) wasm_runtime_deinstantiate(da->module_instance);
@@ -231,6 +527,10 @@ static void wasm_destroy_instance(pvm_wasm_da_t da) {
     da->exec_env = NULL;
     da->module_instance = NULL;
     da->module = NULL;
+
+    // seems unnecessary, but wouldn't hurt
+    hdir_clear(pvm_data_area(da->wasm_sandboxed_objects, directory));
+    da->inner_exception = NULL;
     da->function_instance = NULL;
 }
 
@@ -264,6 +564,8 @@ static int si_load_module_wasm_8(pvm_object_t me, pvm_object_t *ret, struct data
         goto fail;
     }
 
+    wasm_da->owner_thread = pvm_da_to_object(tc);
+
     SYS_FREE_O(code_obj);
     SYSCALL_RETURN_NOTHING;
 
@@ -282,6 +584,7 @@ static bool wasm_prepare_function(pvm_wasm_da_t da, const char* func_name, char*
 
     da->module_instance = NULL;
     da->exec_env = NULL;
+    da->inner_exception = NULL;
 
     // Create an instance of WASM module 
     da->module_instance = wasm_runtime_instantiate(da->module, stack_size, heap_size, error_buf, err_buf_size);
@@ -296,6 +599,8 @@ static bool wasm_prepare_function(pvm_wasm_da_t da, const char* func_name, char*
         ph_snprintf(error_buf, err_buf_size, "Create wasm execution environment failed");
         return false;
     }
+    // add pointer to the owner phantom object to execution environment
+    wasm_runtime_set_user_data(da->exec_env, (void*) da);
 
     da->function_instance = wasm_runtime_lookup_function(da->module_instance, func_name, NULL);
     if (!da->function_instance) {
@@ -387,8 +692,10 @@ static int si_invoke_wasm_wasm_9(pvm_object_t me, pvm_object_t *ret, struct data
 #undef FAIL_SYSCALL
 destroy:
     wasm_da->function_instance = NULL;
+    hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
 
     if (return_value) SYSCALL_RETURN(return_value);
+    if (wasm_da->inner_exception) SYSCALL_THROW(wasm_da->inner_exception);
     
     SYSCALL_THROW_STRING(error_buf);
 }
@@ -456,8 +763,8 @@ static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, stru
     
         // thrown if proc_exit is called, and is not a real exception
         const char *wasi_proc_exit = "Exception: wasi proc exit:";
-        if (ph_strncmp(exception, wasi_proc_exit, strlen(wasi_proc_exit)) == 0) {
-            int32_t exitcode = (int32_t) ph_atol(exception + strlen(wasi_proc_exit));
+        if (ph_strncmp(exception, wasi_proc_exit, ph_strlen(wasi_proc_exit)) == 0) {
+            int32_t exitcode = (int32_t) ph_atol(exception + ph_strlen(wasi_proc_exit));
             return_value = pvm_create_int_object(exitcode);
         } else {
             FAIL_SYSCALL("Wasm function call failed: %s", exception);
@@ -471,10 +778,12 @@ static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, stru
 #undef FAIL_SYSCALL
 destroy:
     wasm_da->function_instance = NULL;
+    hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
 
     for (size_t i = 0; i < wasi_argc; i++) ph_free(wasi_argv[i]);
 
     if (return_value) SYSCALL_RETURN(return_value);
+    if (wasm_da->inner_exception) SYSCALL_THROW(wasm_da->inner_exception);
     
     SYSCALL_THROW_STRING(error_buf);
 }
@@ -517,14 +826,15 @@ void pvm_gc_iter_wasm(gc_iterator_call_t func, pvm_object_t self, void *arg) {
 
     func(wasm_da->wasm_code_str, arg);
     func(wasm_da->env_vars_array, arg);
+    func(wasm_da->wasm_sandboxed_objects, arg);
 
     if (wasm_da != master_instance) {
         func(pvm_da_to_object(master_instance), arg);
         return;
     }
 
-    func(master_instance->wasm_global_objects_array, arg);
-    func(master_instance->wasm_instance_objects_array, arg);
+    func(master_instance->wasm_native_symbols, arg);
+    func(master_instance->wasm_runtime_objects, arg);
     func(master_instance->wasm_mutex_array, arg);
     func(master_instance->wasm_cond_array, arg);
 }
@@ -573,16 +883,11 @@ void pvm_restart_wasm(pvm_object_t o) {
 // ######################################################
 
 void wamr_phantom_alloc_callback(pvm_object_t obj) {
-    pvm_append_array(
-        master_instance->wasm_instance_objects_array 
-            ? master_instance->wasm_instance_objects_array 
-            : master_instance->wasm_global_objects_array,
-        obj
-    );
+    pvm_append_array(master_instance->wasm_runtime_objects, obj);
 }
 
 void wamr_phantom_free_callback(pvm_object_t obj) {
-    pvm_pop_array(master_instance->wasm_instance_objects_array, obj);
+    pvm_pop_array(master_instance->wasm_runtime_objects, obj);
 }
 
 int wamr_phantom_create_mutex(hal_mutex_t *mutex, const char *name) {

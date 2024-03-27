@@ -16,6 +16,7 @@
 // __dead2
 #include <sys/cdefs.h>
 #include <vm/internal_da.h>
+#include <vm/syscall_tools.h>
 
 // Size of syscall instruction in bytes, to rewind IP on execution syscall
 #define VM_SYSCALL_INSTR_SIZE 2
@@ -48,6 +49,7 @@ pvm_exec_run_method(
 
 void create_and_run_object(const char *class_name, int method );
 
+syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index );
 
 typedef struct dynamic_method_info
 {
