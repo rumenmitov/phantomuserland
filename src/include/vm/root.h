@@ -186,7 +186,8 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_CLASS_LOADER 18
 
-//#define PVM_ROOT_OBJECT_DRIVER_CLASS 19
+// unused
+#define PVM_ROOT_OBJECT_DRIVER_CLASS 19
 
 #define PVM_ROOT_OBJECT_MUTEX_CLASS 20
 
@@ -232,6 +233,8 @@ extern struct pvm_root_t pvm_root;
 #define PVM_ROOT_OBJECT_UI_FONT_CLASS 40
 
 #define PVM_ROOT_OBJECT_WASM_CLASS 41
+
+#define PVM_ROOT_LAST_CLASS_INDEX PVM_ROOT_OBJECT_WASM_CLASS
 
 
 

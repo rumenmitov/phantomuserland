@@ -230,13 +230,10 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     u_int8_t flags = dir->flags[keypos];
 
     // No indirection and key is equal
-    if( (!flags) && !pvm_is_null( okey ) )
+    if( (!flags) && !pvm_is_null( okey ) && (0 == hdir_cmp_keys( ikey, i_key_len, okey )) )
     {
-        if( 0 == hdir_cmp_keys( ikey, i_key_len, okey ) )
-        {
-            UNLOCK_DIR(dir);
-            return EEXIST;
-        }
+        UNLOCK_DIR(dir);
+        return EEXIST;
     }
 
     // No indirection and corresponding key slot is empty
@@ -306,12 +303,13 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     if(debug_print) lprintf("put to existing indirect keypos = %d\n", keypos );
 
-    size_t indir_size = get_array_size( dir->keys );
+    size_t indir_size = get_array_size( okey );
+    pvm_object_t valarray = pvm_get_array_ofield( dir->values, keypos );
 
     int i, empty_pos = -1;
     for( i = 0; i < indir_size; i++ )
     {
-        pvm_object_t indir_key = pvm_get_array_ofield( dir->keys, i );
+        pvm_object_t indir_key = pvm_get_array_ofield( okey, i );
         if(pvm_is_null(indir_key))
         {
             empty_pos = i;
@@ -321,6 +319,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
         // Have key
         if( 0 == hdir_cmp_keys( ikey, i_key_len, indir_key ) )
         {
+            pvm_object_t new_key = pvm_create_string_object_binary( ikey, i_key_len );
             UNLOCK_DIR(dir);
             return EEXIST;
         }
@@ -330,13 +329,13 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     pvm_object_t new_key = pvm_create_string_object_binary( ikey, i_key_len );
     if( empty_pos >= 0 )
     {
-        pvm_set_array_ofield( dir->keys, empty_pos, new_key );
-        pvm_set_array_ofield( dir->values, empty_pos, add );
+        pvm_set_array_ofield( okey, empty_pos, new_key );
+        pvm_set_array_ofield( valarray, empty_pos, add );
     }
     else
     {
-        pvm_append_array( dir->keys, new_key );
-        pvm_append_array( dir->values, add );
+        pvm_append_array( okey, new_key );
+        pvm_append_array( valarray, add );
     }
     ref_inc_o( add );
     dir->nEntries++;
@@ -356,7 +355,7 @@ static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey )
     const char *okeyp = pvm_get_str_data(okey);
 
     int i;
-    for( i = 0; i < ikey_len; i++ )
+    for( i = 0; i < ikey_len; i++, okeyp++, ikey++ )
     {
         if( *okeyp > *ikey ) return 1;
         if( *ikey > *okeyp ) return 1;
@@ -393,7 +392,11 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 
     dir->keys = pvm_create_array_object();
     dir->values = pvm_create_array_object();
-    dir->flags = ph_calloc( sizeof(u_int8_t), initial_size );
+
+    int flags_size = sizeof(u_int8_t) * initial_size;
+    dir->flags_container = pvm_create_string_object_binary(NULL, flags_size);
+    dir->flags = pvm_get_str_data(dir->flags_container);
+    ph_memset(dir->flags, 0, flags_size);
 
     //hexdump( dir->flags, dir->capacity, "hdir flags", 0 );
 
@@ -443,6 +446,25 @@ errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out )
     return 0;
 }
 
+void hdir_clear( hashdir_t *dir ) {
+    if (dir->nEntries == 0) return;
+    
+    // ??
+    #warning lock 
+    ph_printf(" ########## CLEAR START ############\n");
+
+    for( int i = 0; i < dir->capacity; i++ )
+    {
+        // if there were objects / arrays in there, they will get dec-refed
+        pvm_set_array_ofield( dir->keys, i, pvm_create_null_object() );
+        pvm_set_array_ofield( dir->values, i, pvm_create_null_object() );
+        dir->flags[i] = 0;
+    }
+
+    ph_printf(" ########## CLEAR FINISH ############\n");
+
+    dir->nEntries = 0;
+}
 
 
 

@@ -421,6 +421,7 @@ struct data_area_4_directory
 
     pvm_object_t                        keys;           // Where we actually hold keys
     pvm_object_t                        values;         // Where we actually hold values
+    pvm_object_t                        flags_container;// persistent container for `flags` array
     u_int8_t                           *flags;          // Is this keys/values slot pointing to 2nd level array
 
     pvm_spinlock_t                      pvm_lock;
@@ -434,6 +435,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out, int delete_found );
 //! Get all keys as array
 errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out );
+// Remove all objects from directory
+void    hdir_clear( hashdir_t *dir );
 
 
 
