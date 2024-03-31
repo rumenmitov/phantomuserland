@@ -205,7 +205,7 @@ pagelist_write_seq( pagelist *me, disk_page_no_t wr_data )
         {
         if( me->curr->head.next == 0 )
             {
-            if( !pager_alloc_page(&me->curr->head.next) )
+            if( !pager_alloc_page_locked(&me->curr->head.next) )
                 panic("out of disk space in pagelist");
 
             disk_page_cache_seek_noread( &me->curr_p, me->curr->head.next );

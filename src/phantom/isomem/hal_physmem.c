@@ -61,7 +61,7 @@ static void cmd_mem_stat( int ac, char **av );
 
 
 static physalloc_t   	vm_map;
-static map_elem_t    	mapbuf[MAP_SIZE_ELEM(PHYSALLOC_MAXPAGES)];
+//static map_elem_t    	mapbuf[MAP_SIZE_ELEM(PHYSALLOC_MAXPAGES)];
 
 
 //static void hal_init_physmem_alloc_thread(void);

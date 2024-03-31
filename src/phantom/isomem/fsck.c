@@ -25,6 +25,7 @@
 #define MAP_FREE 0
 #define MAP_USED 1
 #define MAP_UNKNOWN 2
+#define MAP_LIST_NODE 3
 
 static amap_t map; 
 static int map_created = 0;
@@ -160,6 +161,12 @@ static int fsck_just_mark_as_free( disk_page_no_t disk_block_num )
     return 0;
 }
 
+static int fsck_just_mark_as_node( disk_page_no_t disk_block_num )
+{
+    amap_modify( &map, disk_block_num, 1, MAP_LIST_NODE );
+    return 0;
+}
+
 
 /**
  *
@@ -188,7 +195,8 @@ static void fsck_set_map_used()
     amap_modify( &map, 0, ~0, MAP_USED );
 }
 
-
+static int fsck_forlist_ext( disk_page_no_t list_start, unsigned int check_magic, 
+    int (*leaf_f) (disk_page_no_t), int (*node_f) (disk_page_no_t ) );
 
 /**
  *
@@ -201,6 +209,12 @@ static void fsck_set_map_used()
 
 
 static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, int (*process_f) (disk_page_no_t ) )
+{
+    return fsck_forlist_ext(list_start, check_magic, process_f, process_f);
+}
+
+static int fsck_forlist_ext( disk_page_no_t list_start, unsigned int check_magic, 
+    int (*leaf_f) (disk_page_no_t), int (*node_f) (disk_page_no_t ) )
 {
     int insane = 0;
 
@@ -218,7 +232,7 @@ static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, in
             break;
         }
 
-        if(process_f) process_f( next );
+        if(node_f) node_f( next );
 
         disk_page_cache_seek_sync( &curr_p, next );
         curr = (struct phantom_disk_blocklist *)disk_page_cache_data(&curr_p);
@@ -245,7 +259,7 @@ static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, in
         if( used != N_REF_PER_BLOCK && next != 0 )
             SHOW_ERROR( 0, "FSCK warning: incomplete list page, magic 0x%x, blk %d", curr->head.magic, currp_no );
 
-        if(process_f != NULL )
+        if(leaf_f != NULL )
         {
             unsigned int i;
             for( i = 0; i < used; i++ )
@@ -259,7 +273,7 @@ static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, in
                         insane = 1;
                         break;
                     }
-                    process_f(lbn);
+                    leaf_f(lbn);
                 }
             }
         }
@@ -282,7 +296,7 @@ static void fsck_list_justadd_as_used( disk_page_no_t list_start )
 // Add all list blocks (including list itself) to map as free
 static void fsck_list_justadd_as_free( disk_page_no_t list_start )
 {
-    fsck_forlist( list_start, 0, fsck_just_mark_as_free );
+    fsck_forlist_ext( list_start, 0, fsck_just_mark_as_free, fsck_just_mark_as_node );
 }
 
 
@@ -571,6 +585,14 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
     pager_free_page( toFree );
 }
 
+static void free_blocklist_page_snap_worker(disk_page_no_t toFree, int flags)
+{
+    assert(toFree);
+    assert(flags == MAP_LIST_NODE);
+
+    pager_free_blocklist_page_locked( toFree );
+}
+
 void phantom_free_snap(
                        disk_page_no_t old_snap_start,
                        disk_page_no_t curr_snap_start,
@@ -593,9 +615,8 @@ void phantom_free_snap(
 
     // go through list, free pages that are finally free in map
     iterate_map(free_snap_worker, MAP_FREE);
-    pager_flush_free_list();
-
-    // ERROR - list structure for old_snap_start has to be freed too
+    iterate_map(free_blocklist_page_snap_worker, MAP_LIST_NODE);
+    pager_commit_active_free_list();
 
     fsck_delete_map();
 

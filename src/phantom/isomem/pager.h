@@ -40,100 +40,62 @@ int         pager_fast_fsck(void);
 int         pager_long_fsck(void);
 
 /*
-    ###########################################################
-    ######################## DISK LEAK ########################
-    ###########################################################
-
-    Possible points of disk leak:
-        - during snapshot first kickout phase: blocks are being removed 
-            from freelist, and as another node of freelist is empty, the
-            freelist head is updated, written to superblock and flushed 
-            to disk. Interruption during or after this phase will result
-            in freelist being much shorter than before. In fact, the 
-            vulnerable interval is [kickout_start; snap_finish]; where
-            snap_finish is when the snapshot is already commited, but
-            the older snapshot is not freed yet
-        - previous snapshot release: if the system is interrupted AFTER 
-            the new snapshot was made, but BEFORE the old is deleted, 
-            all the free blocks in the old snapshot do not get released,
-            and the reference to the old snapshot is lost
-
-*/
-
-
-/*
-    Adds the specified disk block to the freelist. In case the current node
-    is full, the specified block is used as a new freelist node instead.
-    If the freelist is not initialized *or* does not exist, it is created
-    in the specified disk block and the superblock is updated.
-
-    // I currently have no explanation on why is it made this way :/
-    All changes to freelist / superblock are immediately written to disk,
-    except: 
-    - if the freelist exists and is initialized, and the current node is 
-        *not* full at the moment of the call, no updates will be written to 
-        disk 
-    - if the current freelist block is full, then the current block gets 
-        used as a new freelist head. While new value of freelist head is 
-        written to superblock structure, the superblock is not flushed to 
-        disk by this function in this case.
-
-    Note that the disk block that is passed to this function may be 
-    overwritten immediately (by a freelist node structure). Hence this 
-    function should only be called if you are 100% sure that this disk 
-    block is free and is not used by any current snapshots
-
-    This function is called either when fixing an incomplete superblock (on 
-    system boot) or by `pager_free_page` function, when freeing a disk block  
-
-    // DO NOT use superblock free_start! -- WHY? [dz]
+    Adds the specified disk block to the active freelist (or increments active 
+    free_start, if applicable). If the current active list head is full, it is 
+    flushed to disk, and the given disk block is used as a new active freelist head. 
 */
 void        pager_put_to_free_list( disk_page_no_t );
 /*
-    Adds free disk blocks to reserve list until it is full. Free blocks 
-    are taken from the freelist, or from `free_start` if the freelist is
-    empty. These disk blocks are removed from freelist / free_start as a
-    result. 
+    Allocates disk blocks and adds them to reserve list until it is full. Allocated
+    blocks come from either active freelist, or active `free_start` if the freelist 
+    is emtpy.
     
     Reserve list of free disk blocks is a short array providing easy access
     to some available to use disk blocks.
 
-    If the freelist head changes as a result of this function, this change
-    is immediately written to superblock and to disk. However, the updated
-    value of `free_start` is not written to disk by this function.
-
-    This function is called by `pager_refill_free` (unconfirmed, but this
-    might be called at any moment); and by `pager_alloc_page` function.
+    Should be called with `pager_freelist_mutex` taken
 */
 void        pager_refill_free_reserve(void);
-/*
-    Makes the specified disk block a new head of the free list. This block
-    is immediately overwritten with empty list node structure, with `next`
-    node set to the current freelist head specified in the superblock.
-
-    Note that this function modifies contents of `freelist_head` global 
-    variable, but does not modify the value of current freelist head in the
-    superblock structure. 
-
-    This can potentially lead to:
-    1) leakage of freed disk blocks: blocks will be written to the new
-        node, event though it is not an actual freelist head
-    2) freelist corruption: if the contents of `freelist_head` are not
-        appropriately reloaded, and are written to the location of 
-        actual freelist head, all the previous nodes in the list will
-        be lost, and the resulting freelist is a single node that points
-        to itself
-
-    This function is called: when fixing an incomlete superblock (on system
-    boot); and by `pager_put_to_free_list` function, when extending or 
-    initializing the freelist.
-*/
-void        pager_format_empty_free_list_block( disk_page_no_t );
+/**
+ * Writes the contents of the current active freelist head to disk, and sets the 
+ * given disk block as a new active head. Allows active freelist head to be 0, in
+ * which case the disk write is skipped
+ * 
+ * Should be called with `pager_freelist_mutex` taken
+ */
+void        pager_extend_active_free_list( disk_page_no_t );
+/**
+ * Performs some sanity checks and loads freelist head specified in superblock to
+ * memory. Allocates a new active freelist head.
+ */
 void        pager_init_free_list(void);
-/*
-    Writes current freelist head to disk
-*/
-void        pager_flush_free_list(void);
+/**
+ * Writes current active freelist head to disk and writes both active freelist head
+ * and active_free_start to superblock. Allocates a new active freelist head.
+ * 
+ * When this function returns, the previous active freelist is fully commited to 
+ * disk and will become valid after the superblock is saved to disk.
+ */
+void        pager_commit_active_free_list(void);
+/**
+ * Marks a disk block as a blocklist page to be freed. The block will actually be 
+ * freed by a call to `pager_free_blocklist_pages()`. This is done to aboid blocks
+ * containing blocklist nodes to be overwritten with new data too soon.
+ * 
+ * XXX : since the list of free blocklist blocks is stored in memory, these blocks
+ * can be lost / leaked.
+ */
+void        pager_free_blocklist_page_locked(disk_page_no_t blk);
+/**
+ * Actually free all the blocklist blocks marked to be freed by 
+ * `pager_free_blocklist_page_locked()`. Frees blocks using `pager_free_page()`
+ */
+void        pager_free_blocklist_pages(void);
+/**
+ * Calculates the number of free disk blocks (for last snapshot)
+ * May take some time (and IO) to complete
+ */
+int64_t     pager_calculate_free_block_count(void);
 
 
 // NB! On pager_init() call pagefile must be good and healthy,
@@ -151,7 +113,7 @@ void        pager_finish(void);
 
 
 int         pager_interrupt_alloc_page(disk_page_no_t *out);
-int         pager_alloc_page(disk_page_no_t *out);
+int         pager_alloc_page_locked(disk_page_no_t *out);
 void        pager_free_page( disk_page_no_t );
 
 int         pager_can_grow(); // can I grow pagespace

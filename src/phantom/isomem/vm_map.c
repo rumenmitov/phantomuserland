@@ -709,7 +709,7 @@ vm_page_req_pageout(vm_page *me)
         // Ask them to allocate us some disk space.
         if(PAGING_DEBUG) hal_printf("ask disk block 0x%X\n", me->virt_addr );
 
-        if( !pager_alloc_page(&me->curr_page) )
+        if( !pager_alloc_page_locked(&me->curr_page) )
         {
             panic("can't alloc disk page in req pageout");
         }
@@ -857,7 +857,7 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     }
     else
     {
-        if( !pager_alloc_page(&(p->make_page)) )
+        if( !pager_alloc_page_locked(&(p->make_page)) )
             panic("can't alloc disk page in req pageout");
         p->flag_have_make = 1;
         page_touch_history(p);
@@ -866,10 +866,6 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     // start pageout
     if(SNAP_DEBUG) hal_printf("req pageout fast");
     p->pager_io.disk_page = p->make_page;
-
-    // #ifdef PHANTOM_GENODE
-    // hal_page_control(p->phys_addr, p->virt_addr, page_unmap, page_rw );
-    // #endif
 
     hal_page_control(p->phys_addr, p->virt_addr, page_map, page_rw );
     p->flag_phys_protect = 0;
@@ -1112,16 +1108,15 @@ page_fault_write( vm_page *p )
     {
         page_touch_history(p);
         if(FAULT_DEBUG) hal_printf("have physmem 0x%X\n", p->virt_addr );
-        if(p->flag_phys_protect)
-        {
-            page_touch_history(p);
-            hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
-            p->flag_phys_protect = 0;
-            p->access_count++;
-            p->flag_phys_dirty = 1; // we'll be dirty after return from trap
-            move_to_dirty_q(p);
-            if(FAULT_DEBUG) hal_printf("unprotect to write 0x%X\n", p->virt_addr );
-        }
+        assert(p->flag_phys_protect);
+        
+        page_touch_history(p);
+        hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
+        p->flag_phys_protect = 0;
+        p->access_count++;
+        p->flag_phys_dirty = 1; // we'll be dirty after return from trap
+        move_to_dirty_q(p);
+        if(FAULT_DEBUG) hal_printf("unprotect to write 0x%X\n", p->virt_addr );
         return;
     }
 
@@ -1307,9 +1302,6 @@ static void mark_for_snap(vm_page *p)
 
     if(DEBUG_MARK) hal_printf("set to ro\n");
     // ok, page is mapped, writeable: the real case.
-    #ifdef PHANTOM_GENODE
-    hal_page_control( p->phys_addr, p->virt_addr, page_unmap, page_ro );
-    #endif
     hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
     p->flag_phys_protect = 1;
 }
@@ -1496,7 +1488,6 @@ void do_snapshot(void)
 
     if(enabled) hal_sti();
 
-    // TODO : Uncomment! It should be done here
     phantom_snapper_reenable_threads();
 #if USE_SNAP_WAIT
     signal_snap_snap_passed(); // or before enabling threads?
@@ -1512,9 +1503,6 @@ void do_snapshot(void)
     if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: pgout");
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
 
-    //if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: go kick ass those lazy pages");
-    //if(SNAP_DEBUG) getchar();
-
     ph_syslog( 0, "snap: will finalize_snap");
     // scan nonsnapped pages, snap them manually (or just access to cause
     // page fault?)
@@ -1528,18 +1516,16 @@ void do_snapshot(void)
     // now all the pages for snapshot are done. Now create
     // the disk data structure for them
 
-    // TODO - free prev snap first!
+    // TODO - free prev snap first! -- (why?)
 
-    //long new_snap_head = 0;
     disk_page_no_t new_snap_head = 0;
 
 
     if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating primary pagelist root");
-    if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
+    if( !pager_alloc_page_locked(&new_snap_head) ) panic("out of disk!");
 
 
     if(SNAP_STEPS_DEBUG) ph_syslog( 0, "snap: creating pagelist 0...");
-    //if(SNAP_DEBUG) getchar();
 
     {
         pagelist saver;
@@ -1566,55 +1552,33 @@ void do_snapshot(void)
     // TODO : Optimize if possible
     // vm_verify_snap(new_snap_head);
 
-    // ok, now we have current snap and previous one. come fix the
-    // superblock
-    disk_page_no_t toFree = pager_superblock_ptr()->prev_snap; // Save list head to be deleted
-
+    // ok, now we have current snap and previous one. come fix the superblock
+    pager_superblock_ptr()->snap_to_free = pager_superblock_ptr()->prev_snap;
     pager_superblock_ptr()->prev_snap = pager_superblock_ptr()->last_snap;
     pager_superblock_ptr()->last_snap = new_snap_head;
-    pager_flush_free_list();
+    pager_commit_active_free_list();
     pager_update_superblock();
-
-
-    // TODO free list @toFree excep for pages used in actual two lists
-    disk_page_no_t actual1 = pager_superblock_ptr()->prev_snap;
-    disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
-
-    phantom_free_snap ( toFree, actual1, actual2 );
-
-    // Force all io to complete BEFORE updating superblock
-    pager_fence();
-
+    
+    pager_free_blocklist_pages();
+    // these two are probably unnecessary, but they should slightly reduce disk leak
+    pager_commit_active_free_list();
     pager_update_superblock();
-
-    //#error not impl
-    // and free pages of previous-previous snapshot that changed in this
-    // snapshot and not used in previous. Release data structure of
-    // previous-previous snapshot too
 
     //#error not impl
     // free journal part, which was created before this snap
     // was started
-
-    // Force all io to complete
-    pager_fence();
 
     // DONE!
     ph_syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
 
-    // phantom_snapper_reenable_threads();
-
 #if USE_SNAP_WAIT
     signal_snap_done_passed();
 #endif
 
-    // XXX : Not sure why to wait here for so long
-    // hal_sleep_msec(20000);
-    // ph_syslog( 0, "snap: wait for 10 sec more");
-    // hal_sleep_msec(10000);
-
+    // for tracking disk leak, remove once it is resolved
+    pager_calculate_free_block_count();
 }
 
 
@@ -1722,6 +1686,26 @@ static void vm_map_lazy_pageout_thread(void)
 static int request_snap_flag = 0;
 static int seconds_between_snaps = 5;
 
+static void free_old_snapshot() {
+    if (pager_superblock_ptr()->snap_to_free == 0) return;
+
+    disk_page_no_t to_free = pager_superblock_ptr()->snap_to_free;
+    disk_page_no_t actual1 = pager_superblock_ptr()->prev_snap;
+    disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
+
+    phantom_free_snap( to_free, actual1, actual2 );
+    pager_superblock_ptr()->snap_to_free = 0;
+
+    // Force all io to complete BEFORE updating superblock
+    pager_fence();
+
+    pager_update_superblock();
+
+    pager_free_blocklist_pages();
+    pager_commit_active_free_list();
+    pager_update_superblock();
+}
+
 static void vm_map_snapshot_thread(void)
 {
     t_current_set_name("SnapShot");
@@ -1732,6 +1716,8 @@ static void vm_map_snapshot_thread(void)
         SHOW_FLOW0( 1, "Snapshot loop");
         SHOW_FLOW(0, "%d %d %d", stop_lazy_pageout_thread, vm_regular_snaps_enabled, request_snap_flag);
         
+        free_old_snapshot();
+
         if( stop_lazy_pageout_thread )
         {
             do_snapshot();
@@ -1758,7 +1744,7 @@ static void vm_map_snapshot_thread(void)
         }
 
         if( vm_regular_snaps_enabled || request_snap_flag ){
-            SHOW_FLOW0(0, "about ot snap");
+            SHOW_FLOW0(0, "about to snap");
             do_snapshot();
         }
 

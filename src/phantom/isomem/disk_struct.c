@@ -103,6 +103,7 @@ int superblocks_are_equal(const phantom_disk_superblock *a, const phantom_disk_s
         cmpab(last_short_journal_flags) && cmpab(last_long_journal_flags) &&
         /*cmpab(prev_short_journal_blocks) && */ cmpab(prev_long_journal_root) &&
         cmpab(prev_short_journal_flags) && cmpab(prev_long_journal_flags) &&
+        cmpab(snap_to_free) && 
         1;
 }
 

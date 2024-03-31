@@ -93,14 +93,14 @@ typedef struct phantom_disk_superblock
     char                        general_flags_3;        // undefined yet
 
     disk_page_no_t              last_snap;      // the latest snapshot or 0 if no.
-    //long                      last_snap_time; // unix time_t - NOT IMPL
-    //long                      last_snap_crc32;        // to make sure it is correct - NOT IMPL
     u_int32_t                   last_snap_time; // unix time_t - NOT IMPL
     u_int32_t                   last_snap_crc32;        // to make sure it is correct - NOT IMPL
 
-    disk_page_no_t		prev_snap;      // previous snapshot or 0 if no.
+    disk_page_no_t              prev_snap;      // previous snapshot or 0 if no.
     u_int32_t                   prev_snap_time; // unix time_t - NOT IMPL
     u_int32_t                   prev_snap_crc32;        // to make sure it is correct - NOT IMPL
+
+    disk_page_no_t              snap_to_free;   // snap that is yet to free
 
     u_int32_t                   magic2;         // 32 bits  - DISK_STRUCT_MAGIC_SUPER_2
 
@@ -130,9 +130,7 @@ typedef struct phantom_disk_superblock
 
     unsigned char               prev_short_journal_flags; //  - NOT IMPL
     unsigned char               prev_long_journal_flags; //  - NOT IMPL
-
-} __attribute__((__packed__)) phantom_disk_superblock;
-// XXX : packed attribute causes warnings - do we need it?
+} phantom_disk_superblock;
 
 void phantom_disk_format( struct phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname );
 int phantom_calc_sb_checksum( struct phantom_disk_superblock *sb );
