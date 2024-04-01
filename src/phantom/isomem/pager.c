@@ -1313,6 +1313,7 @@ int64_t pager_calculate_free_block_count(void) {
             list->head._reserved != 0
         ) {
             SHOW_ERROR0(0, "Freelist values are insane");
+            disk_page_io_finish(&disk_io);
             return -1;
         }
 
@@ -1323,15 +1324,18 @@ int64_t pager_calculate_free_block_count(void) {
         errno_t rc = disk_page_io_load_sync(&disk_io, list->head.next);
         if (rc) {
             SHOW_ERROR0(0, "Disk load error");
+            disk_page_io_finish(&disk_io);
             return -1;
         }
     } while (list_free + start_free < superblock.disk_page_count);
 
+    assert(list->head.next == 0);
+    disk_page_io_finish(&disk_io);
+    
     int64_t true_free = list_free + start_free;
     int64_t total_free = true_free + list_nodes;
     int percentage = 1000 * total_free / superblock.disk_page_count;
 
-    assert(list->head.next == 0);
     SHOW_INFO(9, "Disk usage stats: %d blocks free (%d.%d%% : %d true [%d startfree, %d in freelist], %d nodes)", 
         total_free, percentage / 10, percentage % 10, true_free, start_free, list_free, list_nodes);
 

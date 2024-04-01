@@ -33,6 +33,7 @@ disk_page_io_release(disk_page_io *me)
     if(!me->mem_allocated) return;
 
     hal_pv_free( me->req.phys_page, me->mem, PAGE_SIZE );
+    hal_sem_destroy( &(me->done) );
 
     me->mem_allocated = 0;
 }

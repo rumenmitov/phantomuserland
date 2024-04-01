@@ -242,6 +242,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     vm_lock_persistent_memory();
 
     ref_dec_o( arg ); // Ref will be lost if restart? - No, control will get here again.
+    ref_dec_o(args[1]);
     *ret = oret;
 
     SHOW_FLOW( 5, "method %d end", nmethod );

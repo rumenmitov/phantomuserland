@@ -102,10 +102,9 @@ again:
         if( rect_includes( r, &pqel->r ) )
         {
             queue_remove( &rect_list, pqel, pqel_t *, chain );
+            ph_free(pqel);
             goto again;
         }
-        // TODO: Memory leak???????
-
 
         // qe includes r - skip addition
         if( rect_includes( &pqel->r, r ) )
