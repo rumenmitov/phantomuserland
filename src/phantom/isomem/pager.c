@@ -109,10 +109,30 @@ static struct phantom_mem_blocklist *freed_list_blocks;
 
 static disk_page_no_t           sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
 
+// Note: some of these declarations were moved here from pager.h since they are not
+// thread-safe, and require mutex to be taken. No reason to expose these calls
 
-static int
-pager_alloc_page(disk_page_no_t *out_page_no);
+static int pager_alloc_page(disk_page_no_t *out_page_no);
+static void pager_release_free_reserve(void);
+/*
+    Allocates disk blocks and adds them to reserve list until it is full. Allocated
+    blocks come from either active freelist, or active `free_start` if the freelist 
+    is emtpy.
+    
+    Reserve list of free disk blocks is a short array providing easy access
+    to some available to use disk blocks.
 
+    Should be called with `pager_freelist_mutex` taken
+*/
+static void pager_refill_free_reserve(void);
+/**
+ * Writes the contents of the current active freelist head to disk, and sets the 
+ * given disk block as a new active head. Allows active freelist head to be 0, in
+ * which case the disk write is skipped
+ * 
+ * Should be called with `pager_freelist_mutex` taken
+ */
+static void pager_extend_active_free_list( disk_page_no_t );
 
 #if !PAGING_PARTITION
 
@@ -789,7 +809,7 @@ pager_fix_incomplete_format()
     {
         if(i == free || is_default_sb_block(i)) continue;
 
-        pager_put_to_free_list(i);
+        pager_put_to_free_list_locked(i);
     }
 
     freelist_inited = 1;
@@ -1081,27 +1101,26 @@ void pager_free_blocklist_pages(void) {
     ph_memset(freed_list_blocks, 0, sizeof(struct phantom_mem_blocklist));
     hal_mutex_unlock(&pager_freelist_mutex);
 
-    int cnt = 0;
-
     struct phantom_mem_blocklist *current = &blocklist;
     while (current) {
         for (int i = 0; i < current->used; i++) {
             pager_free_page(current->list[i]);
-            cnt++;
         }
 
         struct phantom_mem_blocklist *prev = current;
         current = current->next;
+        // do not free stack memory :)
         if (prev != &blocklist) ph_free(prev);
     }
-
-    SHOW_INFO(0, "Freed old freelist: %d blocks", cnt);
 }
 
 void pager_commit_active_free_list(void)
 {
     hal_mutex_lock(&pager_freelist_mutex);
     if (active_freelist_head == 0) panic("No active head");
+
+    // to not leak reserved blocks
+    pager_release_free_reserve();
 
 #if USE_SYNC_IO
     //errno_t rc = phantom_sync_write_block( pp, &u.free_head, superblock.free_list, 1 );
@@ -1118,27 +1137,26 @@ void pager_commit_active_free_list(void)
     active_freelist_root = ((struct phantom_disk_blocklist *)disk_page_io_data(&freelist_io))->head.next;
 
 #endif
+    pager_refill_free_reserve();
     if (pager_alloc_page(&active_freelist_head) == 0) panic("Out of disk");
 
     hal_mutex_unlock(&pager_freelist_mutex);
 }
 
-void
+// call with lock
+static void
 pager_put_to_free_list( disk_page_no_t free_page )
 {
     SHOW_FLOW( 8, "Put to free %d", free_page);
-    hal_mutex_lock(&pager_freelist_mutex);
 
     if( need_fsck )
     {
         SHOW_ERROR0( 1, " disk is insane, put_to_free_list skipped...");
-        hal_mutex_unlock(&pager_freelist_mutex);
         return;
     }
 
     if (active_free_start + 1 == free_page) {
         active_free_start++;
-        hal_mutex_unlock(&pager_freelist_mutex);
         return;
     }
 
@@ -1160,8 +1178,26 @@ pager_put_to_free_list( disk_page_no_t free_page )
             pager_extend_active_free_list(free_page);
 #endif
     } else { list->list[list->head.used++] = free_page; }
+}
 
+void pager_put_to_free_list_locked(disk_page_no_t free_page) {
+    hal_mutex_lock(&pager_freelist_mutex);
+    pager_put_to_free_list(free_page);
     hal_mutex_unlock(&pager_freelist_mutex);
+}
+
+// call in lock
+static void pager_release_free_reserve(void) {
+    SHOW_INFO(10, "Releasing free reserve: %d blocks", free_reserve_n);
+
+    while(free_reserve_n) {
+        disk_page_no_t page_no = free_reserve[--free_reserve_n];
+
+        assert(((unsigned long)page_no) >= ((unsigned long)superblock.disk_start_page));
+        assert(!is_default_sb_block(page_no));
+
+        pager_put_to_free_list(page_no);
+    }
 }
 
 void
@@ -1295,7 +1331,6 @@ pager_refill_free_reserve()
     }
 }
 
-// could return wrong results due to parallel superblock (or disk) access? 
 int64_t pager_calculate_free_block_count(void) {
     int64_t start_free = superblock.disk_page_count - superblock.free_start;
     int64_t list_free = 0, list_nodes = 0;
@@ -1400,7 +1435,7 @@ pager_free_page( disk_page_no_t page_no )
         panic("tried to free superblock");
     }
 
-    pager_put_to_free_list( page_no );
+    pager_put_to_free_list_locked( page_no );
 }
 
 

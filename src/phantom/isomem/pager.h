@@ -39,31 +39,12 @@ void        pager_fix_incomplete_format(void);
 int         pager_fast_fsck(void);
 int         pager_long_fsck(void);
 
-/*
-    Adds the specified disk block to the active freelist (or increments active 
-    free_start, if applicable). If the current active list head is full, it is 
-    flushed to disk, and the given disk block is used as a new active freelist head. 
-*/
-void        pager_put_to_free_list( disk_page_no_t );
-/*
-    Allocates disk blocks and adds them to reserve list until it is full. Allocated
-    blocks come from either active freelist, or active `free_start` if the freelist 
-    is emtpy.
-    
-    Reserve list of free disk blocks is a short array providing easy access
-    to some available to use disk blocks.
-
-    Should be called with `pager_freelist_mutex` taken
-*/
-void        pager_refill_free_reserve(void);
 /**
- * Writes the contents of the current active freelist head to disk, and sets the 
- * given disk block as a new active head. Allows active freelist head to be 0, in
- * which case the disk write is skipped
- * 
- * Should be called with `pager_freelist_mutex` taken
+ * Adds the specified disk block to the active freelist (or increments active 
+ * free_start, if applicable). If the current active list head is full, it is 
+ * flushed to disk, and the given disk block is used as a new active freelist head.
  */
-void        pager_extend_active_free_list( disk_page_no_t );
+void        pager_put_to_free_list_locked( disk_page_no_t );
 /**
  * Performs some sanity checks and loads freelist head specified in superblock to
  * memory. Allocates a new active freelist head.
@@ -93,7 +74,9 @@ void        pager_free_blocklist_page_locked(disk_page_no_t blk);
 void        pager_free_blocklist_pages(void);
 /**
  * Calculates the number of free disk blocks (for last snapshot)
- * May take some time (and IO) to complete
+ * May take some time (and IO) to complete.
+ * 
+ * TODO: ensure this is thread safe? do we need thread safety at all?
  */
 int64_t     pager_calculate_free_block_count(void);
 

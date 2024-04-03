@@ -762,7 +762,34 @@ void pageout_callback( pager_io_request *req, int write )
     hal_mutex_unlock(&vmp->lock);
 }
 
+// call under lock
+static inline void select_make_page(vm_page *p) {
+    assert(!p->flag_have_make);
 
+    if(p->flag_have_curr)
+    {
+        page_touch_history(p);
+        p->make_page = p->curr_page;
+        p->flag_have_curr = 0;
+        p->flag_have_make = 1;
+        return;
+    }
+
+    if(p->flag_have_prev)
+    {
+        page_touch_history(p);
+        p->make_page = p->prev_page;
+        p->flag_have_prev = 0;
+        p->flag_have_make = 1;
+        return;
+    }
+
+    page_touch_history(p);
+
+    // either empty or nonexistent. How can we distinguish?
+    p->make_page = 0; // NB! means page is not to be written or can be written as zeros
+    p->flag_have_make = 1;
+}
 
 
 //---------------------------------------------------------------------------
@@ -783,46 +810,9 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     if(p->flag_have_make)
         return 0; // No special snap treatment needed, or, maybe, already done
 
-    if(!p->flag_phys_mem || !p->flag_phys_dirty)
-    {
-        // Since we're not backed, have only actual copy on disk.
-        // this copy will go to snapshot, but we'll read it in
-        // for process to go on. And later will swap out to a separate
-        // disk page
-
-        if(SNAP_DEBUG) hal_printf("snapaid !physmem 0x%X\n", p->virt_addr );
-
-        // after we will return 0 caller will alloc phys page.
-
-        // where precisely on disk?
-        if( p->flag_have_curr )
-        {
-            page_touch_history(p);
-            p->make_page = p->curr_page;
-            p->flag_have_curr = 0;
-            p->flag_have_make = 1;
-            return 0; // Do standard write fault processing
-        }
-
-        if( p->flag_have_prev )
-        {
-            page_touch_history(p);
-            // do nothing, just mark we're up to date, since
-            // page did not change since previous snap. This situation
-            // has to be taken care about in snap finalization.
-            // Code there must move page to const block, possibly.
-            // (A block that keeps pages that do not change for
-            // generations.)
-            p->make_page = p->prev_page;
-            p->flag_have_prev = 0;
-            p->flag_have_make = 1;
-            return 0; // Do standard write fault processing
-        }
-
-        page_touch_history(p);
-        // BUG? Can we just let him go? We definitely shall not write him?
-        p->make_page = 0;
-        p->flag_have_make = 1;
+    // Either not backed or clean, i.e. we have actual copy on disk, skip COW
+    if(!p->flag_phys_mem || !p->flag_phys_dirty) {
+        select_make_page(p);
         return 0; // Do standard write fault processing
     }
 
@@ -1312,7 +1302,7 @@ static void kick_pageout(vm_page *p)
 {
     page_touch_history(p);
     static int cnt = 0;
-    if(p->flag_phys_dirty)
+    if(p->flag_phys_dirty && !p->flag_have_make)
     {
         //if(SNAP_DEBUG) hal_printf("V");
         vm_page_req_pageout(p);
@@ -1354,29 +1344,7 @@ static void finalize_snap(vm_page *p)
 
     assert(!p->flag_phys_dirty);
 
-    if(p->flag_have_curr)
-    {
-        page_touch_history(p);
-        p->make_page = p->curr_page;
-        p->flag_have_curr = 0;
-        p->flag_have_make = 1;
-        return;
-    }
-
-    if(p->flag_have_prev)
-    {
-        page_touch_history(p);
-        p->make_page = p->prev_page;
-        p->flag_have_prev = 0;
-        p->flag_have_make = 1;
-        return;
-    }
-
-    page_touch_history(p);
-
-    // either empty or nonexistent. How can we distinguish?
-    p->make_page = 0; // NB! means page is not to be written or can be written as zeros
-    p->flag_have_make = 1;
+    select_make_page(p);
 
     if(SNAP_DEBUG) hal_printf(" done, " );
 }
@@ -1389,11 +1357,13 @@ static void save_snap(vm_page *p)
     page_touch_history(p);
     // TODO added for safety - remove or do in a more smart way?
     // HACK! We set have make and make_page = 0 on unused page
-    if(! (p->flag_have_make && p->make_page == 0 && !p->flag_have_curr && !p->flag_have_prev) )
-    {
-        page_touch_history(p);
-        vm_page_req_pageout(p);
-    }
+
+    // What is the purpose of this? no idea, so removed it
+    // if(! (p->flag_have_make && p->make_page == 0 && !p->flag_have_curr && !p->flag_have_prev) )
+    // {
+    //     page_touch_history(p);
+    //     vm_page_req_pageout(p);
+    // }
 
     assert(p->flag_have_make);
 
