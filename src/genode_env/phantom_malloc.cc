@@ -102,3 +102,9 @@ extern "C" void *ph_realloc(void *ptr, size_t size){
 
     return new_area;
 }
+
+// Returns the number of bytes currently allocated on heap 
+// Heap is primarily allocated via ph_malloc()
+extern "C" int64_t phantom_heap_bytes_consumed() {
+    return main_obj->_heap.consumed();
+}

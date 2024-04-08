@@ -13,4 +13,6 @@ void *ph_calloc(size_t n_elem, size_t elem_size);
 
 void *ph_realloc(void *ptr, size_t size);
 
+int64_t phantom_heap_bytes_consumed();
+
 #endif

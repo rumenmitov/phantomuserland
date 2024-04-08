@@ -56,6 +56,10 @@ class wasm
         var tmp : .internal.object;
 
         wamr.invokeWasm("hello_world", args);
+        wamr.invokeWasm("phantom_hello_world", args);
+        tmp = 0;
+        args[0] = tmp;
+        wamr.invokeWasm("weather_demo", args);
 
         tmp = (.internal.long) 5000000;
         args[0] = tmp;

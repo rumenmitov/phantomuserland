@@ -258,7 +258,7 @@ struct Phantom::Vmem_adapter
             //     writeable);
 
             // _obj_spacea
-            Region_map::Local_addr laddr = 0x0;
+            Region_map::Local_addr laddr = (intptr_t) 0x0;
             Genode::retry<Genode::Out_of_ram>(
                 [&]()
                 {

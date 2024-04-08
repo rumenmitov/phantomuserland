@@ -218,9 +218,6 @@ void partition_pager_init(phantom_disk_partition_t *p)
         pager_long_fsck();
     }
 
-    // TODO : REMOVE!!!
-    superblock.disk_page_count = 0x50000;
-
     //superblock.fs_is_clean = 0; // mark as dirty
     pager_update_superblock();
 }
@@ -829,7 +826,14 @@ pager_get_superblock()
 
     SHOW_INFO0(3, "Failed to load default root superblock, trying secondary");
 
-    if (pager_try_get_superblock_from(sb_default_page_numbers[3]) == 0) return;
+    // if we're here - primary superblock is damaged, rewrite it ASAP
+    if (pager_try_get_superblock_from(sb_default_page_numbers[3]) == 0) {
+        *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
+
+        if (disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]))
+            panic( "Superblock primary write error!" );
+        return;
+    }
 
     panic("Failed to load superblock");
 }

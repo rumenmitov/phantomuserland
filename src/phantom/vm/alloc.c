@@ -666,6 +666,39 @@ static int memcheck_one(unsigned int i, void * start, void * end)
     return 1;
 }
 
+// count persistent objects in the specified memory range
+// intended for debugging purposes
+static int64_t count_objects(void *start, void *end)
+{
+    int64_t count = 0;
+    pvm_object_t curr = start;
+
+    while(((void *)curr) < end) {
+        if(!pvm_alloc_is_object(curr)) return -1;
+
+        if(curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) {
+            if(!pvm_object_is_allocated(curr)) return -1;
+            count++;
+        }
+
+        curr = (pvm_object_t)( ((void *)curr) + curr->_ah.exact_size );
+    }
+
+    return count;
+}
+
+// scan entire object land for objects and count them
+// intended for debugging purposes
+// will likely fail if any PVM threads are active
+int64_t pvm_count_allocated_objects() {
+    int64_t object_count = count_objects(pvm_object_space_start, pvm_object_space_end);
+    if (object_count < 0) {
+        SHOW_ERROR0(0, "Failed! (did not lock memory before scan?)");
+    } else {
+        SHOW_INFO(0, "Total persistent objects currently allocated: %d", object_count);
+    }
+    return object_count;
+}
 
 static void memcheck_print_histogram(unsigned int arena)
 {

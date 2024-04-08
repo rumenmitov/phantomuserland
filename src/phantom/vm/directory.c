@@ -447,23 +447,20 @@ errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out )
 }
 
 void hdir_clear( hashdir_t *dir ) {
-    if (dir->nEntries == 0) return;
-    
-    // ??
-    #warning lock 
-    ph_printf(" ########## CLEAR START ############\n");
+    LOCK_DIR(dir);
 
-    for( int i = 0; i < dir->capacity; i++ )
-    {
-        // if there were objects / arrays in there, they will get dec-refed
-        pvm_set_array_ofield( dir->keys, i, pvm_create_null_object() );
-        pvm_set_array_ofield( dir->values, i, pvm_create_null_object() );
-        dir->flags[i] = 0;
+    if (dir->nEntries > 0) {
+        for( int i = 0; i < dir->capacity; i++ )
+        {
+            // if there were objects / arrays in there, they will get dec-refed
+            pvm_set_array_ofield( dir->keys, i, pvm_create_null_object() );
+            pvm_set_array_ofield( dir->values, i, pvm_create_null_object() );
+            dir->flags[i] = 0;
+        }
     }
 
-    ph_printf(" ########## CLEAR FINISH ############\n");
-
     dir->nEntries = 0;
+    UNLOCK_DIR(dir);
 }
 
 

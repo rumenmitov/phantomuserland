@@ -33,6 +33,7 @@ void pvm_alloc_clear_mem(void);
 pvm_object_storage_t *get_root_object_storage(void);
 
 int pvm_memcheck(void);
+int64_t pvm_count_allocated_objects(void);
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
 bool pvm_object_is_allocated(pvm_object_storage_t *p);
 void pvm_object_is_allocated_assert(pvm_object_storage_t *p);
