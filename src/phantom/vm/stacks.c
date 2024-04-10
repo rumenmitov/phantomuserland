@@ -295,33 +295,40 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
  *
 **/
 
+// ! Apparently unions are not entirely portable, consider replacing 
+// regardless, union seems like the best option for packing-unpacking
+union int_long {
+    int64_t _long;
+    int32_t _ints[2];
+};
 
 #if 1
 void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
 {
-    //ph_printf("lpush %lld; \n", o);
-    pvm_istack_push( rootda, (int)(o >> 32));
-    pvm_istack_push( rootda, (int)o);
+    union int_long conv;
+    conv._long = o;
+
+    pvm_istack_push( rootda, conv._ints[1]);
+    pvm_istack_push( rootda, conv._ints[0]);
 }
 
 int64_t pvm_lstack_pop( struct data_area_4_integer_stack* rootda )
 {
-    int64_t o;
-    o = pvm_istack_pop( rootda );
-    o |= ((int64_t)pvm_istack_pop( rootda )) << 32;
-    return o;
+    union int_long conv;
+    conv._ints[0] = pvm_istack_pop( rootda );
+    conv._ints[1] = pvm_istack_pop( rootda );
+    return conv._long;
 }
 
 int64_t  pvm_lstack_top( struct data_area_4_integer_stack* rootda )
 {
-    int64_t o;
+    union int_long conv;
 
-    int low = pvm_istack_pop( rootda );
-    int hi = pvm_istack_top( rootda );
-    pvm_istack_push( rootda, low );    
+    conv._ints[0] = pvm_istack_pop( rootda );
+    conv._ints[1] = pvm_istack_top( rootda );
+    pvm_istack_push( rootda, conv._ints[0] );
 
-    o = low; o |= ((int64_t)hi) << 32;
-    return o;
+    return conv._long;
 }
 
 
@@ -329,6 +336,8 @@ void pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
 {
     unsigned int pagesize = rootda->common.__sSize;
     pvm_object_t c = rootda->common.root;
+    union int_long conv;
+    conv._long = val;
 
     while( abs_pos >= pagesize )
     {
@@ -337,7 +346,7 @@ void pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
         abs_pos -= pagesize;
     }
 
-    pvm_object_da(c,integer_stack)->stack[abs_pos]   = (int32_t)(val >> 32);
+    pvm_object_da(c,integer_stack)->stack[abs_pos] = conv._ints[1];
 
     abs_pos++;
 
@@ -348,13 +357,14 @@ void pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
         abs_pos -= pagesize;
     }
 
-    pvm_object_da(c,integer_stack)->stack[abs_pos] = (int32_t)val;
+    pvm_object_da(c,integer_stack)->stack[abs_pos] = conv._ints[0];
 }
 
 int64_t pvm_lstack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 {
     unsigned int pagesize = rootda->common.__sSize;
     pvm_object_t c = rootda->common.root;
+    union int_long conv;
 
     while( abs_pos >= pagesize )
     {
@@ -363,7 +373,7 @@ int64_t pvm_lstack_abs_get( struct data_area_4_integer_stack* rootda, int abs_po
         abs_pos -= pagesize;
     }
 
-    int hi = pvm_object_da(c,integer_stack)->stack[abs_pos];
+    conv._ints[1] = pvm_object_da(c,integer_stack)->stack[abs_pos];
 
     abs_pos++;
 
@@ -374,10 +384,10 @@ int64_t pvm_lstack_abs_get( struct data_area_4_integer_stack* rootda, int abs_po
         abs_pos -= pagesize;
     }
 
-    int lo = pvm_object_da(c,integer_stack)->stack[abs_pos];
+    conv._ints[0] = pvm_object_da(c,integer_stack)->stack[abs_pos];
 
-    return (((int64_t)hi) << 32) | lo;
-    }
+    return conv._long;
+}
 
 
 #else

@@ -343,28 +343,28 @@ class regression_tests
         var a : .internal.long;
         var b : .internal.long;
         var c : .internal.long;
+        var d : .internal.long;
 
         print("start long tests\n");
-/*
-        a = (long)12;
-        b = (long)2;
-        c = (long)0-3;
-*/
+
         a = 12;
         b = 2;
         c = 0-3;
+        d = 5000000000; // actual long, not 32-bit
         print("long tests 1\n");
 
         if( (a/b) != 6 ) 	throw "long error 1";
         if( (b-c) != 5 ) 	throw "long error 2";
         if( (b*c) != 0-6 ) 	throw "long error 3";
         if( (a+c) != 9 ) 	throw "long error 4";
+        if( (d+b) != 5000000002 ) throw "long error 5";
+        if( (b-d) !=-4999999998 ) throw "long error 6";
         print("long tests 2\n");
 
-        if( b<c ) 		throw "long error 5";
-        if( b>a ) 		throw "long error 6";
-        if( b<=c ) 		throw "long error 7";
-        if( b>=a ) 		throw "long error 8";
+        if( b<c ) 		throw "long error 7";
+        if( b>a ) 		throw "long error 8";
+        if( b<=c ) 		throw "long error 9";
+        if( b>=a ) 		throw "long error 10";
         print("long tests passed\n");
     }
 
