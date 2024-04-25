@@ -7,12 +7,6 @@ int hal_time_init()
     return 0;
 }
 
-bigtime_t hal_system_time(void)
-{
-    _stub_print();
-    return 0;
-}
-
 bigtime_t hal_system_time_lores(void)
 {
     _stub_print();

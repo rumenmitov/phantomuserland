@@ -55,6 +55,11 @@ extern "C"
         return 1337;
     }
 
+    bigtime_t hal_system_time(void)
+    {
+        return main_obj->_timer_adapter.curr_time_us();
+    }
+
     
     // bigtime_t hal_system_time(void){
     //     hal_mutex_lock(time_mutex);

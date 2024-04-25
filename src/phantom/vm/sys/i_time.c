@@ -65,7 +65,15 @@ static int si_time_time_16( pvm_object_t me, pvm_object_t *ret, struct data_area
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
+// TODO: switch to persistent uptime ?
+static int si_time_uptime_9(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{
+    (void) me; (void) tc; (void) args;
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(0);
 
+    SYSCALL_RETURN(pvm_create_long_object(hal_system_time()));
+}
 
 
 
@@ -83,7 +91,7 @@ syscall_func_t  syscall_table_4_time[18] =
     &si_void_4_equals,                  &si_time_tostring_5,
     &si_void_6_toXML,                   &si_void_7_fromXML,
     // 8
-    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &si_time_uptime_9,
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &si_void_15_hashcode,

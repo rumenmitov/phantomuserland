@@ -257,9 +257,10 @@ extern "C"
     }
 
     void
-    memcpy_v2p(physaddr_t to, void *from, size_t size)
+    memcpy_v2p(physaddr_t to, void *_from, size_t size)
     {
         void *addr;
+        char *from = (char*) _from; // avoid void* pointer arithmetics
         // if (hal_alloc_vaddress(&addr, 1))
         //     panic("out of vaddresses");
 
@@ -281,7 +282,7 @@ extern "C"
             // hal_page_control(page, addr, page_map, page_rw);
             addr = main_obj->_vmem_adapter.map_somewhere(page, true, 1);
 
-            ph_memcpy(addr + shift, from, part);
+            ph_memcpy((char*)addr + shift, from, part);
 
             // hal_page_control(page, addr, page_unmap, page_noaccess);
             main_obj->_vmem_adapter.unmap_page((addr_t)addr);
@@ -321,9 +322,10 @@ extern "C"
     }
 
     void
-    memcpy_p2v(void *to, physaddr_t from, size_t size)
+    memcpy_p2v(void *_to, physaddr_t from, size_t size)
     {
         void *addr;
+        char *to = (char*) _to; // avoid void* pointer arithmetics
         // if (hal_alloc_vaddress(&addr, 1))
         //     panic("out of vaddresses");
 

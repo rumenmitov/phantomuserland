@@ -9,10 +9,10 @@ extern "C"
 #include <ph_malloc.h>
 #include <vm/bulk.h>
 
-    void hal_sleep_msec(int miliseconds)
+    void hal_sleep_msec(int milliseconds)
     {
-        // main_obj->_sleep_timer.msleep(miliseconds);
-        main_obj->_timer_adapter.sleep_microseconds(miliseconds * 1000);
+        if (milliseconds < 0) milliseconds = 0;
+        main_obj->_timer_adapter.sleep_microseconds(milliseconds * 1000);
     }
 
     void hal_disable_preemption()

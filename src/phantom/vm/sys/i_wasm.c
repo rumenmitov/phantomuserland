@@ -44,7 +44,7 @@
 
 typedef struct data_area_4_wasm *pvm_wasm_da_t;
 
-static const u_int32_t stack_size = 8092, heap_size = 8092;
+static const u_int32_t stack_size = 8092, heap_size = 32768 * 8;
 
 // for wamr malloc / free / mutex / cond callbacks (rework?)
 static pvm_wasm_da_t master_instance = NULL;
