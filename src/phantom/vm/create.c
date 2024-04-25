@@ -338,8 +338,10 @@ pvm_create_page_object( int n_slots, pvm_object_t *init, int init_slots )
 	assert(init_slots < n_slots);
 
 	int i;
-	for( i = 0; i < init_slots; i++ )
+	for( i = 0; i < init_slots; i++ ) {
 		data_area[i] = *init++;
+        ref_inc_o(data_area[i]); // XXX : hack to avoid elements to be freed when the original page is deleted
+    }
 
 	for( ; i < n_slots; i++ )
 		data_area[i] = pvm_get_null_object();

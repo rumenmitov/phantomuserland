@@ -94,10 +94,11 @@ void pvm_set_array_ofield(pvm_object_t o, unsigned int slot, pvm_object_t value 
 
         if(new_page_size < 16) new_page_size = 16;
 
-        if( (!pvm_is_null(da->page)) && da->page_size > 0 )
-            //da->page = pvm_object_storage::create_page( new_page_size, da->page()->da_po_ptr(), da->page_size );
-            da->page = pvm_create_page_object( new_page_size, (void *)&(da->page->da), da->page_size );
-        else
+        if( (!pvm_is_null(da->page)) && da->page_size > 0 ) {
+            pvm_object_t old_page = da->page;
+            da->page = pvm_create_page_object( new_page_size, (void *)&(old_page->da), da->page_size );
+            ref_dec_o(old_page);
+        } else
             da->page = pvm_create_page_object( new_page_size, 0, 0 );
 
         da->page_size = new_page_size;

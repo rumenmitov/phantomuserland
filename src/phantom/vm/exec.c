@@ -2547,7 +2547,8 @@ pvm_object_t pvm_exec_lookup_class_by_name(pvm_object_t name)
 {
     pvm_object_t found_class;
 
-    ref_inc_o(name); // hack
+    // this ref inc seems to be unnecessary (and harmful), commented out for now
+    // ref_inc_o(name); // hack
 
     // Try internal
     pvm_object_t ret = pvm_lookup_internal_class(name);
