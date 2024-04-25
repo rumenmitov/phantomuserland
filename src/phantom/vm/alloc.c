@@ -666,12 +666,17 @@ static int memcheck_one(unsigned int i, void * start, void * end)
     return 1;
 }
 
+#include <vm/internal_da.h>
+
 // count persistent objects in the specified memory range
 // intended for debugging purposes
 static int64_t count_objects(void *start, void *end)
 {
     int64_t count = 0;
+    int64_t arena_size = ((char*) end) - ((char*) start);
+    int64_t used_bytes = 0;
     pvm_object_t curr = start;
+    int int_count = 0, long_count = 0, str_count = 0, arr_count = 0, page_count = 0;
 
     while(((void *)curr) < end) {
         if(!pvm_alloc_is_object(curr)) return -1;
@@ -679,10 +684,21 @@ static int64_t count_objects(void *start, void *end)
         if(curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) {
             if(!pvm_object_is_allocated(curr)) return -1;
             count++;
+            used_bytes += curr->_ah.exact_size;
+
+            if (curr->_class == pvm_get_int_class()) int_count++;
+            if (curr->_class == pvm_get_long_class()) long_count++;
+            if (curr->_class == pvm_get_string_class()) str_count++;
+            if (curr->_class == pvm_get_array_class()) arr_count++;
+            if (curr->_class == pvm_get_page_class()) page_count++;
         }
 
         curr = (pvm_object_t)( ((void *)curr) + curr->_ah.exact_size );
     }
+
+    int percent_used = 100 * used_bytes / arena_size;
+    SHOW_INFO(0, "Arena @%p, ints: %d, longs: %d, strs: %d, arrs: %d, pages: %d | %d%% used", 
+        start, int_count, long_count, str_count, arr_count, page_count, percent_used);
 
     return count;
 }
