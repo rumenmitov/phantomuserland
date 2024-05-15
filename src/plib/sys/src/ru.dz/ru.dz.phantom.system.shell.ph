@@ -52,7 +52,7 @@ class shell extends runnable
 
     //var mtx : .internal.mutex;
 
-    var demo : .ru.dz.demo.wasm;
+    //var demo : .ru.dz.demo.wasm;
     // var demo : .ru.dz.demo.start;
 /*
     void init()
@@ -112,8 +112,8 @@ class shell extends runnable
         stat_conn.connect("stt:");
 
         //demo = new .ru.dz.demo.start();
-        demo = new .ru.dz.demo.wasm();
-        demo.run(console);
+        //demo = new .ru.dz.demo.wasm();
+        //demo.run(console);
 
         while(1)
         {
