@@ -1,1 +1,0 @@
-long ph_random(void);

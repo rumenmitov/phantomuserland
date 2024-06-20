@@ -1,0 +1,27 @@
+Experimental simple and reliable FS code, not so connected to Phantom OS
+
+JetOS howto:
+
+ln -s <this directory> /...path-to-JetOS/examples/<copy-of-pure-arinc653-buffer/P1
+cd there, scons, scons run
+
+
+Questions:
+
+- max disk size
+- max file size
+- have atime, mtime? (ctime is neary free)
+- time variable format/unit/0 time?
+
+- max num of concurrent io ops
+
+- open/create timing depends on max file count in dir
+
+TODO
+- mark each func with max disk r/w ops count and max execution time on target CPU
+- disk struct align - check field order and use GCC attributes?
+- fsck
+- multiple fs used concurrently (will fail now)
+- r/w errors, not panic
+- indirect blocks in inodes
+

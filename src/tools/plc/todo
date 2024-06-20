@@ -1,0 +1,6 @@
+
+- non-public classes, more than one class in src file, compile used class before one that uses it
+
+- java constructors and <init> - replace <init> with call to root constructor?
+
+- not converted to Phantom types ".byte" and ".short" types exist

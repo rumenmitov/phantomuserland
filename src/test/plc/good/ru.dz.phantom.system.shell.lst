@@ -1,0 +1,411 @@
+Class .ru.dz.phantom.system.shell
+  Field console
+  Field conn
+  Field incr
+  Field stat_pos
+  Field stat_next_pos
+  Field stat_conn
+  Field cpu_idle
+  Field mtx
+  Field white
+  Field old_idle
+  Field stat_val
+  Field win
+  Field cb
+  C'tor  void <init>(  ):
+    empty : void
+
+  Method void go(  ):
+    void  : void
+      . : void
+        ident mtx : .internal.mutex
+        Method unlock : void
+
+  Method void run( parent_object: unknown ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            ,  : void
+                                              void  : void
+                                                = : void
+                                                  ident win : .internal.window
+                                                  new .internal.window : .internal.window
+                                              void  : void
+                                                . : void
+                                                  ident win : .internal.window
+                                                  Method setWinPosition : void
+                                                  arg  : int
+                                                    int const "50" : int const
+                                                  arg  : unknown
+                                                    int const "310" : int const
+                                            void  : void
+                                              . : void
+                                                ident win : .internal.window
+                                                Method setTitle : void
+                                                arg  : unknown
+                                                  string pool const id="0" : string const
+                                          void  : void
+                                            . : void
+                                              ident win : .internal.window
+                                              Method setFg : void
+                                              arg  : unknown
+                                                int const "-16777216" : int const
+                                        void  : void
+                                          . : void
+                                            ident win : .internal.window
+                                            Method clear : void
+                                      void  : void
+                                        . : void
+                                          ident win : .internal.window
+                                          Method update : void
+                                    void  : void
+                                      = : void
+                                        ident stat_pos : int
+                                        int const "0" : int const
+                                  void  : void
+                                    = : void
+                                      ident old_idle : int
+                                      int const "0" : int const
+                                void  : void
+                                  = : void
+                                    ident white : int
+                                    int const "-1" : int const
+                              void  : void
+                                = : void
+                                  ident console : .internal.io.tty
+                                  new .internal.io.tty : .internal.io.tty
+                            void  : void
+                              = : void
+                                ident incr : int
+                                int const "1" : int const
+                          void  : void
+                            . : void
+                              ident console : .internal.io.tty
+                              Method moveWindow : void
+                              arg  : int
+                                int const "10" : int const
+                              arg  : unknown
+                                int const "10" : int const
+                        void  : void
+                          . : void
+                            ident console : .internal.io.tty
+                            Method setTitle : void
+                            arg  : unknown
+                              string pool const id="1" : string const
+                      void  : void
+                        = : void
+                          ident conn : .internal.connection
+                          new .internal.connection : .internal.connection
+                    void  : void
+                      . : int
+                        ident conn : .internal.connection
+                        Method connect : void
+                        arg  : unknown
+                          string pool const id="2" : string const
+                  void  : void
+                    = : void
+                      ident cb : .ru.dz.phantom.system.shell_callback
+                      new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
+                void  : void
+                  . : void
+                    ident cb : .ru.dz.phantom.system.shell_callback
+                    Method init : void
+                    arg  : unknown
+                      ident console : .internal.io.tty
+              void  : void
+                . : int
+                  ident conn : .internal.connection
+                  Method setCallback : void
+                  arg  : .ru.dz.phantom.system.shell_callback
+                    ident cb : .ru.dz.phantom.system.shell_callback
+                  arg  : unknown
+                    int const "17" : int const
+            void  : void
+              . : int
+                ident conn : .internal.connection
+                Method invoke : void
+                arg  : int
+                  int const "1000" : int const
+                arg  : unknown
+                  int const "0" : int const
+          void  : void
+            = : void
+              ident stat_conn : .internal.connection
+              new .internal.connection : .internal.connection
+        void  : void
+          . : int
+            ident stat_conn : .internal.connection
+            Method connect : void
+            arg  : unknown
+              string pool const id="3" : string const
+      do-while : void
+        int const "1" : int const
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            ,  : void
+                                              ,  : void
+                                                ,  : void
+                                                  ,  : void
+                                                    ,  : void
+                                                      ,  : void
+                                                        ,  : void
+                                                          ,  : void
+                                                            ,  : void
+                                                              ,  : void
+                                                                void  : void
+                                                                  . : void
+                                                                    ident mtx : .internal.mutex
+                                                                    Method lock : void
+                                                                void  : void
+                                                                  . : void
+                                                                    ident console : .internal.io.tty
+                                                                    Method putws : void
+                                                                    arg  : unknown
+                                                                      string pool const id="4" : string const
+                                                              void  : void
+                                                                . : void
+                                                                  ident console : .internal.io.tty
+                                                                  Method putws : void
+                                                                  arg  : unknown
+                                                                    string pool const id="5" : string const
+                                                            void  : void
+                                                              . : void
+                                                                ident console : .internal.io.tty
+                                                                Method putws : void
+                                                                arg  : unknown
+                                                                  string pool const id="6" : string const
+                                                          void  : void
+                                                            . : void
+                                                              ident console : .internal.io.tty
+                                                              Method putws : void
+                                                              arg  : unknown
+                                                                . : string
+                                                                  ident incr : int
+                                                                  Method toString : void
+                                                        void  : void
+                                                          . : void
+                                                            ident console : .internal.io.tty
+                                                            Method putws : void
+                                                            arg  : unknown
+                                                              string pool const id="7" : string const
+                                                      void  : void
+                                                        . : int
+                                                          ident conn : .internal.connection
+                                                          Method block : void
+                                                          arg  : .internal.object
+                                                            null : .internal.object const
+                                                          arg  : unknown
+                                                            int const "500" : int const
+                                                    void  : void
+                                                      = : void
+                                                        ident stat_val : int
+                                                        . : int
+                                                          ident stat_conn : .internal.connection
+                                                          Method block : void
+                                                          arg  : int
+                                                            int const "26" : int const
+                                                          arg  : unknown
+                                                            int const "0" : int const
+                                                  void  : void
+                                                    . : void
+                                                      ident console : .internal.io.tty
+                                                      Method putws : void
+                                                      arg  : unknown
+                                                        string pool const id="8" : string const
+                                                void  : void
+                                                  = : void
+                                                    ident cpu_idle : int
+                                                    . : int
+                                                      ident stat_conn : .internal.connection
+                                                      Method block : void
+                                                      arg  : int
+                                                        int const "0" : int const
+                                                      arg  : unknown
+                                                        int const "5" : int const
+                                              void  : void
+                                                . : void
+                                                  ident console : .internal.io.tty
+                                                  Method putws : void
+                                                  arg  : unknown
+                                                    string pool const id="9" : string const
+                                            void  : void
+                                              . : void
+                                                ident console : .internal.io.tty
+                                                Method putws : void
+                                                arg  : unknown
+                                                  . : string
+                                                    ident cpu_idle : int
+                                                    Method toString : void
+                                          void  : void
+                                            . : void
+                                              ident console : .internal.io.tty
+                                              Method putws : void
+                                              arg  : unknown
+                                                string pool const id="10" : string const
+                                        void  : void
+                                          = : void
+                                            ident cpu_idle : int
+                                            - : int
+                                              int const "100" : int const
+                                              ident cpu_idle : int
+                                      void  : void
+                                        = : void
+                                          ident stat_next_pos : int
+                                          + : int
+                                            ident stat_pos : int
+                                            int const "1" : int const
+                                    if : unknown
+                                      >= : int
+                                        ident stat_next_pos : int
+                                        . : int
+                                          ident win : .internal.window
+                                          Method getXSize : void
+                                      void  : void
+                                        = : void
+                                          ident stat_next_pos : int
+                                          int const "0" : int const
+                                  void  : void
+                                    . : void
+                                      ident win : .internal.window
+                                      Method setFg : void
+                                      arg  : unknown
+                                        int const "-16711936" : int const
+                                void  : void
+                                  . : void
+                                    ident win : .internal.window
+                                    Method drawLine : void
+                                    arg  : int
+                                      ident stat_next_pos : int
+                                    arg  : int
+                                      int const "5" : int const
+                                    arg  : int
+                                      int const "0" : int const
+                                    arg  : unknown
+                                      int const "300" : int const
+                              void  : void
+                                . : void
+                                  ident win : .internal.window
+                                  Method setFg : void
+                                  arg  : unknown
+                                    ident white : int
+                            void  : void
+                              . : void
+                                ident win : .internal.window
+                                Method drawLine : void
+                                arg  : int
+                                  ident stat_pos : int
+                                arg  : int
+                                  int const "5" : int const
+                                arg  : int
+                                  int const "0" : int const
+                                arg  : unknown
+                                  int const "300" : int const
+                          void  : void
+                            . : void
+                              ident win : .internal.window
+                              Method setFg : void
+                              arg  : unknown
+                                int const "-16777216" : int const
+                        void  : void
+                          . : void
+                            ident win : .internal.window
+                            Method drawLine : void
+                            arg  : int
+                              ident stat_pos : int
+                            arg  : int
+                              int const "5" : int const
+                            arg  : int
+                              int const "0" : int const
+                            arg  : unknown
+                              + : int
+                                int const "0" : int const
+                                ident stat_val : int
+                      void  : void
+                        . : void
+                          ident win : .internal.window
+                          Method setFg : void
+                          arg  : unknown
+                            int const "-16776961" : int const
+                    void  : void
+                      . : void
+                        ident win : .internal.window
+                        Method drawLine : void
+                        arg  : int
+                          - : int
+                            ident stat_pos : int
+                            int const "1" : int const
+                        arg  : int
+                          ident old_idle : int
+                        arg  : int
+                          int const "1" : int const
+                        arg  : unknown
+                          - : int
+                            ident cpu_idle : int
+                            ident old_idle : int
+                  void  : void
+                    = : void
+                      ident old_idle : int
+                      ident cpu_idle : int
+                void  : void
+                  = : void
+                    ident stat_pos : int
+                    ident stat_next_pos : int
+              void  : void
+                . : void
+                  ident win : .internal.window
+                  Method update : void
+            void  : void
+              . : void
+                ident mtx : .internal.mutex
+                Method unlock : void
+          void  : void
+            = : void
+              ident incr : int
+              + : int
+                ident incr : int
+                int const "1" : int const
+
+  Method void init(  ):
+    ,  : void
+      void  : void
+        = : void
+          ident mtx : .internal.mutex
+          new .internal.mutex : .internal.mutex
+      void  : void
+        . : void
+          ident mtx : .internal.mutex
+          Method lock : void
+

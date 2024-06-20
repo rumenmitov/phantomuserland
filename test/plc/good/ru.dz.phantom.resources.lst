@@ -1,5 +1,0 @@
-Class .ru.dz.phantom.resources
-  Method string getCloseButton(  ):
-    return : void const
-      binary const, "643" bytes : string const
-

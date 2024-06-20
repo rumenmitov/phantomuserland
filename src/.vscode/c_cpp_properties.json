@@ -1,0 +1,99 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/include"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/../genode/repos/base/include",
+                "${workspaceFolder}/../genode/repos/base/include/spec/64bit",
+                "${workspaceFolder}/../genode/repos/base/include/spec/x86",
+                "${workspaceFolder}/../genode/repos/base/include/spec/x86_64",
+                "${workspaceFolder}/../genode/repos/base-nova/include",
+                "${workspaceFolder}/../genode/repos/os/include",
+                "${workspaceFolder}/include/genode-amd64",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/../genode/repos/libports/include",
+                "${workspaceFolder}/../genode/contrib/libc-c7cd230b11ca71979f32950803bc78b45adfa0ce/include/libc",
+                "${workspaceFolder}/../genode/contrib/libc-c7cd230b11ca71979f32950803bc78b45adfa0ce/include/spec/x86_64/libc"
+            ],
+            "defines": [
+                "PHANTOM_GENODE=1"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "forcedInclude": [
+                "${workspaceFolder}/include/kernel/config.h",
+                "${workspaceFolder}/include/genode-amd64/arch/arch-config.h",
+                "${workspaceFolder}/include/genode-amd64/arch/board-amd64-pc-config.h"
+            ],
+            "compilerArgs": [
+                "-nostdinc",
+                "-nostdinc++"
+            ]
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/include/ia32"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "gcc-x86",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/include/ia32"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

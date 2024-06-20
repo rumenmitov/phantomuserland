@@ -1,0 +1,81 @@
+Class version 20190820104300497
+
+method <init> ordinal 19
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
+
+method get ordinal 16
+--
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 44
+  summon this						//  @5
+  call m=18 nparm=0					//  @6
+  os drop							//  @8
+; Line 45
+  load fld=0						//  @9
+; Line 45
+; key
+  get o stk pos=0						//  @11
+; Line 45
+  call m=18 nparm=1					//  @16
+; Line 45
+  ret							//  @18
+; Line 45
+  ret							//  @19
+--
+method end
+
+method set ordinal 17
+--
+  arg_count 2						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 38
+  summon this						//  @5
+  call m=18 nparm=0					//  @6
+  os drop							//  @8
+; Line 39
+  load fld=0						//  @9
+; Line 39
+; key
+  get o stk pos=0						//  @11
+; Line 39
+; val
+  get o stk pos=1						//  @16
+; Line 39
+; Line 39
+  call m=17 nparm=2					//  @21
+; Line 39
+  ret							//  @23
+; Line 39
+  ret							//  @24
+--
+method end
+
+method init ordinal 18
+--
+  arg_count 0						//  @0
+; Line 33
+; Line 32
+  load fld=0						//  @2
+; Line 32
+  summon null						//  @4
+; Line 32
+  ptr eq							//  @5
+  jz _label_0						//  @6
+  summon class phantom.util.map				//  @11
+  new							//  @33
+  pull depth=0						//  @34
+  summon class phantom.util.map				//  @39
+  static invoke ord=16 n_param=0				//  @61
+  os drop							//  @70
+; set env
+  save fld=0						//  @71
+_label_0:	//  @73
+  ret							//  @73
+--
+method end
+

@@ -1,1 +1,0 @@
-Directory _old is not used and can be safely removed.

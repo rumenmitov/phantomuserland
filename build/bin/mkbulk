@@ -1,2 +1,0 @@
-#!/bin/sh
-java -jar ${PHANTOM_HOME}/build/jar/mkbulk.jar $@ 

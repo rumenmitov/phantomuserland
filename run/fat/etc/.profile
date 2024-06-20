@@ -1,1 +1,0 @@
-echo "executing /etc/profile"

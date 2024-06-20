@@ -43,19 +43,19 @@ What are the future plans:
 
 For now, this repository contains a lot of unused old code since the porting process is still in progress. Directories containing sources that are actually used are:
 
-- `/include` - contains Phantom OS headers
-- `/include/genode-amd64` - contains architecture specific headers
-- `/include/genode-libc` - contains Genode's libc headers
-- `/phantom/isomem` - the set of sources from the old kernel that implement persistent memory layer
-  - `/phantom/isomem/genode_*.cc` - source files containing stubs for interfaces that should be implemented in Genode. Some of them are disabled using conditional compilation with `PHANTOM_THREADS_STUB` macro
-- `/genode_env` - adapters to Genode that are implementing Phantom OS low-level interfaces
-- `/phantom/vm` - Phantom Virtual Machine
+- `src/include` - contains Phantom OS headers
+- `src/include/genode-amd64` - contains architecture specific headers
+- `src/include/genode-libc` - contains Genode's libc headers
+- `src/phantom/isomem` - the set of sources from the old kernel that implement persistent memory layer
+  - `src/phantom/isomem/genode_*.cc` - source files containing stubs for interfaces that should be implemented in Genode. Some of them are disabled using conditional compilation with `PHANTOM_THREADS_STUB` macro
+- `src/genode_env` - adapters to Genode that are implementing Phantom OS low-level interfaces
+- `src/phantom/vm` - Phantom Virtual Machine
 
 and PVM dependencies (graphics subsystem):
 
-- `/phantom/libfreetype`
-- `/phantom/gl`
-- `/phantom/libwin`
+- `src/phantom/libfreetype`
+- `src/phantom/gl`
+- `src/phantom/libwin`
 
 > The detailed description of the adapters will be added soon
 
@@ -83,7 +83,162 @@ We assume that several tasks mentioned earlier as our plans can be done in paral
 
 Also, if you want to participate in any of the current tasks feel free to contact us!
 
+## Setting up environment to build and run Phantom OS
+
+Here are the instructions you should follow before proceeding to building and running Phantom OS.
+
+### Cloning required repositories
+
+```bash
+git clone -b dev --recurse-submodules https://github.com/Phantom-OS/phantomuserland
+
+cd phantomuserland
+
+# Repository with Genode build container wrapper
+git clone https://github.com/skalk/genode-devel-docker
+# Repostory with Genode
+git clone https://github.com/genodelabs/genode
+# Setting up with goa - tool for building genode applications
+git clone https://github.com/genodelabs/goa
+```
+
+### Genode development container
+
+We use genode development container to use genode build toolchain. You first have to create or import docker image:
+
+> Note: you can omit `SUDO=sudo` if your docker is set up to work without root priviliges
+
+```bash
+cd genode-devel-docker
+
+# Recommended: import exising docker image
+./docker import SUDO=sudo
+
+# Alternative: build the image on your machine
+./docker build SUDO=sudo
+```
+
+#### Starting the container
+
+Start the genode development container and return to the working directory:
+
+```bash
+./docker run SUDO=sudo DOCKER_CONTAINER_ARGS=" --network host "
+
+cd <PATH_TO_PHANTOMUSERLAND>
+
+# You should add goa to $PATH every time you restart the conatiner
+export PATH=$PATH:$(pwd)/goa/bin
+```
+
+> Note: you can also add goa to your `PATH` permanently (i.e. in `.bashrc`), in which case you won't need to manually add it every time container is started.
+
+> `--network host` is optional, but it helps to avoid the process of setting up the network for debugging. You can omit `DOCKER_CONTAINER_ARGS=" --network host "` if you won't use debuggers.
+
+### Initial setup
+
+This section contains commands that would prepare the environment to build Phantom OS. 
+
+> Following commands should be executed inside the container!
+
+```bash
+cd ./genode/
+
+# Switch to supported version
+git checkout 24.02
+
+# Creating build directory
+./tool/create_builddir x86_64
+
+# Preparing ports required for building the system 
+./tool/ports/prepare_port jitterentropy linux x86emu grub2
+
+# Enable optional repositories in build configuration
+sed -i 's/#REPOSITORIES/REPOSITORIES/g' build/x86_64/etc/build.conf
+# Remove `-no-kvm` qemu option
+sed -i '/QEMU_OPT += -no-kvm/d' build/x86_64/etc/build.conf
+
+# go back
+cd ../
+
+# Creating soft link required to assemble system image
+mkdir -p genode/build/x86_64/bin
+# what is it for again?
+ln -s $(pwd)/raw/phantom_bins.tar genode/build/x86_64/bin
+# softlink main phantom binary
+ln -s $(pwd)/var/build/x86_64/isomem genode/build/x86_64/bin/isomem
+# softlink run recepies
+ln -s $(pwd)/run/* genode/repos/ports/run/
+# softlink phantom classes 
+ln -s $(pwd)/src/plib/bin/classes genode/build/x86_64/bin/phantom_classes
+
+# Create a 2 GB empty disk image
+dd if=/dev/zero of=empty_disk.raw bs=1M count=0 seek=2048
+dd conv=notrunc bs=4096 count=1 seek=16 if=src/run/img/phantom.superblock of=empty_disk.raw
+
+# Copy disk image to bin/
+cp empty_disk.raw genode/build/x86_64/bin/block0.raw
+```
+
+> Note: executing command `cp empty_disk.raw genode/build/x86_64/bin/block0.raw` again will result in erasing contents of disk used by emulated Phantom OS. You can use it to reset the system state. 
+
+## Building & running Phantom OS
+
+Once you completed the instructions in previous section, you should be ready to build and run Phantom OS. 
+
+### Build main binary
+
+> Before building Phantom OS, make sure that you are in the genode development container, and that `goa` is added to the `$PATH` (see **Starting the container** section)
+
+Running the following command from `phantomuserland` directory builds main phantom binary:
+
+`goa build`
+
+> Note: As a part of build process this command will create `var` subdirectory, which holds all the build files, including CMake-related files containing build configuration.
+
+#### Build options
+
+When building phantom you may want to configure some of the options:
+
+---
+
+`PHANTOM_BUILD_NO_DISPLAY`:
+* 0 to enable graphics, 1 to disable. Default: 0
+
+`PHANTOM_BUILD_TESTS_ONLY`:
+* 0 to build phantom kernel, 1 to build only kernel tests. Default: 0
+
+---
+
+You can specify build options by setting environment variables passed to goa, e.g.:
+
+`PHANTOM_BUILD_NO_DISPLAY=1 goa build` 
+
+This command will build phantom with graphics disabled. Note that you have to specify your custom build options every time you issue `goa build` command. Alternatively, run the following command (note: you should run `goa build` at least once before using the following command, in order to create CMake build directory):
+
+`cmake -D<build-option-name>=<value> var/build/x86_64`
+
+e.g.:
+
+`cmake -DPHANTOM_BUILD_NO_DISPLAY=1 var/build/x86_64`
+
+This command will permanently change build configuration. In this particular case it configures to build phantom with graphics disabled, i.e. when you run `goa build`, phantom will be built without graphics.
+
+
+### Running Phantom OS
+
+After you have built the main phantom binary, run the following command in order to build system image and run phantom using QEMU with graphics enabled:
+
+> Note: running this command might fail with message: `Error: missing depot archives`. In this case execute the command suggested below the error message to create the required archives.
+
+`make -C genode/build/x86_64/ KERNEL=hw BOARD=pc run/phantom`
+
+If you have disabled graphics with `PHANTOM_BUILD_NO_DISPLAY=1`, use the following command instead:
+
+`make -C genode/build/x86_64/ KERNEL=hw BOARD=pc run/phantom_no_video`
+
 ## Contacts
 
-a.antonov@innopolis.ru - Anton Antonov, author of the port
+a.antonov@innopolis.ru - Anton Antonov, author of the port \
+k.samburskiy@innopolis.university - Kirill Samburskiy, author of WAMR port \
 dz@dz.ru - Dmitry Zavalishin, author of Phantom OS

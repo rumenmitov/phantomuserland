@@ -1,0 +1,35 @@
+Class .ru.dz.phantom.system.shell_callback
+  Field console
+  C'tor  void <init>(  ):
+    empty : void
+
+  Method void init( tt: .internal.io.tty ):
+    void  : void
+      = : void
+        ident console : .internal.io.tty
+        ident tt : .internal.io.tty
+
+  Method void run( time: int ):
+    ,  : void
+      ,  : void
+        void  : void
+          . : void
+            ident console : .internal.io.tty
+            Method putws : void
+            arg  : unknown
+              string pool const id="0" : string const
+        void  : void
+          . : void
+            ident console : .internal.io.tty
+            Method putws : void
+            arg  : unknown
+              . : string
+                ident time : int
+                Method toString : void
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : void
+          arg  : unknown
+            string pool const id="1" : string const
+

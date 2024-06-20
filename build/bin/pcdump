@@ -1,2 +1,0 @@
-#!/bin/bash
-java -cp ${PHANTOM_HOME}/build/jar/plc.jar ru.dz.jpc.pcdump.PcDump $@ 
