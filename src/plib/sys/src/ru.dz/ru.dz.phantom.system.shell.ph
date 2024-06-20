@@ -23,6 +23,8 @@ import .ru.dz.phantom.system.shell_callback;
 
 import .ru.dz.demo.wasm;
 import .ru.dz.demo.start;
+import .ru.dz.phantom.persistence_test;
+import .ru.dz.phantom.performance_test;
 
 attribute const * ->!;
 
@@ -54,6 +56,7 @@ class shell extends runnable
 
     var demo : .ru.dz.demo.wasm;
     // var demo : .ru.dz.demo.start;
+    // var demo : .ru.dz.phantom.persistence_test;
 /*
     void init()
     {
@@ -111,8 +114,9 @@ class shell extends runnable
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");
 
-        //demo = new .ru.dz.demo.start();
+        // demo = new .ru.dz.demo.start();
         demo = new .ru.dz.demo.wasm();
+        // demo = new .ru.dz.phantom.persistence_test();
         demo.run(console);
 
         while(1)

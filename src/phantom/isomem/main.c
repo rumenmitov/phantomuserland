@@ -587,7 +587,7 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
         hal_sleep_msec(60000*13);
         ph_printf("\nWILL CRASH ON PURPOSE\n\n" );
         hal_sleep_msec(20000);
-        hal_cpu_reset_real();
+        // hal_cpu_reset_real();
     }
 
     while(1)

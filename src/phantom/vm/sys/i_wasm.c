@@ -37,14 +37,14 @@
 
 // ev_assert - always evaluates but only panics in debug
 #ifdef NDEBUG
-#define	ev_assert(e)	(void)(e)
+#define	ev_assert(e)    (void)(e)
 #else
 #define	ev_assert(e)    r_assert(e)
 #endif
 
 typedef struct data_area_4_wasm *pvm_wasm_da_t;
 
-static const u_int32_t stack_size = 8092, heap_size = 32768 * 8;
+static const u_int32_t stack_size = 1024 * 32, heap_size = 32768 * 32;
 
 // for wamr malloc / free / mutex / cond callbacks (rework?)
 static pvm_wasm_da_t master_instance = NULL;
@@ -242,6 +242,23 @@ static uint64_t wasm_phantom_create_string(wasm_exec_env_t exec_env, const char*
     return wasm_add_to_object_pool(wasm, string);
 }
 
+#define WASM_OUT_OF_MEMORY_ERROR "Wasm: Out of memory"
+
+static uint32_t wasm_phantom_get_string_contents(wasm_exec_env_t exec_env, uint64_t object_id) {
+    pvm_wasm_da_t wasm = wasm_runtime_get_user_data(exec_env);
+    pvm_object_t string = wasm_object_id_to_object(wasm, object_id);
+    if (string->_class != pvm_get_string_class()) return 0;
+
+    uint32_t wasm_ptr = wasm_runtime_module_malloc(wasm->module_instance, pvm_get_str_len(string), NULL);
+    if (!wasm_ptr) return 0;
+
+    void *buffer = wasm_runtime_addr_app_to_native(wasm->module_instance, wasm_ptr);
+    ev_assert(wasm_runtime_validate_native_addr(wasm->module_instance, buffer, pvm_get_str_len(string)));
+    ph_memcpy(buffer, pvm_get_str_data(string), pvm_get_str_len(string));
+
+    return wasm_ptr;
+}
+
 /*
     Defines 3 native Wasm functions: for creating, setting and getting a value of numeric phantom objects
     The functions are:
@@ -409,6 +426,7 @@ static int wasm_phantom_throw(wasm_exec_env_t exec_env, uint64_t object_id) {
 static NativeSymbol phantom_native_symbols[] = 
 {
     { "phantom_create_string", wasm_phantom_create_string, "(*~)I" },
+    { "phantom_get_string_contents", wasm_phantom_get_string_contents, "(I)i" },
     DECLARE_NUMERIC_NATIVE_FUNCTIONS(int, "i"),
     DECLARE_NUMERIC_NATIVE_FUNCTIONS(float, "f"),
     DECLARE_NUMERIC_NATIVE_FUNCTIONS(long, "I"),
@@ -666,7 +684,7 @@ static int si_invoke_wasm_wasm_9(pvm_object_t me, pvm_object_t *ret, struct data
             pvm_object_t item = pvm_get_array_ofield(wasm_args_obj, i);
 
             switch (func->param_types[i]) {
-                GET_ARG(VALUE_TYPE_I32, int, int);
+                GET_ARG(VALUE_TYPE_I32, int, int32_t);
                 GET_ARG(VALUE_TYPE_F32, float, float);
                 GET_ARG(VALUE_TYPE_I64, long, int64_t);
                 GET_ARG(VALUE_TYPE_F64, double, double);
@@ -692,7 +710,7 @@ static int si_invoke_wasm_wasm_9(pvm_object_t me, pvm_object_t *ret, struct data
 #undef FAIL_SYSCALL
 destroy:
     wasm_da->function_instance = NULL;
-    hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
+    // hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
 
     if (return_value) SYSCALL_RETURN(return_value);
     if (wasm_da->inner_exception) SYSCALL_THROW(wasm_da->inner_exception);
@@ -700,7 +718,7 @@ destroy:
     SYSCALL_THROW_STRING(error_buf);
 }
 
-// .internal.int 		invokeWasiStart(var args : .internal.object) [10] { }
+// .internal.int        invokeWasiStart(var args : .internal.object) [10] { }
 static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
 {
     DEBUG_INFO;
@@ -778,7 +796,7 @@ static int si_wasi_invoke_start_wasm_10(pvm_object_t me, pvm_object_t *ret, stru
 #undef FAIL_SYSCALL
 destroy:
     wasm_da->function_instance = NULL;
-    hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
+    // hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
 
     for (size_t i = 0; i < wasi_argc; i++) ph_free(wasi_argv[i]);
 
@@ -788,7 +806,7 @@ destroy:
     SYSCALL_THROW_STRING(error_buf);
 }
 
-// void	wasiSetEnvVariables(var envs : .internal.string[]) [11] { }	
+// void wasiSetEnvVariables(var envs : .internal.string[]) [11] { }
 static int si_wasi_set_env_vars_wasm_11(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
 {
     DEBUG_INFO;
@@ -821,6 +839,58 @@ static int si_wasi_set_env_vars_wasm_11(pvm_object_t me, pvm_object_t *ret, stru
     SYSCALL_RETURN_NOTHING;
 }
 
+// .internal.long shareObject(var object) [12] { }
+static int si_share_object_wasm_12(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(1);
+    CHECK_WASM_INITIALIZED();
+
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
+
+    uint64_t id = wasm_add_to_object_pool(wasm_da, args[0]);
+
+    // do not refdec args[0] - this ref now belongs to wasm pool
+    SYSCALL_RETURN(pvm_create_long_object(id));
+}
+
+// .internal.object retreiveObject(var id : .internal.long, var remove : .internal.int) [13] { }
+static int si_retreive_object_wasm_13(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(2);
+    CHECK_WASM_INITIALIZED();
+
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
+    if (args[0]->_class != pvm_get_long_class()) SYSCALL_THROW_STRING("Expected `id` as long");
+    ASSERT_INT(args[1]);
+    int remove = pvm_get_int(args[1]);
+    u_int64_t id = pvm_get_long(args[0]);
+
+    pvm_object_t obj = wasm_object_id_to_object(wasm_da, id);
+    if (!obj) SYSCALL_THROW_STRING("Requested object not found");
+    ref_inc_o(obj);
+
+    if (remove) {
+        ev_assert(!wasm_remove_from_object_pool(wasm_da, id));
+    }
+
+    SYSCALL_RETURN(obj);
+}
+
+// void releaseObjects() [14] {}
+static int si_release_objects_wasm_14(pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args)
+{
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(0);
+    CHECK_WASM_INITIALIZED();
+
+    pvm_wasm_da_t wasm_da = pvm_data_area(me, wasm);
+    hdir_clear(pvm_data_area(wasm_da->wasm_sandboxed_objects, directory));
+
+    SYSCALL_RETURN_NOTHING;
+}
+
 void pvm_gc_iter_wasm(gc_iterator_call_t func, pvm_object_t self, void *arg) {
     pvm_wasm_da_t wasm_da = pvm_data_area(self, wasm);
 
@@ -848,8 +918,8 @@ syscall_func_t  syscall_table_4_wasm[16] =
     // 8
     &si_load_module_wasm_8,             &si_invoke_wasm_wasm_9,
     &si_wasi_invoke_start_wasm_10,      &si_wasi_set_env_vars_wasm_11,
-    &invalid_syscall,                   &invalid_syscall,
-    &invalid_syscall,                   &invalid_syscall
+    &si_share_object_wasm_12,           &si_retreive_object_wasm_13,
+    &si_release_objects_wasm_14,        &invalid_syscall
 };
 
 DECLARE_SIZE(wasm); // create variable holding size of syscall table

@@ -13,6 +13,8 @@ import .internal.double;
 import .internal.float;
 import .internal.string;
 import .internal.wasm;
+import .internal.window;
+import .internal.bitmap;
 
 class wasm
 {
@@ -56,8 +58,34 @@ class wasm
         var tmp : .internal.object;
 
         wamr.invokeWasm("hello_world", args);
-        wamr.invokeWasm("phantom_hello_world", args);
-        tmp = 0;
+        wamr.loadModule(getBufferBinary());
+
+        // decode image + show in window demo
+        tmp = wamr.shareObject(getJpeg());
+        args[0] = tmp;
+        wamr.invokeWasm("decode_show_image", args);
+
+        // decode image and return result demo
+        tmp = wamr.shareObject(getJpeg());
+        args[0] = tmp;
+        result = wamr.invokeWasm("decode_image", args);
+
+        var bmp : .internal.bitmap;
+        bmp = wamr.retreiveObject((.internal.long) result, /* remove = */ 1);
+
+        // display decoded image
+        var win : .internal.window;
+        win = new .internal.window();
+        win.setTitle("Image");
+        win.drawImage( 0, 0, bmp );
+
+        // ########################################
+        // #########   Weather app demo   #########
+        // ########################################
+
+        wamr.loadModule(getWasmBinary());
+        args = new .internal.object[]();
+        tmp = 250;
         args[0] = tmp;
         wamr.invokeWasm("weather_demo", args);
 
@@ -103,6 +131,16 @@ class wasm
     .internal.string getWasiBinary()
     {
         return import "../resources/wasm/wasi_functions.wasm" ;
+    }
+
+    .internal.string getBufferBinary()
+    {
+        return import "../resources/wasm/img_decoder.wasm" ;
+    }
+
+    .internal.string getJpeg()
+    {
+        return import "../resources/test_images/cat.jpg" ;
     }
 };
 
