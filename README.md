@@ -90,7 +90,7 @@ Here are the instructions you should follow before proceeding to building and ru
 ### Cloning required repositories
 
 ```bash
-git clone -b dev --recurse-submodules https://github.com/Phantom-OS/phantomuserland
+git clone -b dev --recurse-submodules https://github.com/rumenmitov/phantomuserland
 
 cd phantomuserland
 
