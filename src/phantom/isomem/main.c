@@ -47,6 +47,9 @@
 #include <ph_io.h>
 #include <ph_os.h>
 
+#include "vm_hash_map.h"
+#include "test-vm_hash_map.h"
+
 static amap_t ram_map;
 
 // File specific macros
@@ -606,7 +609,13 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 void start_phantom()
 {
+vm_hash_map_init();
+    ph_printf("!!!!! LO!!! THIS SHOULD BE 69: %d\n", vm_hash_map_test());
+    test1();
+    test2();
+    test3(10);
 
+  
     ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");

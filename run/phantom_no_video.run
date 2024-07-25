@@ -44,6 +44,7 @@ install_config {
 		<provides><service name="Timer"/></provides>
 	</start>
 
+
 	<start name="rtc_drv" priority="-1">
 		<resource name="RAM" quantum="1M"/>
 		<provides>
@@ -142,12 +143,15 @@ install_config {
  	</start>
 </config> }
 
+
 #
 # Boot modules
 #
 build_boot_image [list {*}[build_artifacts] phantom_classes isomem]
 
 append qemu_args " -smp 2 "
+# append qemu_args " -serial chardev:uart"
+# append qemu_args " -chardev socket,id=uart,port=5555,host=localhost,server=on,wait=off,ipv4=on"
 # append qemu_args " -s -S "
 # append qemu_args " -m 1024 "
 append qemu_args " -device ahci,id=ahci -boot d "

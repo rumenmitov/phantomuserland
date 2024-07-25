@@ -67,7 +67,7 @@ typedef u_int8_t        bool;
 
 #else
 
-typedef u_int32_t       wchar_t;
+//typedef u_int32_t       wchar_t;
 
 // FreeBSD code wants these
 typedef u_int64_t       uintmax_t;

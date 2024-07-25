@@ -16,7 +16,7 @@
 
 #include <phantom_types.h>
 #include <stdarg.h>
-#include <malloc.h>
+//#include <malloc.h>
 
 #ifndef NULL
 #define NULL 0

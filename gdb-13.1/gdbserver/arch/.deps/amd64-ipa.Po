@@ -1,0 +1,81 @@
+arch/amd64-ipa.o: ../gdb/arch/amd64.c ../gdbsupport/common-defs.h \
+ ../gdbsupport/config.h ../gnulib/config.h ../gnulib/import/stdio.h \
+ ../gnulib/import/stdlib.h ../gnulib/import/string.h \
+ ../include/ansidecl.h ../include/libiberty.h ../include/ansidecl.h \
+ ../gnulib/import/pathmax.h ../gnulib/import/unistd.h \
+ ../gnulib/import/limits.h ../include/gdb/signals.h \
+ ../include/gdb/signals.def ../gdbsupport/gdb_locale.h \
+ ../gnulib/import/locale.h ../gdbsupport/ptid.h \
+ ../gdbsupport/common-types.h ../gnulib/import/inttypes.h \
+ ../gdbsupport/common-types.h ../gdbsupport/common-utils.h \
+ ../gdbsupport/byte-vector.h ../gdbsupport/def-vector.h \
+ ../gdbsupport/default-init-alloc.h ../gdbsupport/gdb_unique_ptr.h \
+ ../gdbsupport/gdb-xfree.h ../gdbsupport/poison.h ../gdbsupport/traits.h \
+ ../include/obstack.h ../gdbsupport/poison.h \
+ ../gdbsupport/gdb_string_view.h ../gdbsupport/gdb_assert.h \
+ ../gdbsupport/errors.h ../gdbsupport/print-utils.h \
+ ../gdbsupport/common-debug.h ../gdbsupport/gdb_optional.h \
+ ../gdbsupport/traits.h ../gdbsupport/preprocessor.h \
+ ../gdbsupport/cleanups.h ../gdbsupport/common-exceptions.h \
+ ../gdb/arch/amd64.h ../gdbsupport/tdesc.h ../gdbsupport/x86-xstate.h \
+ ../gdb/arch/../features/i386/64bit-avx.c \
+ ../gdb/arch/../features/i386/64bit-avx512.c \
+ ../gdb/arch/../features/i386/64bit-core.c \
+ ../gdb/arch/../features/i386/64bit-linux.c \
+ ../gdb/arch/../features/i386/64bit-mpx.c \
+ ../gdb/arch/../features/i386/64bit-segments.c \
+ ../gdb/arch/../features/i386/64bit-sse.c \
+ ../gdb/arch/../features/i386/pkeys.c \
+ ../gdb/arch/../features/i386/x32-core.c
+../gdbsupport/common-defs.h:
+../gdbsupport/config.h:
+../gnulib/config.h:
+../gnulib/import/stdio.h:
+../gnulib/import/stdlib.h:
+../gnulib/import/string.h:
+../include/ansidecl.h:
+../include/libiberty.h:
+../include/ansidecl.h:
+../gnulib/import/pathmax.h:
+../gnulib/import/unistd.h:
+../gnulib/import/limits.h:
+../include/gdb/signals.h:
+../include/gdb/signals.def:
+../gdbsupport/gdb_locale.h:
+../gnulib/import/locale.h:
+../gdbsupport/ptid.h:
+../gdbsupport/common-types.h:
+../gnulib/import/inttypes.h:
+../gdbsupport/common-types.h:
+../gdbsupport/common-utils.h:
+../gdbsupport/byte-vector.h:
+../gdbsupport/def-vector.h:
+../gdbsupport/default-init-alloc.h:
+../gdbsupport/gdb_unique_ptr.h:
+../gdbsupport/gdb-xfree.h:
+../gdbsupport/poison.h:
+../gdbsupport/traits.h:
+../include/obstack.h:
+../gdbsupport/poison.h:
+../gdbsupport/gdb_string_view.h:
+../gdbsupport/gdb_assert.h:
+../gdbsupport/errors.h:
+../gdbsupport/print-utils.h:
+../gdbsupport/common-debug.h:
+../gdbsupport/gdb_optional.h:
+../gdbsupport/traits.h:
+../gdbsupport/preprocessor.h:
+../gdbsupport/cleanups.h:
+../gdbsupport/common-exceptions.h:
+../gdb/arch/amd64.h:
+../gdbsupport/tdesc.h:
+../gdbsupport/x86-xstate.h:
+../gdb/arch/../features/i386/64bit-avx.c:
+../gdb/arch/../features/i386/64bit-avx512.c:
+../gdb/arch/../features/i386/64bit-core.c:
+../gdb/arch/../features/i386/64bit-linux.c:
+../gdb/arch/../features/i386/64bit-mpx.c:
+../gdb/arch/../features/i386/64bit-segments.c:
+../gdb/arch/../features/i386/64bit-sse.c:
+../gdb/arch/../features/i386/pkeys.c:
+../gdb/arch/../features/i386/x32-core.c:

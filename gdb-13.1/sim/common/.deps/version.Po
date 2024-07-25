@@ -1,0 +1,4 @@
+common/version.o: common/version.c /usr/include/stdc-predef.h \
+ common/version.h
+/usr/include/stdc-predef.h:
+common/version.h:

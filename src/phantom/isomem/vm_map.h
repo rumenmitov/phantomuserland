@@ -17,7 +17,7 @@
 #include <kernel/vm.h>
 
 #include "spinlock.h"
-#include "pager.h"
+#include "pager_io_req.h"
 #include "hal.h"
 
 
@@ -122,6 +122,7 @@ typedef struct vm_page
 
     int                 wired_count; // If nonzero, page must be present and can't be moved/paged out. Physical address must not change.
 
+  int                 exists;
 } vm_page;
 
 

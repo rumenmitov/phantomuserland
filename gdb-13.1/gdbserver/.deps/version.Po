@@ -1,0 +1,2 @@
+version.o: version-generated.cc ../gdbsupport/version.h
+../gdbsupport/version.h:
