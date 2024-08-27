@@ -50,6 +50,7 @@
 #include "vm_hash_map.h"
 #include "test-vm_hash_map.h"
 
+
 static amap_t ram_map;
 
 // File specific macros
@@ -182,6 +183,7 @@ phantom_multiboot_main()
 int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
     ph_printf("Waiting...\n");
+
     // wait_for_continue();
 
     // Test sleep
@@ -609,11 +611,10 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 void start_phantom()
 {
-vm_hash_map_init();
-    ph_printf("!!!!! LO!!! THIS SHOULD BE 69: %d\n", vm_hash_map_test());
-    test1();
-    test2();
-    test3(10);
+  vm_hash_map_init();
+  test1();
+  test2();
+  test3(10);
 
   
     ph_printf("DEBUG!!! STARTING PHANTOM\n");

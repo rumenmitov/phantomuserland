@@ -15,6 +15,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include "squid_cache.h"
+
 #include <kernel/config.h>
 #include <ph_syslog.h>
 #include <kernel/debug_graphical.h>
@@ -535,12 +537,16 @@ void vm_map_finish(void)
 }
 
 
-
 void
 vm_page_init( vm_page *me, void *my_vaddr)
 {
     ph_memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
+    
+    vm_page_generate_hash(me);
+    
+    squid_insert(sq, me);
+    
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
     page_touch_history(me);

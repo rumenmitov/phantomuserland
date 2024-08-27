@@ -108,7 +108,6 @@ bool test_hal()
 // void Libc::Component::construct(Libc::Env &env)
 void Component::construct(Env &env)
 {
-
 	// Libc::with_libc([&]()
 	// 				{
 	// 	int p_argc = 1;

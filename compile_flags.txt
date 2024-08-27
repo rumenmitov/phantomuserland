@@ -4,3 +4,8 @@ src/include/
 -I
 src/include/amd64/
 
+-I
+src/tools/
+
+-I
+genode/repos/base/include/
