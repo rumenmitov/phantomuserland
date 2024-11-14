@@ -1,7 +1,0 @@
--I
-src/include/
-
--I
-src/include/amd64/
-
--std=c23

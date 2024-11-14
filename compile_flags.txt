@@ -1,3 +1,6 @@
+-std=c++20
+-xc++-header
+
 -I
 src/include/
 
@@ -9,3 +12,18 @@ src/tools/
 
 -I
 genode/repos/base/include/
+
+-I
+genode/repos/base/include/spec/64bit/
+
+-I
+genode/repos/base/include/spec/x86_64/
+
+-I
+genode/repos/base/include/spec/x86/
+
+-I
+genode/repos/libports/include/
+
+-I
+genode/repos/os/include/

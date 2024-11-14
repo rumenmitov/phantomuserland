@@ -1,6 +1,6 @@
 set (PHANTOM_ISOMEM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-set (source_all 
+set (source_all
     khash.c 
     udp_json.c 
     vm_cn_stats.c 

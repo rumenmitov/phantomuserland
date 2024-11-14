@@ -15,11 +15,9 @@
 
 #include <queue.h>
 #include <kernel/vm.h>
-
-#include "squid_cache.h"
+#include <pager_io_req.h>
 
 #include "spinlock.h"
-#include "pager_io_req.h"
 #include "hal.h"
 
 
@@ -60,7 +58,8 @@ typedef struct vm_page
     void *              virt_addr;     	// where phys_addr is mapped
     physaddr_t          phys_addr;      // our physical address in RAM, if any
 
-    squid_t squid;                      // corresponding squid file
+    char              squid_hash[32]; // to corresponding squid file
+    
 
     // Can't touch pager_io data
     unsigned char       flag_pager_io_busy      ONEBIT;

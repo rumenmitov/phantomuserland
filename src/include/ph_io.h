@@ -1,6 +1,10 @@
 #ifndef INCLUDE_PH_IO
 #define INCLUDE_PH_IO
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdarg.h>
 #include <stddef.h>
 
@@ -13,5 +17,9 @@ int ph_vprintf(const char *fmt, va_list ap);
 int ph_printf(const char *fmt, ...);
 
 int ph_sscanf(const char *ibuf, const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,3 @@
-
-
-
 #define DEBUG_MSG_PREFIX "boot"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -46,9 +43,6 @@
 #include <ph_malloc.h>
 #include <ph_io.h>
 #include <ph_os.h>
-
-#include "vm_hash_map.h"
-#include "test-vm_hash_map.h"
 
 
 static amap_t ram_map;
@@ -611,12 +605,6 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 void start_phantom()
 {
-  vm_hash_map_init();
-  test1();
-  test2();
-  test3(10);
-
-  
     ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");
