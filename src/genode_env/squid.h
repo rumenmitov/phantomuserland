@@ -24,6 +24,7 @@
 #include <vfs/file_system_factory.h>
 #include <base/buffered_output.h>
 
+
 namespace Squid_snapshot {
     using namespace Genode;
 
@@ -80,17 +81,14 @@ namespace Squid_snapshot {
 	Main(Env &env);
 
 	Heap _heap { _env.ram(), _env.rm() };
-
 	Attached_rom_dataspace _config { _env, "config" };
-
 	Vfs::Global_file_system_factory _fs_factory { _heap };
-
 	Vfs::Simple_env _vfs_env { _env, _heap, _config.xml().sub_node("vfs") };
-
 	typedef Directory::Path Path;
-
 	Directory _root_dir { _vfs_env };
+	
 
+	Genode::uint64_t last_snapshot = 0;
 
 	L2_Dir availability_matrix[Squid_snapshot::L1_SIZE][L2_SIZE];
 

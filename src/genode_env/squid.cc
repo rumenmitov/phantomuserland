@@ -2,6 +2,7 @@
 
 #include <ph_io.h>
 #include "squid.h"
+#include "phantom_timer.h"
 
 
 namespace Squid_snapshot {
@@ -65,7 +66,9 @@ namespace Squid_snapshot {
 
     Genode::Directory::Path SquidFileHash::to_path(void) 
     {
-	auto hash_res = Squid_snapshot::global_squid->_heap.try_alloc( sizeof(char) * 30 );
+	auto hash_res =
+	    Squid_snapshot::global_squid->_heap.try_alloc( sizeof(char) * Squid_snapshot::HASH_LEN );
+	
 	char *hash = nullptr;
 	
 	hash_res.with_result(
@@ -74,7 +77,8 @@ namespace Squid_snapshot {
 
 	if (hash == nullptr) Genode::error("memory allocation nullptr");
 
-	ph_snprintf(hash, Squid_snapshot::HASH_LEN, "/squid-cache/%x/%x/%x",
+	ph_snprintf(hash, Squid_snapshot::HASH_LEN, "/squid-cache/%llu, %x/%x/%x",
+		    Squid_snapshot::global_squid->last_snapshot,
 		    l1_dir,
 		    l2_dir,
 		    file_id);
@@ -85,10 +89,15 @@ namespace Squid_snapshot {
 
     Main::Main(Env &env) : _env(env) 
     {
+	if (last_snapshot == 0) {
+	    Phantom::Timer_adapter timer { _env = env };
+	    last_snapshot =  timer.curr_time_us();
+	}
+	
 	for (unsigned int i = 0; i < Squid_snapshot::L1_SIZE; i++) {
-	    char l1_dir[100];
-	    Genode::memset(l1_dir, 0, 100);
-	    ph_snprintf(l1_dir, 100, "/squid-cache/%x", i);
+	    char l1_dir[150];
+	    Genode::memset(l1_dir, 0, 150);
+	    ph_snprintf(l1_dir, 150, "/squid-cache/%llu/%x", last_snapshot, i);
 	    
 	    _root_dir.create_sub_directory(l1_dir);
 	    if (!_root_dir.directory_exists(l1_dir)) {
@@ -96,9 +105,9 @@ namespace Squid_snapshot {
 	    }
 
 	    for (unsigned int j = 0; j < Squid_snapshot::L2_SIZE; j++) {
-		char l2_dir[100];
-		Genode::memset(l2_dir, 0, 100);
-		ph_snprintf(l2_dir, 100, "/squid-cache/%x/%x", i, j);
+		char l2_dir[150];
+		Genode::memset(l2_dir, 0, 150);
+		ph_snprintf(l2_dir, 150, "/squid-cache/%llu/%x/%x", last_snapshot, i, j);
 	    
 		_root_dir.create_sub_directory(l2_dir);
 		if (!_root_dir.directory_exists(l2_dir)) {
@@ -199,8 +208,6 @@ namespace Squid_snapshot {
 
 	return Error::None;
     }
-    
-	  
 };
 
 
