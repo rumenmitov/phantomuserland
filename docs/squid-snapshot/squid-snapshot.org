@@ -1,0 +1,167 @@
+#+title: Log-Based Snapshotting in PhantomOS Specification
+#+author: Rumen Mitov
+#+date: [2024-11-22]
+#+options: toc:nil
+#+startup: overview
+
+
+* Minutiae
+- Genode-only source code (used for testing): https://github.com/rumenmitov/genode-squid/
+- PhantomOS Squid Snapshot implementation: https://github.com/rumenmitov/phantomuserland/tree/dev
+
+* Introduction
+This work centers around an alternative implementation of the snapshotting mechanism in PhantomOS. PhantomOS is an orthogonally persistent operating system. This is an operating system where the machine's state should survive any unexpected crashes and this should apply to the entire state. This snapshotting should be handled by the kernel, not the userspace programmer[fn:1].
+
+Previously, PhantomOS used a superblock mechanism. This entailed that the machine captured all state into one snapshot[fn:2]. This new approach seeks to use a logging alternative instead. The main idea is to only save changes and use the old, unchanged files from the previous snapshots. The hope is that this will be faster, more memory efficient and more reliable than the superblock approach.
+
+* Terminology
+The previous iteration of snapshotting in PhantomOS used a superblock structure to save the machine state. This new approach uses logging. This new approach means that instead of saving every piece of data every time a snapshot is taken, only the changed pieces of data are saved. On recovery, the kernel walks through all the changes and can recreate the state.
+
+Since this work has been inspired by the Squid Cache, the snapshot mechanism is referred to as Squid Snapshot. The root directory in which all snapshots are stored is =/squid-cache=.
+
+The root directory contains timestamped directories which from now will be referred to as the individual snapshots. Each snapshot comprises of _L1_SIZE_ number of level 1 directory, which itself contains _L2_SIZE_ number of level 2 directories. Since L2 directories have to manage state (/see [[id:directory-structure][Directory Structure]]/) _L2_DIR_ will refer to an arbitrary level 2 directory.
+
+Each _L2_DIR_ contains _CAPACITY_ number of hashes. The hashes are referred to as _SquidFileHash_.
+
+* Architecture
+** Filesystem
+For the logging to work a filesystem that supports it should be integrated into the project. Ext4 was chosen for this due to it being available as a Genode community library and its tenured adoption in Linux.
+
+There are a couple of alternatives we can take when saving memory into the filesystem.
+
+One approach would be to save multiple (perhaps continuous) virtual memory pages inside one file. This approach is memory efficient (less files \Rightarrow less inodes) and fast (a single loaded file can be used for reading/writing multiple pages).
+
+An alternative approach would be to reserve one file per page. This would be far more disk-space efficient, since unchanged files could be hard-linked to older snapshots.
+
+I chose to go with the second option, simply because it sounded more interesting. Although it could be useful in the future to be able to specify which approach the kernel should use.
+
+** State Management
+The state of the Squid Snapshots is managed by the global object _global_squid_ which is initialized at the start of the kernel. This object keeps track of the available hashes, memory allocation and is responsible for interacting with the filesystem (i.e. writing, reading, etc.).
+
+** Directory Structure
+:properties:
+:id: directory-structure
+:end:
+All Squid Snapshots are stored inside the squid root =/squid-cache=. The squid root contains the individual versioned snapshots. The versions are timestamps of when the snapshot was created.
+
+Each snapshot is represented by a bounded trie, i.e. there is a fixed _L1_SIZE_ number of directories within the snapshot (these are referred to as level 1 directories of L1 for short). Inside each L1 there are _L2_SIZE_ number of level 2 directories. Each level 2 directory contains _CAPACITY_ number of hashes.
+
+Each hash represents a unique random file identifier which corresponds to one piece of data (i.e. one virtual memory page). For performance reasons, each _L2_DIR_ keeps track of the available hashes in a stack. When new data requests a hash, an available one is popped. When data is not needed anymore (i.e. its _SquidFileHash_ destructor is called) the available hash is appended back to the stack.
+
+#+begin_export latex
+\clearpage
+#+end_export
+
+#+caption: Example directory tree of Squid Snapshot.
+#+begin_src ascii
+Squid Root                          squid-cache
+                                         |
+                               --------------------
+                               |        ...
+Snapshot Version          <timestamp>
+                               |
+                    ------------------------
+                    |         ...                   
+L1                  00
+                    |
+            -------------------
+            |      ...
+L2          00
+            |
+       -----------
+       |   ...
+Hash  453
+#+end_src
+
+* Snapshotting Algorithm
+** Initialization
+1. Check if disk is mounted correctly
+   - If not, try to recover
+     - If recovery is unsuccessful error message is printed suggesting the use of a tool like *fsck*
+2. Check if a finished snapshot exists
+   - If it does load the *global squid* object from the snapshot root
+3. Check if the squid version of the snapshot matches the system's version
+   - If not, present the user with two options:
+     - System crashes and user must use an older, compliant version of PhantomOS to recover the snapshots
+     - Snapshots are deleted, PhantomOS boots up fresh
+4. Delete *current_snapshot* (if it exists)
+   - *current_snapshot* signifies a snapshot that did not complete
+
+** New Snapshot
+1. Estimate the size of the snapshot (call this size *snap_estimate*)
+2. *snap_estimate* should be 2x free space
+   - If not, delete old snapshot until the condition is true
+3. New snapshot directory is created titled *current_snapshot*
+4. *current_snapshot* is initialized to have the proper structure
+5. Locks acquired for virtual memory pages inside the kernel
+6. For each _dirty_ virtual memory page:
+   1. Acquire unique hash
+      - If no more hashes available crash the system (change the *L1*, *L2* and *CAPACITY* configuration)
+   2. Write virtual memory page to file
+7. For each _non-dirty_ virtual memory page:
+   1. If page is non-dirty it means it exists in an older snapshot and has a hash already
+   2. Hardlink the file from the older snapshot to the current snapshot
+8. Write the *global_squid* object to a file in the root of *current_snapshot*
+9. Measure the size of the snapshot directory and save the information in a human-readable format at the root of the snapshot directory
+10. Rename *current_snapshot* to the current timestamp, thus signifying that the snapshot is complete
+
+* Problems and Potential Solutions
+** DONE Filesystem with Support for Logging
+Hand-rolling a custom logging mechanism is difficult to get right and custom solution is not needed when an industry standard will do just fine. For that reason Ext4 was selected. 
+
+Ext4 is implemented by the [[https://codeberg.org/jws/genode-wundertuete/src/branch/sculpt-24.04-2024-04-19][lwext4]] Genode community library. It required some changes to the run file, but it works as intended.
+
+** DONE Filesystem Improper Unmount
+If the machine were to crash then the filesystem would not be properly unmounted. This is already handled by the above-mentioned [[https://codeberg.org/jws/genode-wundertuete/src/branch/sculpt-24.04-2024-04-19][lwext4]] library. On mount, it first tries to fix the filesystem. If that is unsuccessful it prints out a message that the _fsck_ Linux utility should be used.
+
+** DONE Fast Reads and Writes
+Since each data has a hash corresponding to its file in the Squid Snapshot, reading and writing data is efficient. Moreover since each _L2_DIR_ keeps track of the available hashes in a stack, getting a new hash is fast.
+
+** TODO [#C] Sequential Writes
+As an optimization, maybe we can write pages sequentially based on their addresses in order to make use of locality caching.
+
+** TODO [#A] State-Management of L1
+L1 directories should have a similar state management solution as L2 directories. Some L2 directories could be exhausted at first, but then become available. L1 directories should keep track of this.
+
+** DONE Foreign Function Interface
+Since the underlying filesystem operations are handled by Genode components, the main logic is in the *C++* codebase. However, PhantomOS's kernel code is in the *C* codebase. Hence, an API was created to call the *C++* methods from the *C* code (/see src/include/squidlib.h/).
+
+** TODO [#B] Squid Versioning
+To ensure compatibility with breaking-changes, a versioning system should be introduced. The version data will be kept inside the *global_squid* object and it will be written out in the snapshot metadata in a human-readable format.
+
+** TODO [#B] Virtual Memory Capture and Restore
+The Squid Snapshot mechanism is being integrated into the virtual memory. The changes need to be made in the files *src/phantom/isomem/vm_map.h* and *src/phantom/isomem/vm_map.c*.
+
+** TODO [#C] Hardlink Non-Dirty Pages [%]
+Pages that have not been modified since the last update should already have a hash. Instead of creating a new file for them, the file from the old snapshot should be hardlinked.
+
+- [ ] Will have to modify the _SquidFileHash_ API to allow requesting specific hashes.
+
+** TODO [#C] Snapshot Metadata
+Human-readable metadata should be introduced for debugging and bookkeeping purposes. This metadata will be stored in a text file at the root of every snapshot directory. The metadata should include:
+- Squid Version
+  The version of the implementation.
+- Snapshot Size
+  The disk-space occupied by the snapshot.
+
+** TODO [#B] Incomplete Snapshots
+In the event that the system crashed during a snapshot, the kernel should roll back to the previous version and remove the artifacts of the current incomplete snapshot.
+
+A complete snapshot is signified by a _timestamp_ for a name. An incomplete snapshot would still be called *current_snapshot*.
+
+** TODO [#C] Available Disk-Space [%]
+To ensure there is enough disk-space on for a snapshot we should keep track of the available disk space on the system.
+- [ ] Estimation of snapshot size
+- [ ] Measurement of available space
+- [ ] Deletion of old snapshots
+
+* Conclusion
+
+In conclusion, by transitioning from a superblock structure to a logging-based approach, the new mechanism optimizes memory usage and enhances performance by only saving changes rather than the entire state. The integration of the Ext4 filesystem through the lwext4 Genode community library has proven effective, addressing challenges such as improper unmounting and ensuring efficient data reads and writes.
+
+Overall, the Squid Snapshot mechanism offers a promising path forward for PhantomOS, enhancing its capability to preserve system state across unexpected crashes and providing a more reliable and efficient operating environment.
+
+* Footnotes
+[fn:2] Kirill Samburskiy - "Introducing bytecode runtime into a persistent operating system"
+
+[fn:1] https://phantomdox.readthedocs.io/en/latest/
