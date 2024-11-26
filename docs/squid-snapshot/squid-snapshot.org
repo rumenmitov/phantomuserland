@@ -25,7 +25,7 @@ Each _L2_DIR_ contains _CAPACITY_ number of hashes. The hashes are referred to a
 
 * Architecture
 ** Filesystem
-For the logging to work a filesystem that supports it should be integrated into the project. Ext4 was chosen for this due to it being available as a Genode community library and its tenured adoption in Linux.
+For the logging to work a filesystem that supports it should be integrated into the project. Ext4 was chosen for this due to it being available as a Genode community library and its tenured adoption in Linux[fn:3].
 
 There are a couple of alternatives we can take when saving memory into the filesystem.
 
@@ -129,8 +129,10 @@ Since the underlying filesystem operations are handled by Genode components, the
 ** TODO [#B] Squid Versioning
 To ensure compatibility with breaking-changes, a versioning system should be introduced. The version data will be kept inside the *global_squid* object and it will be written out in the snapshot metadata in a human-readable format.
 
-** TODO [#B] Virtual Memory Capture and Restore
+** TODO [#A] Virtual Memory Capture and Restore
 The Squid Snapshot mechanism is being integrated into the virtual memory. The changes need to be made in the files *src/phantom/isomem/vm_map.h* and *src/phantom/isomem/vm_map.c*.
+
+The snapshot marks pages for a _pageout_, which is handled by =vm_page_req_pageout()= in *src/phantom/isomem/vm_map.c*.
 
 ** TODO [#C] Hardlink Non-Dirty Pages [%]
 Pages that have not been modified since the last update should already have a hash. Instead of creating a new file for them, the file from the old snapshot should be hardlinked.
@@ -162,6 +164,7 @@ In conclusion, by transitioning from a superblock structure to a logging-based a
 Overall, the Squid Snapshot mechanism offers a promising path forward for PhantomOS, enhancing its capability to preserve system state across unexpected crashes and providing a more reliable and efficient operating environment.
 
 * Footnotes
-[fn:2] Kirill Samburskiy - "Introducing bytecode runtime into a persistent operating system"
 
-[fn:1] https://phantomdox.readthedocs.io/en/latest/
+[fn:3] Ext4 Features - https://www.kernel.org/doc/html/latest/admin-guide/ext4.html#features 
+[fn:2] Kirill Samburskiy - "Introducing bytecode runtime into a persistent operating system"
+[fn:1] PhantomOS Book - https://phantomdox.readthedocs.io/en/latest/

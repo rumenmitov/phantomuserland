@@ -58,7 +58,7 @@ typedef struct vm_page
     void *              virt_addr;     	// where phys_addr is mapped
     physaddr_t          phys_addr;      // our physical address in RAM, if any
 
-    char              squid_hash[32]; // to corresponding squid file
+    void *              squid_hash;     // hash to corresponding squid file
     
 
     // Can't touch pager_io data
