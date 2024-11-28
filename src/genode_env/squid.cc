@@ -5,7 +5,39 @@
 #include "phantom_timer.h"
 
 
+static void* squid_malloc(size_t size) 
+{
+    auto alloc_res =
+	Squid_snapshot::global_squid->_heap.try_alloc( sizeof(char) * Squid_snapshot::HASH_LEN );
+	
+    void *alloc = nullptr;
+	
+    alloc_res.with_result(
+	[&](void *addr) { alloc = (char*) addr; },
+	[&](Genode::Allocator::Alloc_error err) { Genode::error(err); });
+
+    if (alloc == nullptr) Genode::error("memory allocation nullptr");
+
+    return alloc;
+}
+
+
+
 namespace Squid_snapshot {
+
+    Squid_Dir::Squid_Dir(unsigned int capacity)
+	: capacity(capacity) 
+    {
+	
+    }
+    
+
+    Squid_Dir::~Squid_Dir(void) 
+    {
+	delete[] this->freelist;
+    }
+
+    
 
     L2_Dir::L2_Dir(void) 
     {
@@ -66,17 +98,8 @@ namespace Squid_snapshot {
 
     Genode::Directory::Path SquidFileHash::to_path(void) 
     {
-	auto hash_res =
-	    Squid_snapshot::global_squid->_heap.try_alloc( sizeof(char) * Squid_snapshot::HASH_LEN );
+	char *hash = (char*) squid_malloc(sizeof(char) * Squid_snapshot::HASH_LEN);
 	
-	char *hash = nullptr;
-	
-	hash_res.with_result(
-	    [&](void *addr) { hash = (char*) addr; },
-	    [&](Genode::Allocator::Alloc_error err) { Genode::error(err); });
-
-	if (hash == nullptr) Genode::error("memory allocation nullptr");
-
 	ph_snprintf(hash, Squid_snapshot::HASH_LEN, "/squid-cache/%llu, %x/%x/%x",
 		    Squid_snapshot::global_squid->last_snapshot,
 		    l1_dir,
@@ -177,14 +200,7 @@ namespace Squid_snapshot {
 	}
 	
 
-	auto echo_res = Squid_snapshot::global_squid->_heap.try_alloc( sizeof(char) * 20 );
-	char *echo = nullptr;
-	
-	echo_res.with_result(
-	    [&](void *addr) { echo = (char*) addr; },
-	    [&](Genode::Allocator::Alloc_error err) { Genode::error(err); });
-
-	if (echo == nullptr) Genode::error("memory allocation nullptr");
+	char *echo = (char*) squid_malloc(sizeof(char) * 20);
 	
 	switch (Squid_snapshot::global_squid->_read(hash.to_path(), (void*) echo)) {
 	case Error::ReadFile:

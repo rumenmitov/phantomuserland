@@ -129,7 +129,7 @@ Since the underlying filesystem operations are handled by Genode components, the
 ** TODO [#B] Squid Versioning
 To ensure compatibility with breaking-changes, a versioning system should be introduced. The version data will be kept inside the *global_squid* object and it will be written out in the snapshot metadata in a human-readable format.
 
-** TODO [#A] Virtual Memory Capture and Restore
+** DONE [#A] Virtual Memory Capture and Restore
 The Squid Snapshot mechanism is being integrated into the virtual memory. The changes need to be made in the files *src/phantom/isomem/vm_map.h* and *src/phantom/isomem/vm_map.c*.
 
 The snapshot marks pages for a _pageout_, which is handled by =vm_page_req_pageout()= in *src/phantom/isomem/vm_map.c*.
@@ -151,10 +151,11 @@ In the event that the system crashed during a snapshot, the kernel should roll b
 
 A complete snapshot is signified by a _timestamp_ for a name. An incomplete snapshot would still be called *current_snapshot*.
 
-** TODO [#C] Available Disk-Space [%]
+** TODO [#C] Available Disk-Space [33%]
 To ensure there is enough disk-space on for a snapshot we should keep track of the available disk space on the system.
 - [ ] Estimation of snapshot size
-- [ ] Measurement of available space
+- [X] Measurement of available space
+ This is already implemented in *src/phantom/isomem/pager.c* in the function *pager_calculate_free_block_count()*.
 - [ ] Deletion of old snapshots
 
 * Conclusion

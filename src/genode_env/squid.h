@@ -45,6 +45,23 @@ namespace Squid_snapshot {
     
     static const unsigned int HASH_LEN = 32;
 
+    class Squid_Dir 
+    {
+    protected:
+	unsigned int capacity;
+	unsigned int *freelist;
+	unsigned int freecount;
+	
+    public:
+	Squid_Dir(unsigned int capacity = 1000);
+	~Squid_Dir(void);
+	
+	unsigned int get_entry(void);
+	void return_entry(unsigned int);
+    };
+    
+	
+
     class L2_Dir
     {
 	static const unsigned int CAPACITY  = 1000;
