@@ -25,8 +25,37 @@ Each _L2_DIR_ contains _CAPACITY_ number of hashes. The hashes are referred to a
 
 * Architecture
 ** Filesystem
-For the logging to work a filesystem that supports it should be integrated into the project. Ext4 was chosen for this due to it being available as a Genode community library and its tenured adoption in Linux[fn:3].
+For the logging to work a filesystem that supports it should be integrated into the project. Ext4 was chosen for this due to it being available as a Genode community library and its tenured adoption in Linux.
 
+This library comes with its own bare-bones implementation of Ext4 with support for the following:
+- Mount operations
+  - Register and unregister block devices
+  - Mount and unmount ext4 partitions
+  - Support for read-only mounts
+  - Setup of OS-dependent lock routines
+  - Retrieve filesystem statistics
+- Journal
+  - Journal recovery
+- File operations
+  - Open, close, read, write, and truncate files
+  - File seeking and position retrieval
+  - File removal and renaming
+  - Create hard links and symbolic links
+  - Create special files (e.g., character and block devices)
+  - Set and get file metadata such as mode, owner, and timestamps
+- Directory operations
+  - Create, remove, and rename directories
+  - Open and close directories
+  - Iterate over directory entries
+- Extended Attributes
+- Cache Management
+  - Enable and disable write-back cache mode
+  - Force cache flush
+- Lock Interface
+  - OS-dependent lock and unlock functions for mount points
+
+
+*** Data Handling
 There are a couple of alternatives we can take when saving memory into the filesystem.
 
 One approach would be to save multiple (perhaps continuous) virtual memory pages inside one file. This approach is memory efficient (less files \Rightarrow less inodes) and fast (a single loaded file can be used for reading/writing multiple pages).
@@ -35,6 +64,10 @@ An alternative approach would be to reserve one file per page. This would be far
 
 I chose to go with the second option, simply because it sounded more interesting. Although it could be useful in the future to be able to specify which approach the kernel should use.
 
+** Retention Policy
+All snapshots are stored in the =/squid-cache= root directory. Finished snapshots are renamed to the UNIX timestamp of when that particular snapshot was completed.
+
+By default, snapshots are taken every minute. The system will retain at most 5 finished snapshots at a time by default. However, if the machine is short on disk space, older snapshots will be pruned at a higher rate (/for more on this see [[id:new-snapshot][New Snapshot]]/).
 ** State Management
 The state of the Squid Snapshots is managed by the global object _global_squid_ which is initialized at the start of the kernel. This object keeps track of the available hashes, memory allocation and is responsible for interacting with the filesystem (i.e. writing, reading, etc.).
 
@@ -78,8 +111,8 @@ Hash  453
 1. Check if disk is mounted correctly
    - If not, try to recover
      - If recovery is unsuccessful error message is printed suggesting the use of a tool like *fsck*
-2. Check if a finished snapshot exists
-   - If it does load the *global squid* object from the snapshot root
+2. Check if a finished snapshot exists (choose latest)
+   - If it does load the *global squid* object from the particular snapshot root
 3. Check if the squid version of the snapshot matches the system's version
    - If not, present the user with two options:
      - System crashes and user must use an older, compliant version of PhantomOS to recover the snapshots
@@ -88,7 +121,10 @@ Hash  453
    - *current_snapshot* signifies a snapshot that did not complete
 
 ** New Snapshot
-1. Estimate the size of the snapshot (call this size *snap_estimate*)
+:properties:
+:id: new-snapshot
+:end:
+1. Estimate the size of the snapshot (call this size *snap_estimate*) by iterating over kernel objects
 2. *snap_estimate* should be 2x free space
    - If not, delete old snapshot until the condition is true
 3. New snapshot directory is created titled *current_snapshot*
@@ -151,11 +187,19 @@ In the event that the system crashed during a snapshot, the kernel should roll b
 
 A complete snapshot is signified by a _timestamp_ for a name. An incomplete snapshot would still be called *current_snapshot*.
 
-** TODO [#C] Available Disk-Space [33%]
+** TODO [#C] Available Disk-Space [0%]
 To ensure there is enough disk-space on for a snapshot we should keep track of the available disk space on the system.
 - [ ] Estimation of snapshot size
-- [X] Measurement of available space
- This is already implemented in *src/phantom/isomem/pager.c* in the function *pager_calculate_free_block_count()*.
+- [ ] Measurement of available space
+ To measure the available disk space with lwext4's ext4.h:
+ #+begin_src C
+   struct ext4_mount_stats stats;
+   
+   int err = ext4_mount_point_stats("/squid-cache", &stats);
+   if (err != 0) {} // error occured
+
+   uint32_t avail_disk_space = stats.free_blocks_count * stats.block_size;
+ #+end_src
 - [ ] Deletion of old snapshots
 
 * Conclusion
@@ -166,6 +210,5 @@ Overall, the Squid Snapshot mechanism offers a promising path forward for Phanto
 
 * Footnotes
 
-[fn:3] Ext4 Features - https://www.kernel.org/doc/html/latest/admin-guide/ext4.html#features 
 [fn:2] Kirill Samburskiy - "Introducing bytecode runtime into a persistent operating system"
 [fn:1] PhantomOS Book - https://phantomdox.readthedocs.io/en/latest/
