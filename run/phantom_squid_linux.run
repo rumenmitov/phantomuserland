@@ -1,0 +1,105 @@
+assert_spec linux
+
+create_boot_directory
+build {
+	core init timer
+	lib/ld lib/vfs
+	server/lx_block
+	server/vfs
+	server/vfs_block
+	lib/vfs_lwext4
+	lib/libc
+	lib/libm
+}
+
+#
+# Build Ext4-file-system image
+#
+set image_size 16
+catch { exec $dd if=/dev/zero of=bin/ext4.raw bs=1M seek=$image_size count=0 }
+catch { exec $mke4fs -O^metadata_csum -F bin/ext4.raw }
+catch { exec $dd if=/dev/zero of=bin/block0.raw bs=1M seek=$image_size count=0 }
+catch { exec $mke4fs -O^metadata_csum -F bin/block0.raw }
+
+create_boot_directory
+
+install_config {
+<config>
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<default caps="100"/>
+
+	<start name="timer" priority="0">
+		<resource name="RAM" quantum="1M"/>
+		<resource name="CPU" quantum="5"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+
+	<start name="lx_block_ext4" ld="no">
+	        <binary name="lx_block" />
+		<resource name="RAM" quantum="1G"/>
+		<provides><service name="Block"/></provides>
+		<config file="ext4.raw" block_size="512" writeable="yes"/>
+	</start>
+
+	<start name="lx_block0" ld="no">
+	        <binary name="lx_block" />
+		<resource name="RAM" quantum="1G"/>
+		<provides><service name="Block"/></provides>
+		<config file="block0.raw" block_size="512" writeable="yes"/>
+	</start>
+
+ 	<start name="vfs_lwext4_fs">
+ 		<binary name="vfs"/>
+ 		<resource name="RAM" quantum="24M" />
+ 		<provides><service name="File_system"/></provides>
+ 		<config ld_verbose="yes">
+ 			<vfs>
+ 				<dir name="dev">
+ 					<block name="hdd" block_buffer_count="128"/>
+ 				</dir>
+ 				<lwext4 block_device="/dev/hdd" cache_write_back="yes" expand_via_io="yes" writeable="yes"/>
+ 			</vfs>
+ 			<policy label_prefix="isomem" root="/" writeable="yes"/>
+ 		</config>
+		<route>
+			<service name="Block"><child name="lx_block_ext4"/></service>
+			<any-service> <parent/> <any-child /> </any-service>
+		</route>
+ 	</start>
+	
+	<start name="isomem" caps="2000">
+ 	  <resource name="RAM" quantum="700M"/>
+ 	  <config verbose="yes" ld_verbose="true">
+	    <large seek="yes"/>
+	    <vfs>
+              <dir name="squid-cache"> <ram /> </dir>
+	      <fs/>
+	    </vfs>
+	    <libc stdout="/dev/log" stderr="/dev/log" rtc="/dev/rtc"/>  
+ 	  </config>
+	  <route>
+		<service name="Block"><child name="lx_block0"/></service>
+	  	<any-service> <parent/> <any-child /> </any-service>
+	  </route>
+ 	</start>
+</config> }
+
+
+#
+# Boot modules
+#
+build_boot_image [list {*}[build_artifacts] phantom_classes isomem ext4.raw block0.raw]
+
+run_genode_until forever

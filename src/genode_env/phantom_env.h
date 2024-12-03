@@ -34,7 +34,7 @@ namespace Phantom
 
         Main(Env &env) : _env(env), _framebuffer()
         {
-
+	    
         }
     };
 

@@ -4,10 +4,10 @@ create_boot_directory
 build {
 	core init timer
 	lib/ld lib/vfs
-	drivers/platform
-	drivers/acpi
-	drivers/ahci
-	drivers/rtc
+	driver/platform
+	driver/acpi
+	driver/ahci
+	driver/rtc
 	app/pci_decode
 	server/report_rom
 	server/nitpicker
@@ -47,7 +47,7 @@ install_config {
 		<provides><service name="Timer"/></provides>
 	</start>
 
-	<start name="rtc_drv" priority="-1">
+	<start name="rtc" priority="-1">
 		<resource name="RAM" quantum="1M"/>
 		<provides>
 			<service name="Rtc"/>
@@ -58,12 +58,12 @@ install_config {
 		<resource name="RAM" quantum="2M"/>
 		<provides> <service name="Report"/> <service name="ROM"/> </provides>
 		<config>
-			<policy label="pci_decode -> system"    report="acpi_drv -> acpi"/>
-			<policy label="platform_drv -> devices" report="pci_decode -> devices"/>
+			<policy label="pci_decode -> system"    report="acpi -> acpi"/>
+			<policy label="platform -> devices" report="pci_decode -> devices"/>
 		</config>
 	</start>
 
-	<start name="acpi_drv" caps="350">
+	<start name="acpi" caps="350">
 		<resource name="RAM" quantum="4M"/>
 		<route>
 			<service name="Report"> <child name="report_rom"/> </service>
@@ -90,7 +90,7 @@ install_config {
 		</route>
 	</start>
 
-	<start name="platform_drv" caps="100" managing_system="yes">
+	<start name="platform" caps="100" managing_system="yes">
 		<resource name="RAM" quantum="1M"/>
 		<provides>
 			<service name="Platform"/>
@@ -109,9 +109,9 @@ install_config {
 		</route>
 		<config>
 			<report devices="yes"/>
-			<policy label="ahci_drv -> "> <pci class="AHCI"/> </policy>
-			<policy label_prefix="ps2_drv"> <device name="ps2"/> </policy>
-			<policy label_prefix="fb_drv"  info="yes"> <pci class="VGA"/> </policy>
+			<policy label="ahci -> "> <pci class="AHCI"/> </policy>
+			<policy label_prefix="ps2"> <device name="ps2"/> </policy>
+			<policy label_prefix="fb"  info="yes"> <pci class="VGA"/> </policy>
 		</config>
 	</start>
 
@@ -122,7 +122,7 @@ install_config {
 		<config verbose="yes"/>
 	</start>
 
-	<start name="ahci_drv">
+	<start name="ahci">
 		<resource name="RAM" quantum="10M" />
 		<provides><service name="Block" /></provides>
 		<config atapi="no">
@@ -135,13 +135,13 @@ install_config {
 		</route>
 	</start>
 
-	<start name="fb_drv" caps="120">
-		<binary name="vesa_fb_drv"/>
+	<start name="fb" caps="120">
+		<binary name="vesa_fb"/>
 		<resource name="RAM" quantum="24M"/>
 		<config width="1024" height="768" buffered="yes"/>
 	</start>
 
-	<start name="ps2_drv" caps="80">
+	<start name="ps2" caps="80">
 		<resource name="RAM" quantum="1280K"/>
 		<config/>
 	</start>
@@ -165,7 +165,7 @@ install_config {
  		<config verbose="yes" ld_verbose="yes">
  		</config>
  		<route>
- 			<service name="Block"><child name="ahci_drv"/></service>
+ 			<service name="Block"><child name="ahci"/></service>
  			<any-service> <parent/> <any-child /> </any-service>
  		</route>
  	</start>

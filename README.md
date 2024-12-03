@@ -100,6 +100,8 @@ git clone https://github.com/skalk/genode-devel-docker
 git clone https://github.com/genodelabs/genode
 # Setting up with goa - tool for building genode applications
 git clone https://github.com/genodelabs/goa
+# Ext4 Library
+git clone -b sculpt-24.04-2024-04-19 https://codeberg.org/jws/genode-wundertuete.git genode/repos/wundertuete
 ```
 
 ### Genode development container
@@ -155,6 +157,8 @@ git checkout 24.02
 
 # Enable optional repositories in build configuration
 sed -i 's/#REPOSITORIES/REPOSITORIES/g' build/x86_64/etc/build.conf
+echo 'REPOSITORIES += $(GENODE_DIR)/repos/wundertuete' >> build/x86_64/etc/build.conf
+
 # Remove `-no-kvm` qemu option
 sed -i '/QEMU_OPT += -no-kvm/d' build/x86_64/etc/build.conf
 

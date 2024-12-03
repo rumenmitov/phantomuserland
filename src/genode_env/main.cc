@@ -13,6 +13,7 @@
 
 // #include <libc/component.h>
 
+#include "base/ipc.h"
 #include "phantom_env.h"
 #include "disk_backend.h"
 #include "phantom_vmem.h"
@@ -24,16 +25,24 @@
 
 #include <base/quota_guard.h>
 
+#include "squid.h"
+
+
 namespace Genode {
 	bool phantom_quota_go = false;
 }
 
 Phantom::Main *Phantom::main_obj = nullptr;
+Squid_snapshot::Main *Squid_snapshot::global_squid = nullptr;
 
 void setup_adapters(Env &env)
 {
-	static Phantom::Main local_main(env);
-	Phantom::main_obj = &local_main;
+    static Phantom::Main local_main(env);
+    Phantom::main_obj = &local_main;
+
+    static Squid_snapshot::Main local_squid(env);
+    Squid_snapshot::global_squid = &local_squid;
+    Squid_snapshot::global_squid->init();
 }
 
 void test_adapters()
@@ -108,7 +117,6 @@ bool test_hal()
 // void Libc::Component::construct(Libc::Env &env)
 void Component::construct(Env &env)
 {
-
 	// Libc::with_libc([&]()
 	// 				{
 	// 	int p_argc = 1;
@@ -146,20 +154,20 @@ void Component::construct(Env &env)
 		// wait_for_continue();
 		log("GO");
 
+
+		/*
+		 * Setup Main object
+		 */
+		try
 		{
-			/*
-			 * Setup Main object
-			 */
-			try
-			{
-				log("--- Setting up adapters ---");
-				setup_adapters(env);
-			}
-			catch (Genode::Service_denied)
-			{
-				error("opening block session was denied!");
-				return;
-			}
+		    log("--- Setting up adapters ---");
+		    setup_adapters(env);
+				
+		}
+		catch (Genode::Service_denied)
+		{
+		    error("opening block session was denied!");
+		    return;
 		}
 
 		// log("--- TESTING LOTS OF ATTACH ---");

@@ -492,4 +492,5 @@ struct Phantom::Vmem_adapter
     }
 };
 
+
 #endif

@@ -1,6 +1,3 @@
-
-
-
 #define DEBUG_MSG_PREFIX "boot"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -46,6 +43,7 @@
 #include <ph_malloc.h>
 #include <ph_io.h>
 #include <ph_os.h>
+
 
 static amap_t ram_map;
 
@@ -179,6 +177,7 @@ phantom_multiboot_main()
 int phantom_main_entry_point(int argc, char **argv, char **envp)
 {
     ph_printf("Waiting...\n");
+
     // wait_for_continue();
 
     // Test sleep
@@ -606,7 +605,6 @@ int phantom_main_entry_point(int argc, char **argv, char **envp)
 
 void start_phantom()
 {
-
     ph_printf("DEBUG!!! STARTING PHANTOM\n");
 
     //pressEnter("will start Phantom");

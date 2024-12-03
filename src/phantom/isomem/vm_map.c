@@ -9,11 +9,13 @@
  *
 **/
 
+#include "ph_io.h"
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
+
 
 #include <kernel/config.h>
 #include <ph_syslog.h>
@@ -59,6 +61,8 @@
 #include "pager.h"
 
 #include <machdep.h>
+
+#include <squidlib.h>
 
 
 // header used only for testing
@@ -440,6 +444,41 @@ vm_map_init(unsigned long page_count)
     hal_mutex_lock(&vm_map_mutex);
     */
 
+    ph_printf("Testing Squid Cache...");
+    enum SquidError err = squid_test();
+    
+    switch (err) {
+    case SQUID_WRITE:
+	ph_printf("\n");
+	ph_printf(SQUID_ERROR_FMT "write failed\n");
+	break;
+	
+    case SQUID_CREATE:
+	ph_printf("\n");
+	ph_printf(SQUID_ERROR_FMT "create failed\n");
+	break;
+
+    case SQUID_READ:
+	ph_printf("\n");
+	ph_printf(SQUID_ERROR_FMT "read failed\n");
+	break;
+
+    case SQUID_CORRUPTED:
+	ph_printf("\n");
+	ph_printf(SQUID_ERROR_FMT "corruped file\n");
+	break;
+
+    case SQUID_DELETE:
+	ph_printf("\n");
+	ph_printf(SQUID_ERROR_FMT "delete file\n");
+	break;
+
+    default:
+	ph_printf("passed.");
+	break;
+    }
+    
+
     unsigned int np;
     for( np = 0; np < page_count; np++ )
         vm_page_init( &vm_map_map[np], ((char *)vm_map_start_of_virtual_address_space) + (__MEM_PAGE * np) );
@@ -535,22 +574,19 @@ void vm_map_finish(void)
 }
 
 
-
 void
 vm_page_init( vm_page *me, void *my_vaddr)
 {
     ph_memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
+
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
     page_touch_history(me);
     pager_io_request_init( &me->pager_io );
+
+    squid_hash(me);
 }
-
-
-
-
-
 
 
 // memory reclaiming helpers
@@ -724,6 +760,11 @@ vm_page_req_pageout(vm_page *me)
     me->pager_io.phys_page = me->phys_addr;
     me->pager_io.pager_callback = pageout_callback;
     me->pager_io.disk_page = me->curr_page;
+
+    enum SquidError err = squid_write(me->squid_hash, me, sizeof(*me));
+    if (err != SQUID_NONE) {
+	hal_printf(SQUID_ERROR_FMT "couldn't save page: 0x%x\n", me->virt_addr);
+    }
 
     remove_from_dirty_q(me);
     page_touch_history(me);

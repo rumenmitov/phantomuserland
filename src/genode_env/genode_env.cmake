@@ -1,4 +1,3 @@
-
 # set PHANTOM_GENODE_ENV_DIR to this directory's path
 set (PHANTOM_GENODE_ENV_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -7,7 +6,7 @@ include_directories(${PHANTOM_GENODE_ENV_DIR})
 
 # look for sources
 # file (GLOB_RECURSE source_all ${PHANTOM_GENODE_ENV_DIR}/*.cc)
-set (source_all 
+set (source_all
     main.cc 
     tests_adapters.cc 
     tests_hal_sync.cc 
@@ -23,6 +22,7 @@ set (source_all
     phantom_timer.cc 
     phantom_unsorted.cc
     phantom_framebuffer.cc
+    squid.cc
 )
 
 # convert filenames to absolute paths
