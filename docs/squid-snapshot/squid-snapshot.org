@@ -203,6 +203,11 @@ To ensure there is enough disk-space on for a snapshot we should keep track of t
  #+end_src
 - [ ] Deletion of old snapshots
 
+** TODO [#C] Clustering
+Cluster multiple files together to save space on metadata?
+
+** TODO [#B] Formal Proof
+Prove that system is bullet proof and that it handles all contingencies.
 * Conclusion
 
 In conclusion, by transitioning from a superblock structure to a logging-based approach, the new mechanism optimizes memory usage and enhances performance by only saving changes rather than the entire state. The integration of the Ext4 filesystem through the lwext4 Genode community library has proven effective, addressing challenges such as improper unmounting and ensuring efficient data reads and writes.

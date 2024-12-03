@@ -33,16 +33,16 @@ namespace Genode {
 }
 
 Phantom::Main *Phantom::main_obj = nullptr;
-Squid_snapshot::Main *Squid_snapshot::global_squid = nullptr;
+SquidSnapshot::Main *SquidSnapshot::global_squid = nullptr;
 
 void setup_adapters(Env &env)
 {
     static Phantom::Main local_main(env);
     Phantom::main_obj = &local_main;
 
-    static Squid_snapshot::Main local_squid(env);
-    Squid_snapshot::global_squid = &local_squid;
-    Squid_snapshot::global_squid->init();
+    static SquidSnapshot::Main local_squid(env);
+    SquidSnapshot::global_squid = &local_squid;
+    SquidSnapshot::global_squid->init();
 }
 
 void test_adapters()

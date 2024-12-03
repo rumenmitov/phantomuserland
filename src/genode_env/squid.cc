@@ -1,13 +1,15 @@
 #include <squidlib.h>
 
 #include <ph_io.h>
+#include <squidlib.h>
+
 #include "squid.h"
 #include "os/vfs.h"
 #include "util/string.h"
 #include "phantom_env.h"
 
 
-void* squid_malloc(size_t size) 
+static void* squid_malloc(size_t size) 
 {
     size_t total_size = sizeof(size_t) + size;
 
@@ -41,7 +43,7 @@ void* squid_malloc(size_t size)
 }
 
 
-void squid_free(void* addr) 
+static void squid_free(void* addr) 
 {
     if (addr == nullptr) return;
 
@@ -55,44 +57,48 @@ void squid_free(void* addr)
 }
 
 
-namespace Squid_snapshot {
+namespace SquidSnapshot {
 
-    Squid_Root::Squid_Root(unsigned int capacity)
+    SnapshotRoot::SnapshotRoot(unsigned int capacity)
 	: capacity(capacity), freecount(capacity)
     {
-	freelist = (L1_Dir*) squid_malloc(sizeof(L1_Dir) * capacity);
+	freelist = (L1Dir*) squid_malloc(sizeof(L1Dir) * capacity);
 
 	Genode::Directory::Path path = to_path();
 
 	global_squid->_root_dir.create_sub_directory(path);
 	if (!global_squid->_root_dir.directory_exists(path)) {
-	    error("ERROR: couldn't create directory: ", path);
+	    error(SQUID_ERROR_FMT "couldn't create directory: ", path);
 	}
 
 	for (unsigned int i = 0; i < capacity; i++) {
-	    freelist[i] = L1_Dir(i, L1_SIZE);
+	    freelist[i] = L1Dir(i, L1_SIZE);
 	}
     }
 
 
-    Squid_Root::~Squid_Root(void)
+    SnapshotRoot::~SnapshotRoot(void)
     {
 	squid_free(freelist);
     }
 
-    Genode::Directory::Path Squid_Root::to_path(void) 
+    Genode::Directory::Path SnapshotRoot::to_path(void) 
     {
-	return Cstring("/squid-cache/current");
+	char path[64];
+	ph_strncpy(path, SQUIDROOT, strlen(SQUIDROOT));
+	ph_strcat(path, "/current");
+	
+	return Cstring(path);
     }
 
 
-    bool Squid_Root::is_full(void) 
+    bool SnapshotRoot::is_full(void) 
     {
 	return freecount == 0;
     }
     
     
-    L1_Dir* Squid_Root::get_entry(void)
+    L1Dir* SnapshotRoot::get_entry(void)
     {
 	if (is_full()) return nullptr;
 
@@ -103,24 +109,24 @@ namespace Squid_snapshot {
 	    }
 	}
 
-	error("This state should not be reacheable!");
+	error(SQUID_ERROR_FMT "This state should not be reacheable!");
 	return nullptr;
     }
 
 
-    void Squid_Root::return_entry(void) 
+    void SnapshotRoot::return_entry(void) 
     {
 	if (freecount == capacity) return;
 	freecount++;
     }
 
 
-    SquidFileHash* Squid_Root::get_hash(void) 
+    SquidFileHash* SnapshotRoot::get_hash(void) 
     {
-	L1_Dir *l1 = get_entry();
+	L1Dir *l1 = get_entry();
 	if (l1 == nullptr) return nullptr;
 
-	L2_Dir *l2 = l1->get_entry();
+	L2Dir *l2 = l1->get_entry();
 	if (l2 == nullptr) return nullptr;
 
 	return l2->get_entry();
@@ -128,32 +134,32 @@ namespace Squid_snapshot {
     
 
 
-    L1_Dir::L1_Dir(unsigned int l1, unsigned int capacity)
+    L1Dir::L1Dir(unsigned int l1, unsigned int capacity)
 	: l1_dir(l1), capacity(capacity), freecount(capacity)
     {
-	freelist = (L2_Dir*) squid_malloc(sizeof(L2_Dir) * capacity);
+	freelist = (L2Dir*) squid_malloc(sizeof(L2Dir) * capacity);
 
 	Genode::Directory::Path path = to_path();
 
 	global_squid->_root_dir.create_sub_directory(path);
 	if (!global_squid->_root_dir.directory_exists(path)) {
-	    error("ERROR: couldn't create directory: ", path);
+	    error(SQUID_ERROR_FMT "couldn't create directory: ", path);
 	}
 
 	for (unsigned int i = 0; i < capacity; i++) {
-	    freelist[i] = L2_Dir(l1_dir, i, L2_SIZE);
+	    freelist[i] = L2Dir(l1_dir, i, L2_SIZE);
 	}
     }
 
 
-    L1_Dir::~L1_Dir(void)
+    L1Dir::~L1Dir(void)
     {
 	squid_free(freelist);
 	parent->return_entry();
     }
 
 
-    Genode::Directory::Path L1_Dir::to_path(void) 
+    Genode::Directory::Path L1Dir::to_path(void) 
     {
 	char *l1_dir_path = (char*) squid_malloc(sizeof(char) * 150);
 	
@@ -164,13 +170,13 @@ namespace Squid_snapshot {
     }
 
 
-    bool L1_Dir::is_full(void) 
+    bool L1Dir::is_full(void) 
     {
 	return freecount == 0;
     }
 
     
-    L2_Dir* L1_Dir::get_entry(void)
+    L2Dir* L1Dir::get_entry(void)
     {
 	if (is_full()) return nullptr;
 
@@ -180,12 +186,12 @@ namespace Squid_snapshot {
 		return &freelist[i];
 	    }
 	}
-	error("This state should not be reacheable!");
+	error(SQUID_ERROR_FMT "This state should not be reacheable!");
 	return nullptr;
     }
 
 
-    void L1_Dir::return_entry(void) 
+    void L1Dir::return_entry(void) 
     {
 	if (freecount == capacity) return;
 	freecount++;
@@ -193,7 +199,7 @@ namespace Squid_snapshot {
     
 
 
-    L2_Dir::L2_Dir(unsigned int l1, unsigned int l2, unsigned int capacity)
+    L2Dir::L2Dir(unsigned int l1, unsigned int l2, unsigned int capacity)
 	: l2_dir(l2), capacity(capacity), freecount(capacity)
     {
 	freelist = (SquidFileHash*) squid_malloc(sizeof(SquidFileHash) * capacity);
@@ -202,7 +208,7 @@ namespace Squid_snapshot {
 
 	global_squid->_root_dir.create_sub_directory(path);
 	if (!global_squid->_root_dir.directory_exists(path)) {
-	    error("ERROR: couldn't create directory: ", path);
+	    error(SQUID_ERROR_FMT "couldn't create directory: ", path);
 	}	
 
 	for (unsigned int i = 0; i < capacity; i++) {
@@ -211,7 +217,7 @@ namespace Squid_snapshot {
     }
 
 
-    L2_Dir::~L2_Dir(void)
+    L2Dir::~L2Dir(void)
     {
 	/* NOTE
 	   Used SquidFileHashes will be deleted from disk
@@ -222,7 +228,7 @@ namespace Squid_snapshot {
     }
 
 
-    Genode::Directory::Path L2_Dir::to_path(void) 
+    Genode::Directory::Path L2Dir::to_path(void) 
     {
 	char *l2_dir_path = (char*) squid_malloc(sizeof(char) * 150);
 	
@@ -234,13 +240,13 @@ namespace Squid_snapshot {
     }
 
 
-    bool L2_Dir::is_full(void) 
+    bool L2Dir::is_full(void) 
     {
 	return freecount == 0;
     }
 
     
-    SquidFileHash* L2_Dir::get_entry(void)
+    SquidFileHash* L2Dir::get_entry(void)
     {
 	if (is_full()) return nullptr;
 	
@@ -265,12 +271,12 @@ namespace Squid_snapshot {
 	    }
 	}
 
-	error("This state should not be reacheable!");
+	error(SQUID_ERROR_FMT "This state should not be reacheable!");
 	return nullptr;
     }
 
 
-    void L2_Dir::return_entry(void) 
+    void L2Dir::return_entry(void) 
     {
 	if (freecount == capacity) return;
 	freecount++;
@@ -292,9 +298,9 @@ namespace Squid_snapshot {
 
     Genode::Directory::Path SquidFileHash::to_path(void) 
     {
-	char *hash = (char*) squid_malloc(sizeof(char) * Squid_snapshot::HASH_LEN);
+	char *hash = (char*) squid_malloc(sizeof(char) * SquidSnapshot::HASH_LEN);
 	
-	ph_snprintf(hash, Squid_snapshot::HASH_LEN, "/squid-cache/%x/%x/%x",
+	ph_snprintf(hash, SquidSnapshot::HASH_LEN, "/squid-cache/%x/%x/%x",
 		    l1_dir,
 		    l2_dir,
 		    file_id);
@@ -310,7 +316,7 @@ namespace Squid_snapshot {
 
     void Main::init(void) 
     {
-	root_manager = (Squid_Root*) squid_malloc(sizeof(Squid_Root));
+	root_manager = (SnapshotRoot*) squid_malloc(sizeof(SnapshotRoot));
     }
 
 
@@ -377,7 +383,7 @@ namespace Squid_snapshot {
 
 	char *echo = (char*) squid_malloc(sizeof(char) * 20);
 	
-	switch (Squid_snapshot::global_squid->_read(hash->to_path(), (void*) echo)) {
+	switch (SquidSnapshot::global_squid->_read(hash->to_path(), (void*) echo)) {
 	case Error::ReadFile:
 	    return Error::ReadFile;
 
@@ -406,25 +412,23 @@ namespace Squid_snapshot {
 
 extern "C" {
 
-    #include <squidlib.h>
-    
     void squid_hash(void *hash) 
     {
 	// #warning should handle fail case (no more hashes)
-	Squid_snapshot::SquidFileHash *squid_generated_hash = Squid_snapshot::global_squid->root_manager->get_hash();
+	SquidSnapshot::SquidFileHash *squid_generated_hash = SquidSnapshot::global_squid->root_manager->get_hash();
 	hash = (void*) squid_generated_hash;
     }
 
 
     enum SquidError squid_write(void *hash, void *payload, unsigned long long size) 
     {
-	auto path = ((Squid_snapshot::SquidFileHash*) hash)->to_path();
+	auto path = ((SquidSnapshot::SquidFileHash*) hash)->to_path();
 	
-	switch (Squid_snapshot::global_squid->_write(path, payload, size)) {
-	case Squid_snapshot::Error::CreateFile:
+	switch (SquidSnapshot::global_squid->_write(path, payload, size)) {
+	case SquidSnapshot::Error::CreateFile:
 	    return SQUID_CREATE;
 
-	case Squid_snapshot::Error::WriteFile:
+	case SquidSnapshot::Error::WriteFile:
 	    return SQUID_WRITE;
 
 	default:
@@ -435,10 +439,10 @@ extern "C" {
     
     enum SquidError squid_read(void *hash, void *payload) 
     {
-	auto path = ((Squid_snapshot::SquidFileHash*) hash)->to_path();
+	auto path = ((SquidSnapshot::SquidFileHash*) hash)->to_path();
 	
-	switch ( Squid_snapshot::global_squid->_read(path, payload) ) {
-	case Squid_snapshot::Error::ReadFile:
+	switch ( SquidSnapshot::global_squid->_read(path, payload) ) {
+	case SquidSnapshot::Error::ReadFile:
 	    return SQUID_READ;
 
 	default:
@@ -448,7 +452,7 @@ extern "C" {
     
     enum SquidError squid_delete(void *hash) 
     {
-	Squid_snapshot::SquidFileHash* file = (Squid_snapshot::SquidFileHash*) hash;
+	SquidSnapshot::SquidFileHash* file = (SquidSnapshot::SquidFileHash*) hash;
 
 	try {
 	    delete file;
@@ -461,17 +465,17 @@ extern "C" {
 
     enum SquidError squid_test(void) 
     {
-	switch (Squid_snapshot::global_squid->_test()) {
-	case Squid_snapshot::Error::CreateFile:
+	switch (SquidSnapshot::global_squid->_test()) {
+	case SquidSnapshot::Error::CreateFile:
 	    return SQUID_CREATE;
 
-	case Squid_snapshot::Error::WriteFile:
+	case SquidSnapshot::Error::WriteFile:
 	    return SQUID_WRITE;
 
-	case Squid_snapshot::Error::ReadFile:
+	case SquidSnapshot::Error::ReadFile:
 	    return SQUID_READ;
 
-	case Squid_snapshot::Error::CorruptedFile:
+	case SquidSnapshot::Error::CorruptedFile:
 	    return SQUID_CORRUPTED;
 
 	default:
