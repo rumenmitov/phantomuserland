@@ -68,6 +68,7 @@ I chose to go with the second option, simply because it sounded more interesting
 All snapshots are stored in the =/squid-cache= root directory. Finished snapshots are renamed to the UNIX timestamp of when that particular snapshot was completed.
 
 By default, snapshots are taken every minute. The system will retain at most 5 finished snapshots at a time by default. However, if the machine is short on disk space, older snapshots will be pruned at a higher rate (/for more on this see [[id:new-snapshot][New Snapshot]]/).
+
 ** State Management
 The state of the Squid Snapshots is managed by the global object _global_squid_ which is initialized at the start of the kernel. This object keeps track of the available hashes, memory allocation and is responsible for interacting with the filesystem (i.e. writing, reading, etc.).
 
