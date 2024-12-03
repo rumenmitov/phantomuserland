@@ -156,7 +156,7 @@ Since each data has a hash corresponding to its file in the Squid Snapshot, read
 ** TODO [#C] Sequential Writes
 As an optimization, maybe we can write pages sequentially based on their addresses in order to make use of locality caching.
 
-** TODO [#A] State-Management of L1
+** DONE State-Management of L1
 L1 directories should have a similar state management solution as L2 directories. Some L2 directories could be exhausted at first, but then become available. L1 directories should keep track of this.
 
 ** DONE Foreign Function Interface

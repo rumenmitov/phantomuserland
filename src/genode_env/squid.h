@@ -32,6 +32,7 @@ namespace Squid_snapshot {
      * @brief Error types associated with Squid Cache.
      */
     enum Error {
+	OutOfHashes,
 	WriteFile,
 	ReadFile,
 	CreateFile,
@@ -39,44 +40,12 @@ namespace Squid_snapshot {
 	None
     };
 
-    static const unsigned int L1_SIZE = 16;
-    static const unsigned int L2_SIZE = 256;
-
+    static const unsigned int ROOT_SIZE = 16;
+    static const unsigned int L1_SIZE 	= 256;
+    static const unsigned int L2_SIZE 	= 1000;
     
     static const unsigned int HASH_LEN = 32;
 
-    class Squid_Dir 
-    {
-    protected:
-	unsigned int capacity;
-	unsigned int *freelist;
-	unsigned int freecount;
-	
-    public:
-	Squid_Dir(unsigned int capacity = 1000);
-	~Squid_Dir(void);
-	
-	unsigned int get_entry(void);
-	void return_entry(unsigned int);
-    };
-    
-	
-
-    class L2_Dir
-    {
-	static const unsigned int CAPACITY  = 1000;
-
-    public:
-	L2_Dir(void);
-
-	unsigned int get_hash(void);
-	void return_hash(unsigned int);
-	
-    private:
-	unsigned int available_arr[CAPACITY];
-	unsigned int available_count = CAPACITY;
-    };
-    
 
     struct SquidFileHash 
     {
@@ -84,11 +53,80 @@ namespace Squid_snapshot {
 	unsigned int l2_dir;
 	unsigned int file_id;
 
-	SquidFileHash(void);
-	SquidFileHash(L2_Dir availability_matrix[16][256]);
+	class L2_Dir *parent;
+
+	SquidFileHash(unsigned int, unsigned int, unsigned int);	
 	~SquidFileHash(void);
 	
 	Genode::Directory::Path to_path(void);
+    };
+
+
+    class L2_Dir 
+    {
+    private:
+	unsigned int capacity;
+	SquidFileHash *freelist;
+	unsigned int freecount;
+
+	unsigned int l1_dir;
+	unsigned int l2_dir;
+
+	class L1_Dir *parent;
+
+    public:
+	L2_Dir(unsigned int l1, unsigned int l2, unsigned int capacity = 1000);
+	~L2_Dir(void);
+
+	Genode::Directory::Path to_path(void);
+	bool is_full(void);
+
+	SquidFileHash* get_entry(void);
+	void return_entry(void);
+    };
+    
+    
+    class L1_Dir 
+    {
+    private:
+	unsigned int capacity;
+	L2_Dir *freelist;
+	unsigned int freecount;
+
+	unsigned int l1_dir;
+
+	class Squid_Root *parent;
+
+    public:
+	L1_Dir(unsigned int l1, unsigned int capacity = 1000);
+	~L1_Dir(void);
+
+	Genode::Directory::Path to_path(void);
+	bool is_full(void);
+
+	L2_Dir* get_entry(void);
+	void return_entry(void);
+    };
+	
+    
+    class Squid_Root
+    {
+    protected:
+	unsigned int capacity;
+	L1_Dir *freelist;
+	unsigned int freecount;
+
+    public:
+	Squid_Root(unsigned int capacity = 1000);
+	~Squid_Root(void);
+
+	Genode::Directory::Path to_path(void);
+	bool is_full(void);
+
+	L1_Dir* get_entry(void);
+	void return_entry(void);
+
+	SquidFileHash* get_hash(void);
     };
 
 
@@ -96,6 +134,7 @@ namespace Squid_snapshot {
     {
 	Env &_env;
 	Main(Env &env);
+	void init(void);
 
 	Heap _heap { _env.ram(), _env.rm() };
 	Attached_rom_dataspace _config { _env, "config" };
@@ -107,7 +146,7 @@ namespace Squid_snapshot {
 
 	Genode::uint64_t last_snapshot = 0;
 
-	L2_Dir availability_matrix[Squid_snapshot::L1_SIZE][L2_SIZE];
+	Squid_Root *root_manager;
 
 
 	/**

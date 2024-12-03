@@ -474,7 +474,7 @@ vm_map_init(unsigned long page_count)
 	break;
 
     default:
-	ph_printf("passed.\n");
+	ph_printf("passed.");
 	break;
     }
     

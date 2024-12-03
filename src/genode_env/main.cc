@@ -42,6 +42,7 @@ void setup_adapters(Env &env)
 
     static Squid_snapshot::Main local_squid(env);
     Squid_snapshot::global_squid = &local_squid;
+    Squid_snapshot::global_squid->init();
 }
 
 void test_adapters()
