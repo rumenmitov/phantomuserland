@@ -474,7 +474,7 @@ vm_map_init(unsigned long page_count)
 	break;
 
     default:
-	ph_printf("passed.\n");
+	ph_printf("passed.");
 	break;
     }
     
@@ -584,6 +584,8 @@ vm_page_init( vm_page *me, void *my_vaddr)
     hal_mutex_init(&me->lock, "VM PG" );
     page_touch_history(me);
     pager_io_request_init( &me->pager_io );
+
+    squid_hash(me);
 }
 
 
@@ -758,6 +760,11 @@ vm_page_req_pageout(vm_page *me)
     me->pager_io.phys_page = me->phys_addr;
     me->pager_io.pager_callback = pageout_callback;
     me->pager_io.disk_page = me->curr_page;
+
+    enum SquidError err = squid_write(me->squid_hash, me, sizeof(*me));
+    if (err != SQUID_NONE) {
+	hal_printf(SQUID_ERROR_FMT "couldn't save page: 0x%x\n", me->virt_addr);
+    }
 
     remove_from_dirty_q(me);
     page_touch_history(me);

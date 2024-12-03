@@ -14,14 +14,14 @@ class Phantom::SleepHandler {
     // Genode::Mutex _sync_mutex{};
     Genode::Blockade _sleep_blockade{};
     Timer::One_shot_timeout<SleepHandler> _timeout;
-    uint64_t _duration = 0;
+    Genode::uint64_t _duration = 0;
 
     void handler(Genode::Duration curr_time) {
         // Genode::log("!!!UNBLOCKING!!!");
         _sleep_blockade.wakeup();
     }
 
-    SleepHandler(Timer::Connection& conn, uint64_t microseconds) : _timeout(conn, *this, &SleepHandler::handler), _duration(microseconds) {}
+    SleepHandler(Timer::Connection& conn, Genode::uint64_t microseconds) : _timeout(conn, *this, &SleepHandler::handler), _duration(microseconds) {}
 
     void sleep(){
         _timeout.schedule(Genode::Microseconds{_duration});
@@ -33,8 +33,8 @@ class Phantom::SleepHandler {
 struct Phantom::Timer_adapter
 {
     Genode::Env &_env;
-    Genode::Entrypoint _ep_timer{_env, sizeof(addr_t)*2048, "timer_ep",
-		             Affinity::Location()};
+    Genode::Entrypoint _ep_timer{_env, sizeof(Genode::addr_t)*2048, "timer_ep",
+				 Genode::Affinity::Location()};
     Timer::Connection _timer{_env, _ep_timer, "Phantom timer"};
     const unsigned int rate_us = 1000;
 
@@ -64,7 +64,7 @@ struct Phantom::Timer_adapter
         _handler = handler;
     }
 
-    void sleep_microseconds(uint64_t microseconds){
+    void sleep_microseconds(Genode::uint64_t microseconds){
 
         // Genode::log("Start to sleep (", microseconds, "): ", _timer.elapsed_ms());
         Phantom::SleepHandler sleep_handler{_timer, microseconds};
@@ -74,7 +74,7 @@ struct Phantom::Timer_adapter
         // Genode::log("Finish to sleep (", microseconds, "): ", _timer.elapsed_ms());
     }
 
-    int64_t curr_time_us() {
+    Genode::int64_t curr_time_us() {
         return _timer.curr_time().trunc_to_plain_us().value;
     }
 
