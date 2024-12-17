@@ -124,7 +124,7 @@ install_config {
 		<config atapi="yes">
 			<report ports="yes"/>
 			<policy label="vfs_lwext4_fs -> " device="0" writeable="yes" />
-			<policy label="isomem -> " device="0" writeable="yes" />			
+			<policy label="isomem -> " device="1" writeable="yes" />			
 		</config>
 	</start>
 	
