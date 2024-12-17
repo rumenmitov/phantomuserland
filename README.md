@@ -200,6 +200,11 @@ Running the following command from `phantomuserland` directory builds main phant
 
 > Note: As a part of build process this command will create `var` subdirectory, which holds all the build files, including CMake-related files containing build configuration.
 
+Cmake generates a configuration for your LSP. To use it copy it to the root of the project:  
+  
+`cp var/build/x86_64/compile_commands.json .`
+  
+
 #### Build options
 
 When building phantom you may want to configure some of the options:

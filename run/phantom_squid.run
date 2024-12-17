@@ -52,7 +52,7 @@ install_config {
 	</start>
 
 
-	<start name="rtc_drv" priority="-1">
+	<start name="rtc_drv" priority="0">
 		<resource name="RAM" quantum="1M"/>
 		<provides>
 			<service name="Rtc"/>
@@ -118,27 +118,16 @@ install_config {
 		</config>
 	</start>
 
-	<start name="ahci_report_rom">
-		<binary name="report_rom"/>
-		<resource name="RAM" quantum="1M"/>
-		<provides> <service name="Report"/> <service name="ROM"/> </provides>
-		<config verbose="yes"/>
-	</start>
-
 	<start name="ahci_drv">
-		<resource name="RAM" quantum="10M" />
-		<provides><service name="Block" /></provides>
+		<resource name="RAM" quantum="10M"/>
+		<provides><service name="Block"/></provides>
 		<config atapi="yes">
-		  <report ports="yes"/>
-		  <policy label="vfs_lwext4_fs -> " device="0" writeable="yes" />			
-		  <policy label="isomem -> " device="1" writeable="yes" />
+			<report ports="yes"/>
+			<policy label="vfs_lwext4_fs -> " device="0" writeable="yes" />
+			<policy label="isomem -> " device="0" writeable="yes" />			
 		</config>
-		<route>
-			<service name="Report"> <child name="ahci_report_rom"/> </service>
-			<any-service> <parent/> <any-child/> </any-service>
-		</route>
 	</start>
-
+	
  	<start name="vfs_lwext4_fs">
  		<binary name="vfs"/>
  		<resource name="RAM" quantum="24M" />
