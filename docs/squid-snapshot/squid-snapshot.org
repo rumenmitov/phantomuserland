@@ -154,7 +154,7 @@ If the machine were to crash then the filesystem would not be properly unmounted
 ** DONE Fast Reads and Writes
 Since each data has a hash corresponding to its file in the Squid Snapshot, reading and writing data is efficient. Moreover since each _L2_DIR_ keeps track of the available hashes in a stack, getting a new hash is fast.
 
-** TODO [#C] Sequential Writes
+** DONE Sequential Writes
 As an optimization, maybe we can write pages sequentially based on their addresses in order to make use of locality caching.
 
 ** DONE State-Management of L1
@@ -164,19 +164,34 @@ L1 directories should have a similar state management solution as L2 directories
 Since the underlying filesystem operations are handled by Genode components, the main logic is in the *C++* codebase. However, PhantomOS's kernel code is in the *C* codebase. Hence, an API was created to call the *C++* methods from the *C* code (/see src/include/squidlib.h/).
 
 ** TODO [#B] Squid Versioning
+:properties:
+:effort: 1
+:end:
 To ensure compatibility with breaking-changes, a versioning system should be introduced. The version data will be kept inside the *global_squid* object and it will be written out in the snapshot metadata in a human-readable format.
 
-** DONE [#A] Virtual Memory Capture and Restore
+** DONE Virtual Memory Capture and Restore
 The Squid Snapshot mechanism is being integrated into the virtual memory. The changes need to be made in the files *src/phantom/isomem/vm_map.h* and *src/phantom/isomem/vm_map.c*.
 
 The snapshot marks pages for a _pageout_, which is handled by =vm_page_req_pageout()= in *src/phantom/isomem/vm_map.c*.
 
+** TODO [#A] Migration of the Snapshotting Mechanism as a Standalone Genode Plugin
+:properties:
+:effort: 40
+:end:
+Separate (and then integrate back into PhantomOS) the squid snapshotting mechanism. The primary advantages of this, is that the implementation can better leverage Genode's API and the plugin can be used in other projects.
+
 ** TODO [#C] Hardlink Non-Dirty Pages [%]
+:properties:
+:effort:   10
+:end:
 Pages that have not been modified since the last update should already have a hash. Instead of creating a new file for them, the file from the old snapshot should be hardlinked.
 
 - [ ] Will have to modify the _SquidFileHash_ API to allow requesting specific hashes.
 
 ** TODO [#C] Snapshot Metadata
+:properties:
+:effort: 3
+:end:
 Human-readable metadata should be introduced for debugging and bookkeeping purposes. This metadata will be stored in a text file at the root of every snapshot directory. The metadata should include:
 - Squid Version
   The version of the implementation.
@@ -184,11 +199,17 @@ Human-readable metadata should be introduced for debugging and bookkeeping purpo
   The disk-space occupied by the snapshot.
 
 ** TODO [#B] Incomplete Snapshots
+:properties:
+:effort: 2
+:end:
 In the event that the system crashed during a snapshot, the kernel should roll back to the previous version and remove the artifacts of the current incomplete snapshot.
 
 A complete snapshot is signified by a _timestamp_ for a name. An incomplete snapshot would still be called *current_snapshot*.
 
 ** TODO [#C] Available Disk-Space [0%]
+:properties:
+:effort: 15
+:end:
 To ensure there is enough disk-space on for a snapshot we should keep track of the available disk space on the system.
 - [ ] Estimation of snapshot size
 - [ ] Measurement of available space
@@ -203,11 +224,34 @@ To ensure there is enough disk-space on for a snapshot we should keep track of t
  #+end_src
 - [ ] Deletion of old snapshots
 
+** TODO [#C] User-defined Snapshot Parameters
+:properties:
+:effort: 15
+:end:
+User should be able to specify values for the snapshot (e.g. *ROOT_SIZE*, *L1_SIZE* and *L2_SIZE*). Currently, the most reasonable way to do this is through Genode's XML API, however the Genode community has expressed interest in moving away from XML.
+
 ** TODO [#C] Clustering
 Cluster multiple files together to save space on metadata?
 
 ** TODO [#B] Formal Proof
+:properties:
+:effort: 10
+:end:
 Prove that system is bullet proof and that it handles all contingencies.
+
+** TODO [#C] Encrypted Snapshots
+:properties:
+:effort: 80
+:end:
+For security reasons, it would be great if the snapshots can be encrypted when saved to disk.
+
+** TODO [#C] Power-Consumption Concerns
+:properties:
+:effort: 40
+:end:
+Since one of PhantomOS's main targets is wearable devices, the operating system should be power efficient.
+- [ ] Look into CPU affinity: can we force the snapshot to take place on a power-efficient core?
+ 
 * Conclusion
 
 In conclusion, by transitioning from a superblock structure to a logging-based approach, the new mechanism optimizes memory usage and enhances performance by only saving changes rather than the entire state. The integration of the Ext4 filesystem through the lwext4 Genode community library has proven effective, addressing challenges such as improper unmounting and ensuring efficient data reads and writes.
