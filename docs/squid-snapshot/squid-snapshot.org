@@ -8,7 +8,7 @@
 * Minutiae
 - Genode-only source code (used for testing): https://github.com/rumenmitov/genode-squid/
 - PhantomOS Squid Snapshot implementation: https://github.com/rumenmitov/phantomuserland/tree/dev
-
+  
 * Introduction
 This work centers around an alternative implementation of the snapshotting mechanism in PhantomOS. PhantomOS is an orthogonally persistent operating system. This is an operating system where the machine's state should survive any unexpected crashes and this should apply to the entire state. This snapshotting should be handled by the kernel, not the userspace programmer[fn:1].
 
@@ -17,11 +17,11 @@ Previously, PhantomOS used a superblock mechanism. This entailed that the machin
 * Terminology
 The previous iteration of snapshotting in PhantomOS used a superblock structure to save the machine state. This new approach uses logging. This new approach means that instead of saving every piece of data every time a snapshot is taken, only the changed pieces of data are saved. On recovery, the kernel walks through all the changes and can recreate the state.
 
-Since this work has been inspired by the Squid Cache, the snapshot mechanism is referred to as Squid Snapshot. The root directory in which all snapshots are stored is =/squid-cache=.
+Since this work has been inspired by the Squid Cache, the snapshot mechanism is referred to as Squid Snapshot. The root directory in which all snapshots are stored is =/squid-root=.
 
-The root directory contains timestamped directories which from now will be referred to as the individual snapshots. Each snapshot comprises of _L1_SIZE_ number of level 1 directory, which itself contains _L2_SIZE_ number of level 2 directories. Since L2 directories have to manage state (/see [[id:directory-structure][Directory Structure]]/) _L2_DIR_ will refer to an arbitrary level 2 directory.
+The root directory contains timestamped directories which from now will be referred to as the individual snapshots. Each snapshot comprises of _ROOT_SIZE_ number of level 1 directory, which itself contains _L1_SIZE_ number of level 2 directories. Since L2 directories have to manage state (/see [[id:directory-structure][Directory Structure]]/) _L2_DIR_ will refer to an arbitrary level 2 directory.
 
-Each _L2_DIR_ contains _CAPACITY_ number of hashes. The hashes are referred to as _SquidFileHash_.
+Each _L2_DIR_ contains _L2_SIZE_ number of hashes. The hashes are referred to as _SquidFileHash_.
 
 * Architecture
 ** Filesystem
